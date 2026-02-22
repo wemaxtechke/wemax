@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx shadcn@latest add button dialog dropdown-menu input label select textarea table --yes --overwrite)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}

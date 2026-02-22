@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .wemax-brand {
+    font-family: "Space Grotesk", Inter, system-ui, sans-serif;
+  }
+}
+
+
+
+:root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    
+    /* Default theme values (will be overridden by ThemeProvider) */
+    --color-primary: #0A6CFF;
+    --color-primary-dark: #0E00FF;
+    --color-background: #0B1C2D;
+    --color-background-secondary: #111212;
+    --color-surface: #111212;
+    --color-surface-elevated: #323232;
+    --color-text: #FFFFFF;
+    --color-text-secondary: #E5E5E5;
+    --color-text-tertiary: #C9B1D9;
+    --color-border: #323232;
+    --color-error: #E5155E5;
+    --color-success: #0A6CFF;
+    --color-warning: #B1650E5;
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-xxl: 3rem;
+    --border-radius-sm: 0.25rem;
+    --border-radius-md: 0.5rem;
+    --border-radius-lg: 1rem;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 20px rgba(10, 108, 255, 0.5);
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--color-background);
+    color: var(--color-text);
+    transition: background 0.3s, color 0.3s;
+}
+
+/* Theme wallpapers */
+html[data-theme="dark"] body {
+    background-image: url("./assets/wemax-dark-bg.png");
+    background-repeat: repeat;
+    background-size: auto 520px;
+    background-attachment: fixed;
+    background-color: #020617;
+}
+
+html[data-theme="light"] body {
+    background-image: url("./assets/wemax-light-bg.png");
+    background-repeat: repeat;
+    background-size: auto 520px;
+    background-attachment: fixed;
+    background-color: #f9fafb;
+}
+
+#root {
+    min-height: 100vh;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    font-family: inherit;
+}
+
+input,
+textarea,
+select {
+    font-family: inherit;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
