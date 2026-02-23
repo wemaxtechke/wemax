@@ -419,7 +419,7 @@ export default function Home() {
                                     </div>
                                     <Link
                                         to="/products"
-                                        className="inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-[11px] md:text-sm font-semibold text-slate-700 shadow-[0_12px_30px_rgba(0,0,0,0.35)] hover:bg-amber-50 hover:text-slate-900 transition-all whitespace-nowrap"
+                                        className="inline-flex items-center gap-2 rounded-full bg-gray-50/95 px-4 py-2 text-[11px] md:text-sm font-semibold text-slate-700 shadow-[0_12px_30px_rgba(0,0,0,0.35)] hover:bg-amber-50 hover:text-slate-900 transition-all whitespace-nowrap"
                                     >
                                         View All Hot Deals
                                         <FaChevronRight className="text-xs" />
