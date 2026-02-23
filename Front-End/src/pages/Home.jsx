@@ -412,14 +412,14 @@ export default function Home() {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-wrap items-center gap-3 text-white">
-                                    <div className="inline-flex items-center rounded-full bg-black/25 px-3 py-1 text-[11px] uppercase tracking-[0.18em]">
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <div className="inline-flex items-center rounded-full bg-black/25 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-white">
                                         <span className="mr-2 inline-flex h-2 w-2 rounded-full bg-amber-300 animate-pulse" />
                                         Limited Time Offers
                                     </div>
                                     <Link
                                         to="/products"
-                                        className="inline-flex items-center gap-2 rounded-full bg-gray-50/95 px-4 py-2 text-[11px] md:text-sm font-semibold text-slate-700 shadow-[0_12px_30px_rgba(0,0,0,0.35)] hover:bg-amber-50 hover:text-slate-900 transition-all whitespace-nowrap"
+                                        className="inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-[11px] md:text-sm font-semibold text-slate-700 shadow-[0_12px_30px_rgba(0,0,0,0.35)] hover:bg-amber-50 hover:text-slate-900 transition-all whitespace-nowrap"
                                     >
                                         View All Hot Deals
                                         <FaChevronRight className="text-xs" />
