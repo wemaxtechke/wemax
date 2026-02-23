@@ -417,25 +417,9 @@ export default function Home() {
                                         <span className="mr-2 inline-flex h-2 w-2 rounded-full bg-amber-300 animate-pulse" />
                                         Limited Time Offers
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="relative flex items-center justify-center h-9 w-9 rounded-full bg-black/20 shrink-0">
-                                            <div className="absolute inset-0 rounded-full border border-white/25 animate-ping opacity-40" />
-                                            <FaClock className="relative text-base" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] uppercase tracking-[0.18em] opacity-80">
-                                                Time Left
-                                            </span>
-                                            <span className="text-sm md:text-base font-semibold">
-                                                {String(timeLeft.hours).padStart(2, '0')}h:
-                                                {String(timeLeft.minutes).padStart(2, '0')}m:
-                                                {String(timeLeft.seconds).padStart(2, '0')}s
-                                            </span>
-                                        </div>
-                                    </div>
                                     <Link
                                         to="/products"
-                                        className="inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-[11px] md:text-sm font-semibold text-grey-600 shadow-[0_12px_30px_rgba(0,0,0,0.35)] hover:bg-amber-50 hover:text-orange-600 transition-all whitespace-nowrap"
+                                        className="inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-[11px] md:text-sm font-semibold text-slate-700 shadow-[0_12px_30px_rgba(0,0,0,0.35)] hover:bg-amber-50 hover:text-slate-900 transition-all whitespace-nowrap"
                                     >
                                         View All Hot Deals
                                         <FaChevronRight className="text-xs" />
