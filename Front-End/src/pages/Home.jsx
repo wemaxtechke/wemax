@@ -13,6 +13,8 @@ export default function Home() {
     const [phonesExpanded, setPhonesExpanded] = useState(false);
     const [flashSaleProducts, setFlashSaleProducts] = useState([]);
     const [flashSaleLoading, setFlashSaleLoading] = useState(true);
+    const [featuredProducts, setFeaturedProducts] = useState([]);
+    const [featuredLoading, setFeaturedLoading] = useState(true);
     const [electronicsBundles, setElectronicsBundles] = useState([]);
     const [electronicsBundlesLoading, setElectronicsBundlesLoading] = useState(true);
     const [furnitureBundles, setFurnitureBundles] = useState([]);
@@ -32,6 +34,22 @@ export default function Home() {
             }
         };
         loadFlashSaleProducts();
+    }, []);
+
+    // Fetch featured products (for Hot Deals carousel)
+    useEffect(() => {
+        const loadFeaturedProducts = async () => {
+            setFeaturedLoading(true);
+            try {
+                const response = await api.get('/products', { params: { featured: 'true', limit: 8 } });
+                setFeaturedProducts(response.data.products || []);
+            } catch (error) {
+                console.error('Failed to load featured products:', error);
+            } finally {
+                setFeaturedLoading(false);
+            }
+        };
+        loadFeaturedProducts();
     }, []);
 
     // Fetch electronics bundle packages (first section after flash sale)
@@ -425,21 +443,21 @@ export default function Home() {
                                 </div>
                             </div>
 
-                            {/* Hot Deals Products */}
-                            {flashSaleLoading ? (
+                            {/* Hot Deals Products (Featured) */}
+                            {featuredLoading ? (
                                 <div className="flex justify-center items-center py-16">
                                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
                                 </div>
-                            ) : flashSaleProducts.length === 0 ? (
+                            ) : featuredProducts.length === 0 ? (
                                 <div className="flex justify-center items-center py-16">
                                     <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                        No hot deals are available at the moment. Please check back soon.
+                                        No featured products are available at the moment. Please check back soon.
                                     </p>
                                 </div>
                             ) : (
                                 <div className={`p-4 md:p-5 ${theme === 'dark' ? 'bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-b from-white via-orange-50 to-white'}`}>
                                     <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
-                                        {flashSaleProducts.map((product) => (
+                                        {featuredProducts.map((product) => (
                                             <Link
                                                 key={product._id}
                                                 to={`/products/${product._id}`}
@@ -536,6 +554,150 @@ export default function Home() {
                                                                                 100,
                                                                                 (product.stock / 50) * 100
                                                                             )}%`,
+                                                                        }}
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-red-500" />
+                                                                )}
+                                                            </div>
+                                                            <p className="text-[10px] sm:text-[11px] mt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                                                                <span>
+                                                                    {product.stock === 0
+                                                                        ? 'Out of stock'
+                                                                        : product.stock < 10
+                                                                        ? `Only ${product.stock} left`
+                                                                        : `${product.stock} in stock`}
+                                                                </span>
+                                                                {product.stock > 0 && product.stock < 20 && (
+                                                                    <span className="inline-flex items-center gap-1">
+                                                                        <FaShoppingCart className="text-[9px] sm:text-[10px]" />
+                                                                        Fast moving
+                                                                    </span>
+                                                                )}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Flash Sales Section - full width so it starts where category starts */}
+                    <div className="col-span-1 md:col-span-4">
+                        <div className={`rounded-3xl overflow-hidden shadow-[0_18px_60px_rgba(190,24,93,0.45)] border ${theme === 'dark' ? 'bg-gray-950/80 border-rose-900/70' : 'bg-white/80 border-rose-100'}`}>
+                            {/* Flash Sales Header */}
+                            <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 md:px-6 py-3 md:py-4 ${theme === 'dark' ? 'bg-gradient-to-r from-rose-700 via-red-600 to-orange-500' : 'bg-gradient-to-r from-rose-500 via-red-500 to-orange-400'}`}>
+                                {/* First Row: Title and Description */}
+                                <div className="flex items-center gap-3 text-white">
+                                    <div>
+                                        <p className="text-xs md:text-sm font-semibold tracking-wide uppercase">
+                                            Flash Sale
+                                        </p>
+                                        <p className="text-xs opacity-85">
+                                            Limited premium drops for today only
+                                        </p>
+                                    </div>
+                                </div>
+                                {/* Second Row: Clock Icon, Timer, and View All Link */}
+                                <div className="flex items-center gap-2 sm:gap-3 md:gap-4 text-white">
+                                    <div className="relative flex items-center justify-center h-9 w-9 rounded-full bg-black/20 shrink-0">
+                                        <div className="absolute inset-0 rounded-full border border-white/30 animate-ping opacity-50" />
+                                        <FaClock className="relative text-base" />
+                                    </div>
+                                    <span className="hidden sm:inline text-[11px] uppercase tracking-[0.18em]">
+                                        Time left
+                                    </span>
+                                    <span className={`text-sm md:text-base font-semibold px-3 py-1 rounded-full ${theme === 'dark' ? 'bg-black/40 text-white' : 'bg-white/90 text-red-600'} shadow-sm`}>
+                                        {String(timeLeft.hours).padStart(2, '0')}h:{String(timeLeft.minutes).padStart(2, '0')}m:{String(timeLeft.seconds).padStart(2, '0')}s
+                                    </span>
+                                    <Link to="/products" className="text-[11px] md:text-xs font-semibold underline-offset-4 hover:underline whitespace-nowrap">
+                                        View all deals →
+                                    </Link>
+                                </div>
+                            </div>
+
+                            {/* Flash Sales Products */}
+                            {flashSaleLoading ? (
+                                <div className="flex justify-center items-center py-20">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                                </div>
+                            ) : flashSaleProducts.length === 0 ? (
+                                <div className="flex justify-center items-center py-20">
+                                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        No flash sale products available at the moment.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="p-4 md:p-5">
+                                    <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
+                                        {flashSaleProducts.map((product) => (
+                                            <Link 
+                                                key={product._id} 
+                                                to={`/products/${product._id}`}
+                                                className={`group flex-none w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)] lg:w-[calc((100%-3rem)/5)] shrink-0 snap-start rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.45)] ${theme === 'dark' ? 'bg-gray-900/80 border border-gray-800' : 'bg-blue-50 border border-blue-100'}`}
+                                            >
+                                                {/* Product Image */}
+                                                <div className={`relative overflow-hidden h-32 sm:h-40 md:h-44 ${theme === 'dark' ? 'bg-gradient-to-b from-gray-800 to-gray-900' : 'bg-gradient-to-b from-blue-50 to-blue-100'}`}>
+                                                    <img 
+                                                        src={product.images?.[0]?.url || wemaxLogo} 
+                                                        alt={product.name}
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                    />
+                                                    {product.discountPercent > 0 && (
+                                                        <div className="absolute top-2 right-2 rounded-full bg-black/70 px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-amber-300 border border-amber-400/40 backdrop-blur">
+                                                            Save {product.discountPercent}%
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Product Info */}
+                                                <div className="p-3 md:p-3.5">
+                                                    <h3 className={`text-[10px] sm:text-sm font-medium line-clamp-2 mb-1 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
+                                                        {product.name}
+                                                    </h3>
+
+                                                    {/* Rating */}
+                                                    {product.averageRating > 0 && (
+                                                        <div className="flex items-center gap-1.5 mb-1.5">
+                                                            <div className="flex text-yellow-400 text-[9px] sm:text-[10px]">
+                                                                {[...Array(5)].map((_, i) => (
+                                                                    <FaStar
+                                                                        key={i}
+                                                                        className={i < Math.round(product.averageRating) ? 'fill-current' : 'text-gray-300'}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                            <span className={`text-[9px] sm:text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                {product.averageRating.toFixed(1)} {product.reviewsCount > 0 && `(${product.reviewsCount})`}
+                                                            </span>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Price */}
+                                                    <div className="mb-1.5">
+                                                        <p className="text-[12px] sm:text-sm md:text-base font-semibold text-amber-400">
+                                                            KES {product.newPrice?.toLocaleString() || '0'}
+                                                        </p>
+                                                        {product.oldPrice && product.oldPrice > product.newPrice && (
+                                                            <p className={`text-[10px] sm:text-[11px] line-through ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                                                                KES {product.oldPrice?.toLocaleString()}
+                                                            </p>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Stock Info */}
+                                                    {product.stock !== undefined && (
+                                                        <div className={`text-[10px] sm:text-[11px] mb-1.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                            <div className={`w-full h-1.5 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'}`}>
+                                                                {product.stock > 0 ? (
+                                                                    <div
+                                                                        className={`h-full bg-gradient-to-r from-amber-400 via-orange-500 to-red-500`}
+                                                                        style={{
+                                                                            width: `${Math.min(100, (product.stock / 50) * 100)}%`,
                                                                         }}
                                                                     />
                                                                 ) : (
