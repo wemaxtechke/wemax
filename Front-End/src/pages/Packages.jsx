@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { fetchPackages } from '../redux/slices/packageSlice.js';
 import { FaBox } from 'react-icons/fa';
 import wemaxLogo from '../assets/wemax-logo.jpg';
+import SmartImage from '../components/SmartImage.jsx';
 
 function Packages() {
     const dispatch = useDispatch();
@@ -105,8 +106,8 @@ function Packages() {
                             >
                                 {/* Package Image */}
                                 <div className={`relative overflow-hidden h-48 sm:h-56 md:h-64 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                                    <img 
-                                        src={pkg.images?.[0]?.url || wemaxLogo} 
+                                    <SmartImage
+                                        src={pkg.images?.[0]?.url || wemaxLogo}
                                         alt={pkg.name}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                     />

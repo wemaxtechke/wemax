@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import api, { apiFormData } from '../../utils/api.js';
 import { cn } from '../../lib/utils.js';
 import { CATEGORIES, PHONE_BRANDS } from '../../constants/categories.js';
+import SmartImage from '../../components/SmartImage.jsx';
 
 const initialSpec = { key: '', value: '' };
 
@@ -224,7 +225,7 @@ export default function AdminProducts() {
                                 <div className="flex items-start gap-3">
                                     <div className="w-14 h-14 rounded-xl overflow-hidden border border-white/10 shrink-0">
                                         {p.images?.[0]?.url ? (
-                                            <img src={p.images[0].url} alt="" className="w-full h-full object-cover" />
+                                            <SmartImage src={p.images[0].url} alt="" className="w-full h-full object-cover" />
                                         ) : (
                                             <div className={cn("w-full h-full flex items-center justify-center text-sm", textSecondaryClass)}>
                                                 —
@@ -302,7 +303,7 @@ export default function AdminProducts() {
                                         <tr key={p._id} className={cn("border-b transition-colors", borderClass, hoverBgClass)}>
                                             <td className="px-4 md:px-6 py-3">
                                                 {p.images?.[0]?.url ? (
-                                                    <img src={p.images[0].url} alt="" className="w-12 h-12 object-cover rounded" />
+                                                    <SmartImage src={p.images[0].url} alt="" className="w-12 h-12 object-cover rounded" />
                                                 ) : (
                                                     <span className={textSecondaryClass}>—</span>
                                                 )}
@@ -614,7 +615,7 @@ export default function AdminProducts() {
                                 <div className="flex flex-wrap gap-3 mb-3">
                                     {existingImages.map((img, i) => (
                                         <div key={i} className="relative">
-                                            <img src={img.url} alt="" className="w-20 h-20 object-cover rounded" />
+                                            <SmartImage src={img.url} alt="" className="w-20 h-20 object-cover rounded" />
                                             <span className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center py-1 rounded-b">Existing</span>
                                         </div>
                                     ))}

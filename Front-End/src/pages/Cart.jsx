@@ -4,6 +4,7 @@ import { fetchCart, removeFromCart } from '../redux/slices/cartSlice.js';
 import { Link } from 'react-router-dom';
 import { FaTrash, FaShoppingCart } from 'react-icons/fa';
 import wemaxLogo from '../assets/wemax-logo.jpg';
+import SmartImage from '../components/SmartImage.jsx';
 
 export default function Cart() {
     const dispatch = useDispatch();
@@ -90,7 +91,7 @@ export default function Cart() {
                                             key={item._id} 
                                             className={`p-4 md:p-6 rounded-lg flex items-center gap-4 justify-between ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}
                                         >
-                                            <img
+                                            <SmartImage
                                                 src={item.product?.images?.[0]?.url || wemaxLogo}
                                                 alt={item.product?.name || 'Product'}
                                                 className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg flex-shrink-0"
@@ -130,7 +131,7 @@ export default function Cart() {
                                             key={pkg._id} 
                                             className={`p-4 md:p-6 rounded-lg flex items-center gap-4 justify-between ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}
                                         >
-                                            <img
+                                            <SmartImage
                                                 src={pkg.package?.images?.[0]?.url || wemaxLogo}
                                                 alt={pkg.package?.name || 'Package'}
                                                 className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg flex-shrink-0"

@@ -7,6 +7,7 @@ import { FaShoppingCart, FaHeart, FaStar, FaShareAlt, FaCheckCircle, FaTruck, Fa
 import { FaStarHalfStroke } from 'react-icons/fa6';
 import wemaxLogo from '../assets/wemax-logo.jpg';
 import api from '../utils/api.js';
+import SmartImage from '../components/SmartImage.jsx';
 
 export default function ProductDetail() {
     const { id } = useParams();
@@ -318,7 +319,7 @@ export default function ProductDetail() {
                     <div className="space-y-4">
                         {/* Main Image */}
                         <div className={`relative rounded-lg overflow-hidden h-80 sm:h-96 md:h-[500px] ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} flex items-center justify-center`}>
-                            <img
+                            <SmartImage
                                 src={images[selectedImage]?.url || wemaxLogo}
                                 alt={currentProduct.name}
                                 className="w-full h-full object-contain p-4"
@@ -350,7 +351,7 @@ export default function ProductDetail() {
                                                     : 'border-gray-300 hover:border-gray-400'
                                         }`}
                                     >
-                                        <img
+                                        <SmartImage
                                             src={img.url}
                                             alt={`${currentProduct.name} ${idx + 1}`}
                                             className="w-full h-full object-cover"
@@ -643,7 +644,7 @@ export default function ProductDetail() {
                                             }`}
                                         >
                                             <div className={`relative overflow-hidden h-40 sm:h-48 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                                                <img
+                                                <SmartImage
                                                     src={product.images?.[0]?.url || wemaxLogo}
                                                     alt={product.name}
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"

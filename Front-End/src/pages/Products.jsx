@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { FaShoppingCart, FaStar } from 'react-icons/fa';
 import wemaxLogo from '../assets/wemax-logo.jpg';
 import { addToCart } from '../redux/slices/cartSlice.js';
+import SmartImage from '../components/SmartImage.jsx';
 
 export default function Products() {
     const dispatch = useDispatch();
@@ -87,8 +88,8 @@ export default function Products() {
                                 >
                                     {/* Product Image Container */}
                                     <div className="relative overflow-hidden h-40 sm:h-48 md:h-56 bg-white">
-                                        <img 
-                                            src={product.images?.[0]?.url || wemaxLogo} 
+                                        <SmartImage
+                                            src={product.images?.[0]?.url || wemaxLogo}
                                             alt={product.name}
                                             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                                         />

@@ -5,6 +5,7 @@ import wemaxLogo from '../assets/wemax-logo.jpg';
 import { FaShoppingCart, FaStar, FaClock, FaChevronRight, FaChevronDown } from 'react-icons/fa';
 import api from '../utils/api.js';
 import { SUB_CATEGORIES, PHONE_BRANDS } from '../constants/categories.js';
+import SmartImage from '../components/SmartImage.jsx';
 
 export default function Home() {
     const { theme } = useSelector((state) => state?.ui || { theme: 'dark' });
@@ -458,7 +459,7 @@ export default function Home() {
                                                             : 'bg-gradient-to-b from-orange-50 to-orange-100'
                                                     }`}
                                                 >
-                                                    <img
+                                                    <SmartImage
                                                         src={product.images?.[0]?.url || wemaxLogo}
                                                         alt={product.name}
                                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"

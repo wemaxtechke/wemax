@@ -5,6 +5,7 @@ import { fetchPackageById } from '../redux/slices/packageSlice.js';
 import { FaShoppingCart, FaBox, FaCheckCircle, FaStar } from 'react-icons/fa';
 import { FaStarHalfStroke } from 'react-icons/fa6';
 import wemaxLogo from '../assets/wemax-logo.jpg';
+import SmartImage from '../components/SmartImage.jsx';
 
 export default function PackageDetail() {
     const { id } = useParams();
@@ -144,7 +145,7 @@ export default function PackageDetail() {
                     <div className="space-y-4">
                         {/* Main Image */}
                         <div className={`relative rounded-lg overflow-hidden h-80 sm:h-96 md:h-[500px] ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} flex items-center justify-center`}>
-                            <img
+                            <SmartImage
                                 src={images[selectedImage]?.url || wemaxLogo}
                                 alt={currentPackage.name}
                                 className="w-full h-full object-contain p-4"
@@ -171,7 +172,7 @@ export default function PackageDetail() {
                                                     : 'border-gray-300 hover:border-gray-400'
                                         }`}
                                     >
-                                        <img
+                                        <SmartImage
                                             src={img.url}
                                             alt={`${currentPackage.name} ${idx + 1}`}
                                             className="w-full h-full object-cover"

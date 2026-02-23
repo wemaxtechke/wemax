@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import api, { apiFormData } from '../../utils/api.js';
 import { cn } from '../../lib/utils.js';
+import SmartImage from '../../components/SmartImage.jsx';
 
 export default function AdminPackages() {
     const [packages, setPackages] = useState([]);
@@ -159,7 +160,7 @@ export default function AdminPackages() {
                                 <div className="flex items-start gap-3">
                                     <div className="w-14 h-14 rounded-xl overflow-hidden border border-white/10 shrink-0">
                                         {pkg.images?.[0]?.url ? (
-                                            <img src={pkg.images[0].url} alt="" className="w-full h-full object-cover" />
+                                            <SmartImage src={pkg.images[0].url} alt="" className="w-full h-full object-cover" />
                                         ) : (
                                             <div className={cn("w-full h-full flex items-center justify-center text-sm", textSecondaryClass)}>
                                                 —
@@ -235,7 +236,7 @@ export default function AdminPackages() {
                                     <tr key={pkg._id} className={cn("border-b last:border-b-0 transition-colors", borderClass, hoverBgClass)}>
                                         <td className="px-4 md:px-6 py-3">
                                             {pkg.images?.[0]?.url ? (
-                                                <img src={pkg.images[0].url} alt="" className="w-12 h-12 rounded-lg object-cover border border-white/10" />
+                                                <SmartImage src={pkg.images[0].url} alt="" className="w-12 h-12 rounded-lg object-cover border border-white/10" />
                                             ) : (
                                                 <span className={cn("text-sm", textSecondaryClass)}>—</span>
                                             )}
@@ -483,7 +484,7 @@ export default function AdminPackages() {
                                     <div className="mt-3 grid grid-cols-3 sm:grid-cols-4 gap-3">
                                         {existingImages.map((img, i) => (
                                             <div key={i} className="relative overflow-hidden rounded-lg border border-white/10">
-                                                <img src={img.url} alt="" className="w-full h-20 object-cover" />
+                                                <SmartImage src={img.url} alt="" className="w-full h-20 object-cover" />
                                                 <div className="absolute inset-x-0 bottom-0 bg-black/55 text-white text-[10px] py-1 text-center">
                                                     Existing
                                                 </div>
