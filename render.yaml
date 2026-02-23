@@ -6,7 +6,6 @@ services:
   - type: web
     name: wemax-api
     runtime: node
-    plan: free
     rootDir: Back-End
 
     buildCommand: npm install
@@ -39,7 +38,6 @@ services:
   - type: web
     name: wemax-frontend
     runtime: static
-    plan: free
     rootDir: Front-End
 
     buildCommand: npm install && npm run build
