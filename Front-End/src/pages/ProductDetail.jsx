@@ -278,6 +278,49 @@ export default function ProductDetail() {
 
     return (
         <div className="relative w-full min-h-screen overflow-hidden">
+            {/* Mobile bottom action bar */}
+            <div className="fixed inset-x-0 bottom-0 z-40 md:hidden">
+                <div className={`${theme === 'dark' ? 'bg-gray-900/95 border-t border-gray-800' : 'bg-white/95 border-t border-gray-200'} backdrop-blur px-4 py-3`}>
+                    <div className="max-w-7xl mx-auto flex gap-3">
+                        <button
+                            onClick={handleAddToCart}
+                            disabled={!isInStock || cartLoading}
+                            className={`flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 ${
+                                !isInStock || cartLoading ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
+                        >
+                            {cartLoading ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                                    Adding...
+                                </>
+                            ) : (
+                                <>
+                                    <FaShoppingCart className="text-xs" /> Add to Cart
+                                </>
+                            )}
+                        </button>
+                        <button
+                            onClick={handleBuyNow}
+                            disabled={!isInStock || cartLoading}
+                            className={`flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 ${
+                                !isInStock || cartLoading ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
+                        >
+                            {cartLoading ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                                    Processing...
+                                </>
+                            ) : (
+                                <>
+                                    <FaShoppingCart className="text-xs" /> Buy Now
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </div>
             {/* Background layer - light and dark mode */}
             <div
                 className="absolute inset-0 z-0"
@@ -288,7 +331,7 @@ export default function ProductDetail() {
                     backgroundSize: 'cover',
                 }}
             />
-            <div className={`relative z-10 w-full min-h-screen py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-8 ${theme === 'dark' ? 'bg-gray-950/35' : 'bg-white/45'} backdrop-blur-[3px]`}>
+            <div className={`relative z-10 w-full min-h-screen py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-8 pb-28 md:pb-16 ${theme === 'dark' ? 'bg-gray-950/35' : 'bg-white/45'} backdrop-blur-[3px]`}>
             {/* Notification Toast */}
             {notification.show && (
                 <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
@@ -431,40 +474,7 @@ export default function ProductDetail() {
                             )}
                         </div>
 
-                        {/* Description */}
-                        <div>
-                            <h3 className={`font-bold text-lg mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                                Description
-                            </h3>
-                            <p className={`leading-relaxed whitespace-pre-wrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                {currentProduct.description}
-                            </p>
-                        </div>
-
-                        {/* Specifications */}
-                        {currentProduct.specifications && currentProduct.specifications.length > 0 && (
-                            <div>
-                                <h3 className={`font-bold text-lg mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                                    Specifications
-                                </h3>
-                                <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} p-4 rounded-lg`}>
-                                    {currentProduct.specifications.map((spec, idx) => (
-                                        spec.key && spec.value && (
-                                            <div key={idx} className="flex gap-2">
-                                                <span className={`font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                    {spec.key}:
-                                                </span>
-                                                <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-                                                    {spec.value}
-                                                </span>
-                                            </div>
-                                        )
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Quantity and Actions */}
+                        {/* Quantity and primary actions (desktop/laptop) */}
                         <div className="space-y-4 pt-4 border-t border-gray-300">
                             {/* Quantity */}
                             {isInStock && (
@@ -511,8 +521,8 @@ export default function ProductDetail() {
                                 </div>
                             )}
 
-                            {/* Action Buttons */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {/* Action Buttons (desktop / tablet) */}
+                            <div className="hidden md:grid grid-cols-2 gap-3">
                                 <button
                                     onClick={handleAddToCart}
                                     disabled={!isInStock || cartLoading}
@@ -531,13 +541,43 @@ export default function ProductDetail() {
                                         </>
                                     )}
                                 </button>
+                                <button
+                                    onClick={handleBuyNow}
+                                    disabled={!isInStock || cartLoading}
+                                    className={`bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 ${
+                                        !isInStock || cartLoading ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
+                                >
+                                    {cartLoading ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FaShoppingCart /> Buy Now
+                                        </>
+                                    )}
+                                </button>
                             </div>
+                        </div>
 
-                            {/* Wishlist Button */}
+                        {/* Description */}
+                        <div>
+                            <h3 className={`font-bold text-lg mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                Description
+                            </h3>
+                            <p className={`leading-relaxed whitespace-pre-wrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                {currentProduct.description}
+                            </p>
+                        </div>
+
+                        {/* Save & Share row (desktop / laptop) */}
+                        <div className="hidden md:grid grid-cols-2 gap-3">
                             <button
                                 onClick={handleWishlistToggle}
                                 disabled={wishlistLoading}
-                                className={`w-full rounded-lg font-bold transition-colors flex items-center justify-center gap-2 py-3 ${
+                                className={`rounded-lg font-bold transition-colors flex items-center justify-center gap-2 py-3 ${
                                     isInWishlist
                                         ? theme === 'dark'
                                             ? 'bg-red-900/30 text-red-400 hover:bg-red-900/40'
@@ -555,31 +595,9 @@ export default function ProductDetail() {
                                     </>
                                 )}
                             </button>
-
-                            {/* Buy Now Button */}
-                            <button
-                                onClick={handleBuyNow}
-                                disabled={!isInStock || cartLoading}
-                                className={`w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 ${
-                                    !isInStock || cartLoading ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
-                            >
-                                {cartLoading ? (
-                                    <>
-                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                        Processing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <FaShoppingCart /> Buy Now
-                                    </>
-                                )}
-                            </button>
-
-                            {/* Share */}
                             <button
                                 onClick={handleShare}
-                                className={`w-full py-2 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 border ${
+                                className={`py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 border ${
                                     theme === 'dark' 
                                         ? 'border-gray-700 text-gray-400 hover:bg-gray-800' 
                                         : 'border-gray-300 text-gray-600 hover:bg-gray-100'
@@ -588,6 +606,40 @@ export default function ProductDetail() {
                                 <FaShareAlt /> Share Product
                             </button>
                         </div>
+
+                        {/* Specifications as table */}
+                        {currentProduct.specifications && currentProduct.specifications.length > 0 && (
+                            <div>
+                                <h3 className={`font-bold text-lg mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                    Specifications
+                                </h3>
+                                <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} rounded-lg overflow-hidden`}>
+                                    <table className="min-w-full text-sm">
+                                        <tbody>
+                                            {currentProduct.specifications.map((spec, idx) => (
+                                                spec.key && spec.value && (
+                                                    <tr
+                                                        key={idx}
+                                                        className={theme === 'dark' ? 'border-b border-gray-700 last:border-b-0' : 'border-b border-gray-200 last:border-b-0'}
+                                                    >
+                                                        <th
+                                                            className={`w-1/3 px-4 py-2 text-left font-semibold ${
+                                                                theme === 'dark' ? 'text-gray-200 bg-gray-900/40' : 'text-gray-700 bg-gray-200/40'
+                                                            }`}
+                                                        >
+                                                            {spec.key}
+                                                        </th>
+                                                        <td className={`px-4 py-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                            {spec.value}
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Shipping Info */}
                         <div className={`p-4 rounded-lg space-y-2 ${theme === 'dark' ? 'bg-blue-900/20 border border-blue-800/30' : 'bg-blue-50 border border-blue-200'}`}>

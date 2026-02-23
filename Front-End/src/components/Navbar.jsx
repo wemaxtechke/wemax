@@ -195,9 +195,7 @@ export default function Navbar() {
 
                 {/* Search bar - full width below nav, responsive */}
                 <form onSubmit={handleSearchSubmit} className="pb-3 sm:pb-4">
-                    <div className={`flex rounded-lg sm:rounded-xl overflow-hidden border shadow-sm min-w-0 ${
-                        theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
-                    }`}>
+                    <div className="flex rounded-lg sm:rounded-xl overflow-hidden border border-blue-500 shadow-sm min-w-0">
                         <div className={`flex-1 flex items-center gap-2 pl-3 pr-2 py-2 sm:pl-4 sm:pr-3 sm:py-3 min-w-0 ${
                             theme === 'dark' ? 'bg-gray-900' : 'bg-white'
                         }`}>
