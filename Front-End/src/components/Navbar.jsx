@@ -52,7 +52,7 @@ export default function Navbar() {
                         <img
                             src={wemaxLogo}
                             alt="Wemax"
-                            className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl"
+                            className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl"
                         />
                         <span
                             style={{ fontFamily: '"Space Grotesk", Inter, system-ui, sans-serif' }}
