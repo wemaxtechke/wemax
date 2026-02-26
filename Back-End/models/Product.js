@@ -78,6 +78,14 @@ const productSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        createdBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
+        createdByEmail: {
+            type: String,
+            index: true,
+        },
     },
     {
         timestamps: true,

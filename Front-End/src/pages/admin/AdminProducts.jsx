@@ -9,6 +9,7 @@ const initialSpec = { key: '', value: '' };
 
 export default function AdminProducts() {
     const { theme } = useSelector((state) => state?.ui || { theme: 'dark' });
+    const { user } = useSelector((state) => state?.auth || { user: null });
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -31,6 +32,7 @@ export default function AdminProducts() {
     });
     const [imageFiles, setImageFiles] = useState([]);
     const [existingImages, setExistingImages] = useState([]);
+    const [myProductCount, setMyProductCount] = useState(null);
 
     const loadProducts = async () => {
         setLoading(true);
@@ -44,9 +46,26 @@ export default function AdminProducts() {
         }
     };
 
+    const loadMyProductCount = async () => {
+        if (!user?.email) return;
+        try {
+            const res = await api.get('/products', {
+                params: { limit: 1, createdByEmail: user.email },
+            });
+            setMyProductCount(res.data?.total ?? 0);
+        } catch (e) {
+            console.error('Failed to load your product count:', e);
+        }
+    };
+
     useEffect(() => {
         loadProducts();
     }, []);
+
+    useEffect(() => {
+        loadMyProductCount();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.email]);
 
     const openAdd = () => {
         setEditingId(null);
@@ -163,6 +182,7 @@ export default function AdminProducts() {
             }
             setFormOpen(false);
             loadProducts();
+            loadMyProductCount();
         } catch (e) {
             setError(e.response?.data?.message || (editingId ? 'Update failed' : 'Create failed'));
         } finally {
@@ -175,6 +195,7 @@ export default function AdminProducts() {
         try {
             await api.delete(`/products/${id}`);
             loadProducts();
+            loadMyProductCount();
         } catch (e) {
             setError(e.response?.data?.message || 'Delete failed');
         }
@@ -190,7 +211,7 @@ export default function AdminProducts() {
 
     return (
         <div>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b-2" style={{ borderColor: 'var(--color-border)' }}>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-3 pb-4 border-b-2" style={{ borderColor: 'var(--color-border)' }}>
                 <h1 className={cn("text-2xl md:text-3xl font-bold m-0", textClass)}>Products</h1>
                 <button 
                     type="button"
@@ -200,6 +221,25 @@ export default function AdminProducts() {
                     Add Product
                 </button>
             </div>
+            {user?.email && (
+                <div
+                    className={cn(
+                        "mb-6 px-4 py-3 rounded-xl border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2",
+                        bgClass,
+                        borderClass
+                    )}
+                >
+                    <div className={cn("text-sm", textSecondaryClass)}>
+                        Signed in as <span className={cn("font-semibold", textClass)}>{user.email}</span>
+                    </div>
+                    <div className={cn("text-sm", textSecondaryClass)}>
+                        Products created by you:{' '}
+                        <span className={cn("font-semibold", textClass)}>
+                            {myProductCount !== null ? myProductCount : '—'}
+                        </span>
+                    </div>
+                </div>
+            )}
             {error && (
                 <div className={cn(
                     "p-4 mb-6 rounded-lg border-l-4 flex items-center gap-2",
@@ -235,6 +275,11 @@ export default function AdminProducts() {
                                     <div className="min-w-0 flex-1">
                                         <div className={cn("font-bold text-base truncate", textClass)}>{p.name}</div>
                                         <div className={cn("mt-1 text-sm", textSecondaryClass)}>{p.category} / {p.subCategory}</div>
+                                        {p.createdByEmail && (
+                                            <div className={cn("mt-1 text-xs", textSecondaryClass)}>
+                                                Created by: <span className={cn("font-medium", textClass)}>{p.createdByEmail}</span>
+                                            </div>
+                                        )}
                                         <div className="mt-2 flex items-center justify-between gap-3">
                                             <div className={cn("text-lg font-extrabold", textClass)}>
                                                 KES {p.newPrice?.toLocaleString()}
@@ -288,13 +333,14 @@ export default function AdminProducts() {
                                     <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Category</th>
                                     <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Price</th>
                                     <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Stock</th>
+                                    <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Created By</th>
                                     <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {products.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className={cn("px-4 md:px-6 py-8 text-center", textSecondaryClass)}>
+                                        <td colSpan={7} className={cn("px-4 md:px-6 py-8 text-center", textSecondaryClass)}>
                                             No products yet. Add one to get started.
                                         </td>
                                     </tr>
@@ -312,6 +358,13 @@ export default function AdminProducts() {
                                             <td className={cn("px-4 md:px-6 py-3", textSecondaryClass)}>{p.category} / {p.subCategory}</td>
                                             <td className={cn("px-4 md:px-6 py-3 font-semibold text-blue-600", textClass)}>KES {p.newPrice?.toLocaleString()}</td>
                                             <td className={cn("px-4 md:px-6 py-3", textClass)}>{p.stock}</td>
+                                            <td className={cn("px-4 md:px-6 py-3", textSecondaryClass)}>
+                                                {p.createdByEmail ? (
+                                                    <span className="break-all">{p.createdByEmail}</span>
+                                                ) : (
+                                                    '—'
+                                                )}
+                                            </td>
                                             <td className="px-4 md:px-6 py-3">
                                                 <div className="flex gap-2 flex-wrap">
                                                     <button 

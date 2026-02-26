@@ -17,6 +17,7 @@ export const getProducts = async (req, res) => {
             limit = 20,
             flashDeal,
             freeShipping,
+            createdByEmail,
         } = req.query;
 
         const query = {};
@@ -39,6 +40,7 @@ export const getProducts = async (req, res) => {
         }
         if (flashDeal === 'true') query.isFlashDeal = true;
         if (freeShipping === 'true') query.freeShipping = true;
+        if (createdByEmail) query.createdByEmail = createdByEmail;
 
         const skip = (Number(page) - 1) * Number(limit);
 
@@ -122,7 +124,13 @@ export const createProduct = async (req, res) => {
         }
 
         const data = parseProductBody(req.body);
-        const product = await Product.create({ ...data, images });
+        const creator = req.user || null;
+        const product = await Product.create({
+            ...data,
+            images,
+            createdBy: creator?._id,
+            createdByEmail: creator?.email || undefined,
+        });
 
         res.status(201).json(product);
     } catch (error) {
