@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import wemaxLogo from '../assets/wemax-logo.jpg';
 import { FaShoppingCart, FaStar, FaClock, FaChevronRight, FaChevronDown } from 'react-icons/fa';
 import api from '../utils/api.js';
-import { SUB_CATEGORIES, PHONE_BRANDS } from '../constants/categories.js';
+import { SUB_CATEGORIES, PHONE_BRANDS, LAPTOP_BRANDS } from '../constants/categories.js';
 import SmartImage from '../components/SmartImage.jsx';
 
 export default function Home() {
@@ -12,6 +12,7 @@ export default function Home() {
     const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
     const [categoriesOpen, setCategoriesOpen] = useState(false);
     const [phonesExpanded, setPhonesExpanded] = useState(false);
+    const [laptopsExpanded, setLaptopsExpanded] = useState(false);
     const [flashSaleProducts, setFlashSaleProducts] = useState([]);
     const [flashSaleLoading, setFlashSaleLoading] = useState(true);
     const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -258,6 +259,52 @@ export default function Home() {
                                             </div>
                                         )}
                                     </div>
+                                ) : category.name === 'Laptops' ? (
+                                    <div key={category.name}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setLaptopsExpanded(!laptopsExpanded)}
+                                            className={`w-full flex items-center justify-between px-4 py-3 transition-colors ${
+                                                theme === 'dark'
+                                                    ? 'hover:bg-gray-900/80 text-gray-100'
+                                                    : 'hover:bg-gray-50 text-gray-900'
+                                            }`}
+                                        >
+                                            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                                                Laptops
+                                            </span>
+                                            <FaChevronDown
+                                                className={`text-[11px] transition-transform ${laptopsExpanded ? 'rotate-180' : ''} ${
+                                                    theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
+                                                }`}
+                                            />
+                                        </button>
+                                        {laptopsExpanded && (
+                                            <div className={`border-l-2 ml-4 pl-2 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                                                <Link
+                                                    to="/products?subCategory=Laptops"
+                                                    onClick={() => { setCategoriesOpen(false); setLaptopsExpanded(false); }}
+                                                    className={`block px-4 py-2 text-sm font-medium ${
+                                                        theme === 'dark' ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-700 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    All Laptops
+                                                </Link>
+                                                {LAPTOP_BRANDS.map((brand) => (
+                                                    <Link
+                                                        key={brand}
+                                                        to={`/products?subCategory=Laptops&brand=${encodeURIComponent(brand)}`}
+                                                        onClick={() => { setCategoriesOpen(false); setLaptopsExpanded(false); }}
+                                                        className={`block px-4 py-2 text-sm ${
+                                                            theme === 'dark' ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-700 hover:bg-gray-50'
+                                                        }`}
+                                                    >
+                                                        {brand}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 ) : (
                                     <Link
                                         key={category.name}
@@ -344,6 +391,57 @@ export default function Home() {
                                                     <Link
                                                         key={brand}
                                                         to={`/products?subCategory=Phones&brand=${encodeURIComponent(brand)}`}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className={`block px-4 py-2 text-sm last:rounded-b-lg ${
+                                                            theme === 'dark'
+                                                                ? 'text-gray-200 hover:bg-gray-700'
+                                                                : 'text-gray-700 hover:bg-blue-50'
+                                                        }`}
+                                                    >
+                                                        {brand}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : category.name === 'Laptops' ? (
+                                        <div
+                                            key={category.name}
+                                            className={`group relative ${theme === 'dark' ? 'hover:bg-gray-900/80' : 'hover:bg-gray-50'}`}
+                                        >
+                                            <div
+                                                className={`flex items-center justify-between px-4 py-3 transition-colors cursor-pointer ${
+                                                    theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+                                                }`}
+                                            >
+                                                <span className="text-sm font-medium">Laptops</span>
+                                                <FaChevronRight
+                                                    className={`text-xs shrink-0 transition-transform group-hover:translate-x-0.5 ${
+                                                        theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
+                                                    }`}
+                                                />
+                                            </div>
+                                            <div
+                                                className={`absolute left-0 top-full mt-1 min-w-[180px] py-2 rounded-lg shadow-xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 ${
+                                                    theme === 'dark'
+                                                        ? 'bg-gray-900 border-gray-700'
+                                                        : 'bg-white border-gray-200'
+                                                }`}
+                                            >
+                                                <Link
+                                                    to="/products?subCategory=Laptops"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className={`block px-4 py-2 text-sm font-medium rounded-t-lg ${
+                                                        theme === 'dark'
+                                                            ? 'text-gray-200 hover:bg-gray-800'
+                                                            : 'text-gray-900 hover:bg-blue-50'
+                                                    }`}
+                                                >
+                                                    All Laptops
+                                                </Link>
+                                                {LAPTOP_BRANDS.map((brand) => (
+                                                    <Link
+                                                        key={brand}
+                                                        to={`/products?subCategory=Laptops&brand=${encodeURIComponent(brand)}`}
                                                         onClick={(e) => e.stopPropagation()}
                                                         className={`block px-4 py-2 text-sm last:rounded-b-lg ${
                                                             theme === 'dark'

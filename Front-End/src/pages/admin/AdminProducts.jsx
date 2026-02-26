@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import api, { apiFormData } from '../../utils/api.js';
 import { cn } from '../../lib/utils.js';
-import { CATEGORIES, PHONE_BRANDS } from '../../constants/categories.js';
+import { CATEGORIES, PHONE_BRANDS, LAPTOP_BRANDS } from '../../constants/categories.js';
 import SmartImage from '../../components/SmartImage.jsx';
 
 const initialSpec = { key: '', value: '' };
@@ -451,6 +451,23 @@ export default function AdminProducts() {
                                     >
                                         <option value="">Select brand</option>
                                         {PHONE_BRANDS.map((b) => (
+                                            <option key={b} value={b}>{b}</option>
+                                        ))}
+                                    </select>
+                                ) : form.category === 'Electronics' && form.subCategory === 'Laptops' ? (
+                                    <select
+                                        value={form.brand}
+                                        onChange={(e) => updateForm('brand', e.target.value)}
+                                        className={cn(
+                                            "w-full px-4 py-2 rounded-lg border transition-all",
+                                            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                                            bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
+                                            borderClass,
+                                            textClass
+                                        )}
+                                    >
+                                        <option value="">Select brand</option>
+                                        {LAPTOP_BRANDS.map((b) => (
                                             <option key={b} value={b}>{b}</option>
                                         ))}
                                     </select>

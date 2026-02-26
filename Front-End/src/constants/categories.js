@@ -14,6 +14,22 @@ export const PHONE_BRANDS = [
     'Google Pixel',
 ];
 
+/** Laptop brands - used when adding laptops (subCategory: Laptops) */
+export const LAPTOP_BRANDS = [
+    'HP',
+    'Dell',
+    'Lenovo',
+    'Apple',
+    'Acer',
+    'ASUS',
+    'MSI',
+    'Toshiba',
+    'Samsung',
+    'Microsoft Surface',
+    'Huawei',
+    'Razer',
+];
+
 /**
  * Product categories and sub-categories. Used for:
  * - Admin product creation (category + subCategory)
@@ -22,6 +38,7 @@ export const PHONE_BRANDS = [
 export const CATEGORIES = {
     Electronics: [
         'Phones',
+        'Laptops',
         'TVs',
         'Woofers',
         'Sound Systems',
@@ -43,10 +60,26 @@ export const CATEGORIES = {
         'Wardrobes',
         'Office Furniture',
     ],
+    Instruments: [
+        'Keyboard',
+        'Acoustic Guitar',
+        'Bass Guitar',
+        'Drum Set',
+        'Electric Guitar',
+        'Violin',
+        'Saxophone',
+        'Piano',
+        'Microphone',
+        'Amplifier',
+        'DJ Controller',
+        'Cymbals',
+        'Ukulele',
+    ],
 };
 
 /** All sub-categories as a flat list for the home page browse section */
 export const SUB_CATEGORIES = [
     ...CATEGORIES.Electronics,
     ...CATEGORIES.Furniture,
+    ...CATEGORIES.Instruments,
 ];
