@@ -146,6 +146,39 @@ export default function AdminProducts() {
         setImageFiles((prev) => [...prev, ...files]);
     };
 
+    const handlePasteImage = async (event) => {
+        const items = event.clipboardData?.items;
+        if (!items || !items.length) return;
+
+        const imageItems = Array.from(items).filter(
+            (item) => item.kind === 'file' && item.type.startsWith('image/')
+        );
+        if (!imageItems.length) return;
+
+        event.preventDefault();
+
+        const pastedFiles = await Promise.all(
+            imageItems.map(
+                (item, index) =>
+                    new Promise((resolve) => {
+                        const file = item.getAsFile();
+                        if (!file) return resolve(null);
+                        // Give pasted images a sensible name if missing
+                        const name =
+                            file.name && file.name !== 'image.png'
+                                ? file.name
+                                : `pasted-image-${Date.now()}-${index}.png`;
+                        resolve(new File([file], name, { type: file.type }));
+                    })
+            )
+        );
+
+        const validFiles = pastedFiles.filter(Boolean);
+        if (validFiles.length) {
+            setImageFiles((prev) => [...prev, ...validFiles]);
+        }
+    };
+
     const removeImageFile = (index) => {
         setImageFiles((prev) => prev.filter((_, i) => i !== index));
     };
@@ -680,7 +713,10 @@ export default function AdminProducts() {
                                 </div>
                             </div>
 
-                            <div className={cn("mt-6 pt-4 border-t", borderClass)}>
+                            <div
+                                className={cn("mt-6 pt-4 border-t", borderClass)}
+                                onPaste={handlePasteImage}
+                            >
                                 <span className={cn("block font-semibold mb-3", textClass)}>Images</span>
                                 <div className="flex flex-wrap gap-3 mb-3">
                                     {existingImages.map((img, i) => (
@@ -705,21 +741,34 @@ export default function AdminProducts() {
                                         </div>
                                     ))}
                                 </div>
-                                <label className={cn(
-                                    "inline-block px-4 py-2 rounded-lg cursor-pointer transition-all",
-                                    "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300",
-                                    "border border-gray-300 dark:border-gray-600",
-                                    "hover:bg-gray-200 dark:hover:bg-gray-600"
-                                )}>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        multiple
-                                        onChange={onImageChange}
-                                        className="hidden"
-                                    />
-                                    Choose images (optional)
-                                </label>
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <label className={cn(
+                                        "inline-block px-4 py-2 rounded-lg cursor-pointer transition-all",
+                                        "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300",
+                                        "border border-gray-300 dark:border-gray-600",
+                                        "hover:bg-gray-200 dark:hover:bg-gray-600"
+                                    )}>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={onImageChange}
+                                            className="hidden"
+                                        />
+                                        Choose images from device
+                                    </label>
+                                    <div
+                                        className={cn(
+                                            "flex-1 px-4 py-2 rounded-lg border text-xs sm:text-sm",
+                                            "border-dashed",
+                                            borderClass,
+                                            textSecondaryClass
+                                        )}
+                                    >
+                                        You can also <span className="font-semibold">paste images directly</span> from
+                                        your clipboard here (Ctrl+V / Cmd+V) after copying them.
+                                    </div>
+                                </div>
                             </div>
 
                             <div className={cn("flex flex-col sm:flex-row gap-3 mt-8 pt-4 border-t", borderClass)}>
