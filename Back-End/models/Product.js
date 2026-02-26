@@ -14,7 +14,7 @@ const productSchema = new mongoose.Schema(
         category: {
             type: String,
             required: true,
-            enum: ['Electronics', 'Furniture', 'Instruments', 'Kitchen Appliances'],
+            enum: ['Electronics', 'Furniture', 'Home Appliances', 'Kitchen Appliances', 'Instruments'],
         },
         subCategory: {
             type: String,

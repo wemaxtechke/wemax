@@ -60,6 +60,19 @@ export const CATEGORIES = {
         'Wardrobes',
         'Office Furniture',
     ],
+    'Home Appliances': [
+        'Washing Machines',
+        'Clothes Iron',
+        'Standing Fans',
+        'Ceiling Fans',
+        'Vacuum Cleaner',
+        'Steam Cleaner',
+        'Air Conditioner',
+        'Heater',
+        'Dehumidifier',
+        'Humidifier',
+        'Air Purifier',
+    ],
     'Kitchen Appliances': [
         'Fridge',
         'Cooker',
@@ -95,6 +108,7 @@ export const CATEGORIES = {
 export const SUB_CATEGORIES = [
     ...CATEGORIES.Electronics,
     ...CATEGORIES.Furniture,
+    ...CATEGORIES['Home Appliances'],
     ...CATEGORIES['Kitchen Appliances'],
     ...CATEGORIES.Instruments,
 ];
