@@ -33,6 +33,8 @@ export default function AdminProducts() {
     const [imageFiles, setImageFiles] = useState([]);
     const [existingImages, setExistingImages] = useState([]);
     const [myProductCount, setMyProductCount] = useState(null);
+    const [specPasteText, setSpecPasteText] = useState('');
+    const [specGenerating, setSpecGenerating] = useState(false);
 
     const loadProducts = async () => {
         setLoading(true);
@@ -139,6 +141,26 @@ export default function AdminProducts() {
             ...prev,
             specifications: prev.specifications.filter((_, i) => i !== index),
         }));
+    };
+
+    const generateSpecsFromText = async () => {
+        if (!specPasteText.trim()) return;
+        setSpecGenerating(true);
+        try {
+            const res = await api.post('/ai/parse-specs', { text: specPasteText });
+            const specs = res.data?.specifications || [];
+            if (Array.isArray(specs) && specs.length) {
+                setForm((prev) => ({
+                    ...prev,
+                    specifications: specs,
+                }));
+            }
+        } catch (e) {
+            console.error('Failed to generate specifications from AI:', e);
+            setError(e.response?.data?.message || 'Failed to generate specifications from AI');
+        } finally {
+            setSpecGenerating(false);
+        }
     };
 
     const onImageChange = (e) => {
@@ -658,58 +680,92 @@ export default function AdminProducts() {
 
                             <div className={cn("mt-6 pt-4 border-t", borderClass)}>
                                 <span className={cn("block font-semibold mb-3", textClass)}>Specifications</span>
-                                <div className="space-y-2">
-                                    {(form.specifications || []).map((spec, i) => (
-                                        <div key={i} className="flex flex-col md:flex-row gap-2">
-                                            <input
-                                                placeholder="Key"
-                                                value={spec.key}
-                                                onChange={(e) => updateSpec(i, 'key', e.target.value)}
-                                                className={cn(
-                                                    "flex-1 px-4 py-2 rounded-lg border transition-all",
-                                                    "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                                    bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                                    borderClass,
-                                                    textClass
-                                                )}
-                                            />
-                                            <input
-                                                placeholder="Value"
-                                                value={spec.value}
-                                                onChange={(e) => updateSpec(i, 'value', e.target.value)}
-                                                className={cn(
-                                                    "flex-1 px-4 py-2 rounded-lg border transition-all",
-                                                    "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                                    bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                                    borderClass,
-                                                    textClass
-                                                )}
-                                            />
-                                            <button 
-                                                type="button" 
-                                                onClick={() => removeSpec(i)}
-                                                className={cn(
-                                                    "px-3 py-2 text-xs rounded font-medium transition-all",
-                                                    "bg-red-500/15 border border-red-500 text-red-500",
-                                                    "hover:bg-red-500 hover:text-white"
-                                                )}
-                                            >
-                                                Remove
-                                            </button>
-                                        </div>
-                                    ))}
-                                    <button 
-                                        type="button" 
-                                        onClick={addSpec}
-                                        className={cn(
-                                            "px-3 py-2 text-xs rounded font-medium transition-all",
-                                            "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300",
-                                            "border border-gray-300 dark:border-gray-600",
-                                            "hover:bg-gray-200 dark:hover:bg-gray-600"
-                                        )}
-                                    >
-                                        Add row
-                                    </button>
+                                <div className="grid grid-cols-1 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4 mb-3">
+                                    <div className="space-y-2">
+                                        {(form.specifications || []).map((spec, i) => (
+                                            <div key={i} className="flex flex-col md:flex-row gap-2">
+                                                <input
+                                                    placeholder="Key"
+                                                    value={spec.key}
+                                                    onChange={(e) => updateSpec(i, 'key', e.target.value)}
+                                                    className={cn(
+                                                        "flex-1 px-4 py-2 rounded-lg border transition-all",
+                                                        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                                                        bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
+                                                        borderClass,
+                                                        textClass
+                                                    )}
+                                                />
+                                                <input
+                                                    placeholder="Value"
+                                                    value={spec.value}
+                                                    onChange={(e) => updateSpec(i, 'value', e.target.value)}
+                                                    className={cn(
+                                                        "flex-1 px-4 py-2 rounded-lg border transition-all",
+                                                        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                                                        bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
+                                                        borderClass,
+                                                        textClass
+                                                    )}
+                                                />
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => removeSpec(i)}
+                                                    className={cn(
+                                                        "px-3 py-2 text-xs rounded font-medium transition-all",
+                                                        "bg-red-500/15 border border-red-500 text-red-500",
+                                                        "hover:bg-red-500 hover:text-white"
+                                                    )}
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button 
+                                            type="button" 
+                                            onClick={addSpec}
+                                            className={cn(
+                                                "px-3 py-2 text-xs rounded font-medium transition-all",
+                                                "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300",
+                                                "border border-gray-300 dark:border-gray-600",
+                                                "hover:bg-gray-200 dark:hover:bg-gray-600"
+                                            )}
+                                        >
+                                            Add row
+                                        </button>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <textarea
+                                            placeholder={`Paste raw specifications here, e.g.\nFront Camera\t5MP\nBack Camera\t8MP\nDisplay\t5.0″ inch\n...`}
+                                            value={specPasteText}
+                                            onChange={(e) => setSpecPasteText(e.target.value)}
+                                            rows={6}
+                                            className={cn(
+                                                "w-full px-3 py-2 rounded-lg border text-sm resize-y min-h-[120px]",
+                                                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                                                bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
+                                                borderClass,
+                                                textClass
+                                            )}
+                                        />
+                                        <button
+                                            type="button"
+                                            disabled={specGenerating || !specPasteText.trim()}
+                                            onClick={generateSpecsFromText}
+                                            className={cn(
+                                                "inline-flex items-center justify-center px-3 py-2 rounded-lg text-xs font-semibold transition-all",
+                                                "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white",
+                                                "hover:shadow-md hover:-translate-y-0.5",
+                                                "disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                                            )}
+                                        >
+                                            {specGenerating ? 'Generating with AI...' : 'Generate specs from text (AI)'}
+                                        </button>
+                                        <p className={cn("text-[11px] leading-snug", textSecondaryClass)}>
+                                            Paste specs like: <span className="font-mono">Front Camera&nbsp;&nbsp;5MP</span> on each line.
+                                            The AI will convert them into key/value rows automatically.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 

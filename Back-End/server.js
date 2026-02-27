@@ -27,6 +27,7 @@ import chatRoutes from './routes/chatRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import flashSaleRoutes from './routes/flashSaleRoutes.js';
 import testRoutes from './routes/testRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -59,6 +60,7 @@ app.use('/api/chats', chatRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/flash-sale', flashSaleRoutes);
 app.use('/api/test', testRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
