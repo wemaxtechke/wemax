@@ -680,7 +680,7 @@ export default function AdminProducts() {
 
                             <div className={cn("mt-6 pt-4 border-t", borderClass)}>
                                 <span className={cn("block font-semibold mb-3", textClass)}>Specifications</span>
-                                <div className="grid grid-cols-1 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4 mb-3">
+                                <div className="space-y-3 mb-3">
                                     <div className="space-y-2">
                                         {(form.specifications || []).map((spec, i) => (
                                             <div key={i} className="flex flex-col md:flex-row gap-2">
@@ -763,7 +763,7 @@ export default function AdminProducts() {
                                         </button>
                                         <p className={cn("text-[11px] leading-snug", textSecondaryClass)}>
                                             Paste specs like: <span className="font-mono">Front Camera&nbsp;&nbsp;5MP</span> on each line.
-                                            The AI will convert them into key/value rows automatically.
+                                            The AI will convert them into key/value rows automatically. You can also paste a short description and the AI will try to extract specs from it.
                                         </p>
                                     </div>
                                 </div>

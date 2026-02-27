@@ -14,28 +14,44 @@ export const parseSpecifications = async (req, res) => {
         }
 
         const prompt = `
-You are a strict JSON generator.
+You are a strict JSON generator that understands common electronics specifications.
 
-Input is a block of text with product specifications, one spec per line.
-Each line usually looks like:
-Front Camera\t5MP
-Back Camera\t8MP
-Display\t5.0″ inch
-Processor\tOcta core
-
-Sometimes the separator may be a tab, multiple spaces, a dash (-), or a colon (:).
+INPUT:
+- A block of text that may contain:
+  - Explicit spec lines like:
+    Front Camera\t5MP
+    Back Camera\t8MP
+    Display  5.0″ inch
+  - Label/value pairs that are split across multiple lines, e.g.:
+    Type
+    Brand New
+    Condition
+    Used
+  - A long free‑form description that may also contain hidden specs.
+- The separator between label and value can be a tab, multiple spaces, a dash (-), or a colon (:).
 
 TASK:
-- Parse the input into an array of { "key": string, "value": string }.
-- Preserve the original wording as much as possible.
-- Do NOT add, remove, or infer extra specs.
-- Ignore completely empty lines.
+- Parse ALL useful specs from the entire text (including description lines) into an array of objects:
+  { "key": string, "value": string }.
+- Use your judgment to pair labels with the correct values:
+  - Example: if you see
+      DJ Controllers
+      Type
+      Brand New
+    treat **"Brand New"** as the value for **"Condition"** (not "Type"), because "Brand New" is a condition.
+  - Example: if you see a brand name like "Numark" or "Samsung" near words like "Brand", map it to key "Brand".
+- Prefer sensible keys like "Condition", "Brand", "Model", etc., when the text clearly indicates them.
+- Do NOT invent specs that are not present in the text.
+- Ignore completely empty lines and meaningless tokens like "Menu".
+- Preserve the original wording for values as much as possible.
 
-Return ONLY valid JSON, with this exact shape:
+OUTPUT FORMAT (VERY IMPORTANT):
+- Return ONLY valid JSON, with this exact shape:
 [
   { "key": "Front Camera", "value": "5MP" },
   { "key": "Back Camera", "value": "8MP" }
 ]
+- No markdown, no backticks, no comments, no trailing commas.
 
 Here is the raw input text to parse:
 ---
