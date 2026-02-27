@@ -65,10 +65,24 @@ ${text}
         }
 
         const data = await response.json();
-        const content = data?.choices?.[0]?.message?.content?.trim();
+        let content = data?.choices?.[0]?.message?.content?.trim();
 
         if (!content) {
             return res.status(502).json({ message: 'Empty response from AI' });
+        }
+
+        // Some models may wrap the JSON in ```json fences or add extra text.
+        // Try to robustly extract the JSON array.
+        const fenceMatch = content.match(/```(?:json)?([\s\S]*?)```/i);
+        if (fenceMatch) {
+            content = fenceMatch[1].trim();
+        }
+
+        // Extract between the first "[" and the last "]"
+        const startIdx = content.indexOf('[');
+        const endIdx = content.lastIndexOf(']');
+        if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+            content = content.slice(startIdx, endIdx + 1).trim();
         }
 
         let specs;
