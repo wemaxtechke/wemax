@@ -1,25 +1,93 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { fetchProducts } from '../redux/slices/productSlice.js';
 import { Link } from 'react-router-dom';
 import { FaShoppingCart, FaStar } from 'react-icons/fa';
 import wemaxLogo from '../assets/wemax-logo.jpg';
 import { addToCart } from '../redux/slices/cartSlice.js';
 import SmartImage from '../components/SmartImage.jsx';
+import api from '../utils/api.js';
 
 export default function Products() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const { items: products, loading } = useSelector((state) => state.products);
     const { theme } = useSelector((state) => state?.ui || { theme: 'dark' });
     const { isAuthenticated } = useSelector((state) => state?.auth || {});
 
+    const PAGE_SIZE = 40;
+    const sentinelRef = useRef(null);
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [error, setError] = useState('');
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+
+    const mergeUniqueById = (prev, next) => {
+        const map = new Map();
+        (prev || []).forEach((p) => map.set(p?._id, p));
+        (next || []).forEach((p) => map.set(p?._id, p));
+        return Array.from(map.values());
+    };
+
+    const fetchProductsPage = useCallback(async (targetPage, { append } = { append: false }) => {
+        setError('');
+        if (append) setLoadingMore(true);
+        else setLoading(true);
+
+        try {
+            const params = Object.fromEntries(searchParams);
+            // Pagination is controlled by this page (ignore any URL page/limit)
+            delete params.page;
+            delete params.limit;
+
+            const response = await api.get('/products', {
+                params: { ...params, page: targetPage, limit: PAGE_SIZE },
+            });
+
+            const nextProducts = response.data?.products || [];
+            const nextTotalPages = Number(response.data?.totalPages ?? 1) || 1;
+            const nextCurrentPage = Number(response.data?.currentPage ?? targetPage) || targetPage;
+
+            setProducts((prev) => (append ? mergeUniqueById(prev, nextProducts) : nextProducts));
+            setTotalPages(nextTotalPages);
+            setPage(nextCurrentPage);
+            setHasMore(nextCurrentPage < nextTotalPages);
+        } catch (e) {
+            setError(e.response?.data?.message || 'Failed to load products');
+        } finally {
+            setLoading(false);
+            setLoadingMore(false);
+        }
+    }, [searchParams]);
+
     useEffect(() => {
-        const params = Object.fromEntries(searchParams);
-        dispatch(fetchProducts(params));
-    }, [dispatch, searchParams]);
+        // Reset to first page whenever filters/search changes
+        fetchProductsPage(1, { append: false });
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }, [fetchProductsPage]);
+
+    useEffect(() => {
+        const el = sentinelRef.current;
+        if (!el) return;
+        if (loading) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const first = entries[0];
+                if (!first?.isIntersecting) return;
+                if (!hasMore) return;
+                if (loadingMore) return;
+                fetchProductsPage(page + 1, { append: true });
+            },
+            { root: null, rootMargin: '300px', threshold: 0 }
+        );
+
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [fetchProductsPage, hasMore, loading, loadingMore, page]);
 
     const vignetteDark = 'radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(3, 7, 18, 0.4) 100%)';
     const vignetteLight = 'radial-gradient(ellipse 100% 100% at 50% 50%, transparent 35%, rgba(241, 245, 249, 0.5) 100%)';
@@ -73,80 +141,106 @@ export default function Products() {
                     All Products
                 </h1>
 
+                {error && (
+                    <div className={`mb-6 rounded-lg border px-4 py-3 text-sm ${
+                        theme === 'dark'
+                            ? 'bg-red-500/10 border-red-500/30 text-red-200'
+                            : 'bg-red-50 border-red-200 text-red-700'
+                    }`}>
+                        {error}
+                    </div>
+                )}
+
                 {loading ? (
                     <div className="flex justify-center items-center py-20">
                         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-                        {products.length > 0 ? (
-                            products.map((product) => (
-                                <Link 
-                                    key={product._id} 
-                                    to={`/products/${product._id}`}
-                                    className={`group rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:shadow-lg'}`}
-                                >
-                                    {/* Product Image Container */}
-                                    <div className="relative overflow-hidden h-40 sm:h-48 md:h-56 bg-white">
-                                        <SmartImage
-                                            src={product.images?.[0]?.url || wemaxLogo}
-                                            alt={product.name}
-                                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                                        />
-                                        {product.discount > 0 && (
-                                            <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs sm:text-sm font-bold">
-                                                -{product.discount}%
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Product Info */}
-                                    <div className={`p-3 sm:p-4 ${theme === 'dark' ? 'bg-blue-950/40' : 'bg-blue-50'}`}>
-                                        <h3 className={`text-xs sm:text-sm md:text-base font-semibold line-clamp-2 mb-2 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
-                                            {product.name}
-                                        </h3>
-
-                                        {/* Rating */}
-                                        <div className="flex items-center gap-1 mb-2">
-                                            <div className="flex text-yellow-500">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <FaStar key={i} className="text-xs sm:text-sm" />
-                                                ))}
-                                            </div>
-                                            <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                                (234)
-                                            </span>
-                                        </div>
-
-                                        {/* Price */}
-                                        <div className="mb-3">
-                                            <p className={`text-lg sm:text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
-                                                KES {product.newPrice?.toLocaleString() || '0'}
-                                            </p>
-                                            {product.oldPrice && product.oldPrice > product.newPrice && (
-                                                <p className="text-xs sm:text-sm line-through text-gray-500">
-                                                    KES {product.oldPrice?.toLocaleString()}
-                                                </p>
+                    <>
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                            {products.length > 0 ? (
+                                products.map((product) => (
+                                    <Link 
+                                        key={product._id} 
+                                        to={`/products/${product._id}`}
+                                        className={`group rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:shadow-lg'}`}
+                                    >
+                                        {/* Product Image Container */}
+                                        <div className="relative overflow-hidden h-40 sm:h-48 md:h-56 bg-white">
+                                            <SmartImage
+                                                src={product.images?.[0]?.url || wemaxLogo}
+                                                alt={product.name}
+                                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                                            />
+                                            {product.discount > 0 && (
+                                                <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs sm:text-sm font-bold">
+                                                    -{product.discount}%
+                                                </div>
                                             )}
                                         </div>
 
-                                        {/* Add to Cart Button */}
-                                        <button
-                                            type="button"
-                                            onClick={(e) => handleAddToCart(e, product)}
-                                            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded text-xs sm:text-sm font-semibold transition-colors duration-300 flex items-center justify-center gap-2"
-                                        >
-                                            <FaShoppingCart className="text-xs sm:text-sm" /> Add
-                                        </button>
-                                    </div>
-                                </Link>
-                            ))
-                        ) : (
-                            <div className={`col-span-2 sm:col-span-2 md:col-span-3 lg:col-span-4 text-center py-12 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                <p>No products found.</p>
-                            </div>
-                        )}
-                    </div>
+                                        {/* Product Info */}
+                                        <div className={`p-3 sm:p-4 ${theme === 'dark' ? 'bg-blue-950/40' : 'bg-blue-50'}`}>
+                                            <h3 className={`text-xs sm:text-sm md:text-base font-semibold line-clamp-2 mb-2 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
+                                                {product.name}
+                                            </h3>
+
+                                            {/* Rating */}
+                                            <div className="flex items-center gap-1 mb-2">
+                                                <div className="flex text-yellow-500">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <FaStar key={i} className="text-xs sm:text-sm" />
+                                                    ))}
+                                                </div>
+                                                <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                    (234)
+                                                </span>
+                                            </div>
+
+                                            {/* Price */}
+                                            <div className="mb-3">
+                                                <p className={`text-lg sm:text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
+                                                    KES {product.newPrice?.toLocaleString() || '0'}
+                                                </p>
+                                                {product.oldPrice && product.oldPrice > product.newPrice && (
+                                                    <p className="text-xs sm:text-sm line-through text-gray-500">
+                                                        KES {product.oldPrice?.toLocaleString()}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {/* Add to Cart Button */}
+                                            <button
+                                                type="button"
+                                                onClick={(e) => handleAddToCart(e, product)}
+                                                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded text-xs sm:text-sm font-semibold transition-colors duration-300 flex items-center justify-center gap-2"
+                                            >
+                                                <FaShoppingCart className="text-xs sm:text-sm" /> Add
+                                            </button>
+                                        </div>
+                                    </Link>
+                                ))
+                            ) : (
+                                <div className={`col-span-2 sm:col-span-2 md:col-span-3 lg:col-span-4 text-center py-12 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    <p>No products found.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Infinite scroll sentinel */}
+                        <div ref={sentinelRef} className="h-1" />
+                        <div className="mt-6 flex justify-center">
+                            {loadingMore ? (
+                                <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    Loading more products...
+                                </div>
+                            ) : !hasMore && products.length > 0 ? (
+                                <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    You’ve reached the end.
+                                </div>
+                            ) : null}
+                        </div>
+                    </>
                 )}
             </div>
             </div>
