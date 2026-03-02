@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import api, { apiFormData } from '../../utils/api.js';
 import { cn } from '../../lib/utils.js';
@@ -12,6 +12,7 @@ export default function AdminProducts() {
     const { user } = useSelector((state) => state?.auth || { user: null });
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState('');
     const [formOpen, setFormOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
@@ -36,17 +37,43 @@ export default function AdminProducts() {
     const [specPasteText, setSpecPasteText] = useState('');
     const [specGenerating, setSpecGenerating] = useState(false);
 
-    const loadProducts = async () => {
-        setLoading(true);
+    const PAGE_SIZE = 50;
+    const sentinelRef = useRef(null);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+
+    const mergeUniqueById = (prev, next) => {
+        const map = new Map();
+        (prev || []).forEach((p) => map.set(p?._id, p));
+        (next || []).forEach((p) => map.set(p?._id, p));
+        return Array.from(map.values());
+    };
+
+    const fetchProductsPage = useCallback(async (targetPage, { append } = { append: false }) => {
+        setError('');
+        if (append) setLoadingMore(true);
+        else setLoading(true);
+
         try {
-            const res = await api.get('/products', { params: { limit: 200 } });
-            setProducts(res.data.products || []);
+            const res = await api.get('/products', {
+                params: { page: targetPage, limit: PAGE_SIZE },
+            });
+            const nextProducts = res.data?.products || [];
+            const nextTotalPages = Number(res.data?.totalPages ?? 1) || 1;
+            const nextCurrentPage = Number(res.data?.currentPage ?? targetPage) || targetPage;
+
+            setProducts((prev) => (append ? mergeUniqueById(prev, nextProducts) : nextProducts));
+            setTotalPages(nextTotalPages);
+            setPage(nextCurrentPage);
+            setHasMore(nextCurrentPage < nextTotalPages);
         } catch (e) {
             setError(e.response?.data?.message || 'Failed to load products');
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
-    };
+    }, []);
 
     const loadMyProductCount = async () => {
         if (!user?.email) return;
@@ -61,8 +88,28 @@ export default function AdminProducts() {
     };
 
     useEffect(() => {
-        loadProducts();
-    }, []);
+        fetchProductsPage(1, { append: false });
+    }, [fetchProductsPage]);
+
+    useEffect(() => {
+        const el = sentinelRef.current;
+        if (!el) return;
+        if (loading) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const first = entries[0];
+                if (!first?.isIntersecting) return;
+                if (!hasMore) return;
+                if (loadingMore) return;
+                fetchProductsPage(page + 1, { append: true });
+            },
+            { root: null, rootMargin: '300px', threshold: 0 }
+        );
+
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [fetchProductsPage, hasMore, loading, loadingMore, page]);
 
     useEffect(() => {
         loadMyProductCount();
@@ -236,7 +283,7 @@ export default function AdminProducts() {
                 await client.post('/products', formData);
             }
             setFormOpen(false);
-            loadProducts();
+            fetchProductsPage(1, { append: false });
             loadMyProductCount();
         } catch (e) {
             setError(e.response?.data?.message || (editingId ? 'Update failed' : 'Create failed'));
@@ -249,7 +296,7 @@ export default function AdminProducts() {
         if (!window.confirm('Delete this product?')) return;
         try {
             await api.delete(`/products/${id}`);
-            loadProducts();
+            fetchProductsPage(1, { append: false });
             loadMyProductCount();
         } catch (e) {
             setError(e.response?.data?.message || 'Delete failed');
@@ -452,6 +499,16 @@ export default function AdminProducts() {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* Infinite scroll sentinel */}
+                    <div ref={sentinelRef} className="h-1" />
+                    <div className="mt-4 flex justify-center">
+                        {loadingMore ? (
+                            <div className={cn("text-sm", textSecondaryClass)}>Loading more products...</div>
+                        ) : !hasMore && products.length > 0 ? (
+                            <div className={cn("text-sm", textSecondaryClass)}>You’ve reached the end.</div>
+                        ) : null}
                     </div>
                 </>
             )}
