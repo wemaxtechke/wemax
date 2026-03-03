@@ -541,8 +541,49 @@ export default function Home() {
 
                             {/* Hot Deals Products (Featured) */}
                             {featuredLoading ? (
-                                <div className="flex justify-center items-center py-16">
-                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                                <div className={`p-4 md:p-5 ${theme === 'dark' ? 'bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-b from-white via-orange-50 to-white'}`}>
+                                    <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className={`group flex-none w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)] lg:w-[calc((100%-3rem)/5)] shrink-0 snap-start rounded-2xl overflow-hidden border animate-pulse ${
+                                                    theme === 'dark'
+                                                        ? 'bg-gray-900/90 border-gray-800'
+                                                        : 'bg-white border-orange-100'
+                                                }`}
+                                            >
+                                                <div
+                                                    className={`relative overflow-hidden h-32 sm:h-40 md:h-44 ${
+                                                        theme === 'dark'
+                                                            ? 'bg-gradient-to-b from-gray-800 to-gray-950'
+                                                            : 'bg-gradient-to-b from-orange-50 to-orange-100'
+                                                    }`}
+                                                />
+                                                <div className="p-3 md:p-3.5">
+                                                    <div
+                                                        className={`h-3 sm:h-4 rounded mb-2 ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
+                                                        }`}
+                                                    />
+                                                    <div
+                                                        className={`h-3 rounded w-2/3 mb-3 ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                        }`}
+                                                    />
+                                                    <div
+                                                        className={`h-4 rounded w-1/2 mb-2 ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                        }`}
+                                                    />
+                                                    <div
+                                                        className={`h-6 rounded ${
+                                                            theme === 'dark' ? 'bg-gray-800' : 'bg-orange-200'
+                                                        }`}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             ) : featuredProducts.length === 0 ? (
                                 <div className="flex justify-center items-center py-16">
@@ -718,8 +759,49 @@ export default function Home() {
 
                             {/* Flash Sales Products */}
                             {flashSaleLoading ? (
-                                <div className="flex justify-center items-center py-20">
-                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                                <div className="p-4 md:p-5">
+                                    <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className={`group flex-none w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)] lg:w-[calc((100%-3rem)/5)] shrink-0 snap-start rounded-2xl overflow-hidden transition-all duration-300 animate-pulse ${
+                                                    theme === 'dark'
+                                                        ? 'bg-gray-900/80 border border-gray-800'
+                                                        : 'bg-blue-50 border border-blue-100'
+                                                }`}
+                                            >
+                                                <div
+                                                    className={`relative overflow-hidden h-32 sm:h-40 md:h-44 ${
+                                                        theme === 'dark'
+                                                            ? 'bg-gradient-to-b from-gray-800 to-gray-900'
+                                                            : 'bg-gradient-to-b from-blue-50 to-blue-100'
+                                                    }`}
+                                                />
+                                                <div className="p-3 md:p-3.5">
+                                                    <div
+                                                        className={`h-3 sm:h-4 rounded mb-2 ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
+                                                        }`}
+                                                    />
+                                                    <div
+                                                        className={`h-3 rounded w-2/3 mb-3 ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                        }`}
+                                                    />
+                                                    <div
+                                                        className={`h-4 rounded w-1/2 mb-2 ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                        }`}
+                                                    />
+                                                    <div
+                                                        className={`h-6 rounded ${
+                                                            theme === 'dark' ? 'bg-gray-800' : 'bg-orange-200'
+                                                        }`}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             ) : flashSaleProducts.length === 0 ? (
                                 <div className="flex justify-center items-center py-20">
@@ -873,8 +955,49 @@ export default function Home() {
                             </div>
 
                             {electronicsBundlesLoading ? (
-                                <div className="flex justify-center items-center py-16">
-                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                                <div className="p-4 md:p-5">
+                                    <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className={`group flex-none w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)] lg:w-[calc((100%-3rem)/5)] shrink-0 snap-start rounded-2xl overflow-hidden transition-all duration-300 animate-pulse ${
+                                                    theme === 'dark'
+                                                        ? 'bg-gray-900/80 border border-gray-800'
+                                                        : 'bg-blue-50 border border-blue-100'
+                                                }`}
+                                            >
+                                                <div
+                                                    className={`relative overflow-hidden h-32 sm:h-40 md:h-44 ${
+                                                        theme === 'dark'
+                                                            ? 'bg-gradient-to-b from-gray-800 to-gray-900'
+                                                            : 'bg-gradient-to-b from-blue-50 to-blue-100'
+                                                    }`}
+                                                />
+                                                <div className="p-3 md:p-3.5">
+                                                    <div
+                                                        className={`h-3 sm:h-4 rounded mb-2 ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
+                                                        }`}
+                                                    />
+                                                    <div
+                                                        className={`h-3 rounded w-2/3 mb-3 ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                        }`}
+                                                    />
+                                                    <div
+                                                        className={`h-4 rounded w-1/2 mb-2 ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                        }`}
+                                                    />
+                                                    <div
+                                                        className={`h-6 rounded ${
+                                                            theme === 'dark' ? 'bg-gray-800' : 'bg-orange-200'
+                                                        }`}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             ) : electronicsBundles.length === 0 ? (
                                 <div className="flex justify-center items-center py-16 px-4">
@@ -965,8 +1088,49 @@ export default function Home() {
                             </div>
 
                             {furnitureBundlesLoading ? (
-                                <div className="flex justify-center items-center py-16">
-                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                                <div className="p-4 md:p-5">
+                                    <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className={`group flex-none w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)] lg:w-[calc((100%-3rem)/5)] shrink-0 snap-start rounded-2xl overflow-hidden transition-all duration-300 animate-pulse ${
+                                                    theme === 'dark'
+                                                        ? 'bg-gray-900/80 border border-gray-800'
+                                                        : 'bg-blue-50 border border-blue-100'
+                                                }`}
+                                            >
+                                                <div
+                                                    className={`relative overflow-hidden h-32 sm:h-40 md:h-44 ${
+                                                        theme === 'dark'
+                                                            ? 'bg-gradient-to-b from-gray-800 to-gray-900'
+                                                            : 'bg-gradient-to-b from-blue-50 to-blue-100'
+                                                    }`}
+                                                />
+                                                <div className="p-3 md:p-3.5">
+                                                    <div
+                                                        className={`h-3 sm:h-4 rounded mb-2 ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
+                                                        }`}
+                                                    />
+                                                    <div
+                                                        className={`h-3 rounded w-2/3 mb-3 ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                        }`}
+                                                    />
+                                                    <div
+                                                        className={`h-4 rounded w-1/2 mb-2 ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                        }`}
+                                                    />
+                                                    <div
+                                                        className={`h-6 rounded ${
+                                                            theme === 'dark' ? 'bg-gray-800' : 'bg-orange-200'
+                                                        }`}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             ) : furnitureBundles.length === 0 ? (
                                 <div className="flex justify-center items-center py-16 px-4">
