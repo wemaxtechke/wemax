@@ -152,9 +152,46 @@ export default function Products() {
                 )}
 
                 {loading ? (
-                    <div className="flex justify-center items-center py-20">
-                        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
-                    </div>
+                    <>
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                            {Array.from({ length: 12 }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    className={`rounded-lg overflow-hidden shadow-sm ${
+                                        theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                                    } animate-pulse`}
+                                >
+                                    <div
+                                        className={`h-40 sm:h-48 md:h-56 ${
+                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                        }`}
+                                    />
+                                    <div className={`p-3 sm:p-4 ${theme === 'dark' ? 'bg-gray-900/40' : 'bg-blue-50'}`}>
+                                        <div
+                                            className={`h-3 sm:h-4 rounded mb-2 ${
+                                                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
+                                            }`}
+                                        />
+                                        <div
+                                            className={`h-3 rounded w-2/3 mb-4 ${
+                                                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                            }`}
+                                        />
+                                        <div
+                                            className={`h-5 sm:h-6 rounded w-1/2 mb-3 ${
+                                                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
+                                            }`}
+                                        />
+                                        <div
+                                            className={`h-8 rounded ${
+                                                theme === 'dark' ? 'bg-gray-800' : 'bg-orange-200'
+                                            }`}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
                 ) : (
                     <>
                         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">

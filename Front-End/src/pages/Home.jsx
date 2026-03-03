@@ -10,6 +10,8 @@ import SmartImage from '../components/SmartImage.jsx';
 export default function Home() {
     const { theme } = useSelector((state) => state?.ui || { theme: 'dark' });
     const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+    const [initialTime, setInitialTime] = useState({ hours: 0, minutes: 0, seconds: 0 });
+    const [flashActive, setFlashActive] = useState(false);
     const [categoriesOpen, setCategoriesOpen] = useState(false);
     const [phonesExpanded, setPhonesExpanded] = useState(false);
     const [laptopsExpanded, setLaptopsExpanded] = useState(false);
@@ -118,12 +120,20 @@ export default function Home() {
             try {
                 const response = await api.get('/flash-sale/remaining');
                 const settings = response.data;
-                if (settings.isActive) {
-                    setTimeLeft({
+                const active = !!settings.isActive;
+                setFlashActive(active);
+
+                if (active) {
+                    const next = {
                         hours: settings.hours || 0,
                         minutes: settings.minutes || 0,
                         seconds: settings.seconds || 0,
-                    });
+                    };
+                    setInitialTime(next);
+                    setTimeLeft(next);
+                } else {
+                    setInitialTime({ hours: 0, minutes: 0, seconds: 0 });
+                    setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
                 }
             } catch (error) {
                 console.error('Failed to load flash sale timer:', error);
@@ -132,15 +142,18 @@ export default function Home() {
         loadTimerSettings();
     }, []);
 
-    // Countdown timer
+    // Countdown timer (auto-loop using initialTime from backend)
     useEffect(() => {
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
                 const { hours, minutes, seconds } = prev;
 
-                // If already at zero, keep it there
+                // If already at zero, restart from initialTime when flash sale is active
                 if (hours === 0 && minutes === 0 && seconds === 0) {
-                    return prev;
+                    if (!flashActive || (initialTime.hours === 0 && initialTime.minutes === 0 && initialTime.seconds === 0)) {
+                        return prev;
+                    }
+                    return { ...initialTime };
                 }
 
                 let nextHours = hours;
@@ -157,7 +170,7 @@ export default function Home() {
                 }
 
                 if (nextHours < 0) {
-                    // Clamp at zero instead of resetting
+                    // Safety clamp
                     return { hours: 0, minutes: 0, seconds: 0 };
                 }
 
@@ -166,7 +179,7 @@ export default function Home() {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, []);
+    }, [flashActive, initialTime.hours, initialTime.minutes, initialTime.seconds]);
 
     const categories = SUB_CATEGORIES.map((name) => ({ name }));
 

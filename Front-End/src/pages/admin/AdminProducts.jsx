@@ -351,9 +351,121 @@ export default function AdminProducts() {
                 </div>
             )}
             {loading ? (
-                <div className="flex justify-center items-center min-h-[400px]">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                </div>
+                <>
+                    {/* Mobile skeleton cards */}
+                    <div className="md:hidden space-y-3">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <div
+                                key={i}
+                                className={cn(
+                                    "rounded-2xl border p-4 shadow-sm flex gap-3 animate-pulse",
+                                    bgClass,
+                                    borderClass
+                                )}
+                            >
+                                <div className={cn(
+                                    "w-14 h-14 rounded-xl shrink-0",
+                                    theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                )} />
+                                <div className="flex-1 space-y-2">
+                                    <div className={cn(
+                                        "h-3 rounded w-2/3",
+                                        theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                    )} />
+                                    <div className={cn(
+                                        "h-3 rounded w-1/2",
+                                        theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                    )} />
+                                    <div className="flex items-center justify-between gap-3 pt-2">
+                                        <div className={cn(
+                                            "h-4 rounded w-20",
+                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                        )} />
+                                        <div className={cn(
+                                            "h-3 rounded w-12",
+                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                        )} />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Desktop table skeleton */}
+                    <div className={cn(
+                        "hidden md:block overflow-x-auto rounded-lg border shadow-sm mt-4",
+                        bgClass,
+                        borderClass
+                    )}>
+                        <table className="w-full border-collapse min-w-[600px]">
+                            <thead>
+                                <tr className={cn("bg-gray-100 dark:bg-gray-900", borderClass, "border-b")}>
+                                    <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Image</th>
+                                    <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Name</th>
+                                    <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Category</th>
+                                    <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Price</th>
+                                    <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Stock</th>
+                                    <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Created By</th>
+                                    <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {Array.from({ length: 6 }).map((_, i) => (
+                                    <tr key={i} className={cn("border-b", borderClass, "animate-pulse")}>
+                                        <td className="px-4 md:px-6 py-3">
+                                            <div className={cn(
+                                                "w-12 h-12 rounded",
+                                                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                            )} />
+                                        </td>
+                                        <td className="px-4 md:px-6 py-3">
+                                            <div className={cn(
+                                                "h-3 rounded w-32 mb-1",
+                                                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                            )} />
+                                        </td>
+                                        <td className="px-4 md:px-6 py-3">
+                                            <div className={cn(
+                                                "h-3 rounded w-32",
+                                                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                            )} />
+                                        </td>
+                                        <td className="px-4 md:px-6 py-3">
+                                            <div className={cn(
+                                                "h-3 rounded w-20",
+                                                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                            )} />
+                                        </td>
+                                        <td className="px-4 md:px-6 py-3">
+                                            <div className={cn(
+                                                "h-3 rounded w-10",
+                                                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                            )} />
+                                        </td>
+                                        <td className="px-4 md:px-6 py-3">
+                                            <div className={cn(
+                                                "h-3 rounded w-40",
+                                                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                            )} />
+                                        </td>
+                                        <td className="px-4 md:px-6 py-3">
+                                            <div className="flex gap-2">
+                                                <div className={cn(
+                                                    "h-7 w-14 rounded",
+                                                    theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                )} />
+                                                <div className={cn(
+                                                    "h-7 w-14 rounded",
+                                                    theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                )} />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
             ) : (
                 <>
                     {/* Mobile cards */}
