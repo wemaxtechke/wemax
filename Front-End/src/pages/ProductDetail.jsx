@@ -320,7 +320,7 @@ export default function ProductDetail() {
                 </script>
             </Seo>
             {/* Mobile bottom action bar */}
-            <div className="fixed inset-x-0 bottom-[calc(3.25rem+env(safe-area-inset-bottom,0px))] z-[48] md:hidden">
+            <div className="fixed inset-x-0 bottom-[calc(3.25rem+env(safe-area-inset-bottom,0px))] z-[105] md:hidden">
                 <div className={`${theme === 'dark' ? 'bg-gray-900/95 border-t border-gray-800' : 'bg-white/95 border-t border-gray-200'} backdrop-blur px-4 py-3`}>
                     <div className="max-w-7xl mx-auto flex gap-3">
                         <button

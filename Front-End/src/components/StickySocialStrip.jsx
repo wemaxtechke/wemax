@@ -1,17 +1,18 @@
 import { useSelector } from 'react-redux';
+import { createPortal } from 'react-dom';
 import { FaFacebook, FaInstagram, FaWhatsapp } from 'react-icons/fa';
 import { WEMAX_FACEBOOK_PAGE, WEMAX_INSTAGRAM_PAGE, getStoreWhatsAppHref } from '../constants/social.js';
 
-/** Slim fixed bar so social links stay visible while browsing (storefront only). */
+/** Slim fixed bar so social links stay visible while browsing (storefront only). Portaled to body so page layers (blur, z-index) never cover it. */
 export default function StickySocialStrip() {
     const { theme } = useSelector((state) => state?.ui || { theme: 'dark' });
 
-    return (
+    const bar = (
         <div
-            className={`fixed inset-x-0 bottom-0 z-[42] flex items-center justify-center gap-4 border-t px-3 py-2 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur-md sm:gap-6 sm:px-4 ${
+            className={`pointer-events-auto fixed inset-x-0 bottom-0 z-[90] flex items-center justify-center gap-4 border-t px-3 py-2 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] backdrop-blur-md sm:gap-6 sm:px-4 ${
                 theme === 'dark'
-                    ? 'border-gray-800 bg-gray-950/92 text-gray-100'
-                    : 'border-gray-200 bg-white/92 text-gray-900'
+                    ? 'border-gray-800 bg-gray-950/95 text-gray-100'
+                    : 'border-gray-200 bg-white/95 text-gray-900'
             }`}
             style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
             role="region"
@@ -55,4 +56,7 @@ export default function StickySocialStrip() {
             </div>
         </div>
     );
+
+    if (typeof document === 'undefined') return null;
+    return createPortal(bar, document.body);
 }
