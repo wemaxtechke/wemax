@@ -56,16 +56,22 @@ export default function TopPromoBanner() {
                     </span>
                 </div>
 
-                {/* Animated headline — scroll up / down + bounce settle */}
-                <div className="relative min-h-[2.75rem] min-w-0 flex-1 overflow-hidden sm:min-h-[3rem] sm:max-w-[220px] md:max-w-xs lg:max-w-md">
+                {/* Animated headline — theme colors (primary + surface from ThemeProvider) */}
+                <div className="relative min-h-[2.75rem] min-w-0 flex-1 overflow-hidden rounded-md border border-[var(--color-primary)] bg-[var(--color-surface)] px-2 py-0.5 shadow-[var(--shadow-sm)] sm:min-h-[3rem] sm:max-w-[220px] sm:px-2.5 sm:py-1 md:max-w-xs lg:max-w-md">
                     <div
                         key={index}
                         className={slideUp ? 'animate-promo-march-up' : 'animate-promo-march-down'}
                     >
-                        <p className="text-sm font-black uppercase leading-tight tracking-tight sm:text-base">
+                        <p
+                            className="text-sm font-black uppercase leading-tight tracking-tight sm:text-base"
+                            style={{ color: 'var(--color-primary)' }}
+                        >
                             {line.top}
                         </p>
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-white/90 sm:text-xs">
+                        <p
+                            className="text-[10px] font-semibold uppercase tracking-wide sm:text-xs"
+                            style={{ color: 'var(--color-text-secondary)' }}
+                        >
                             {line.bottom}
                         </p>
                     </div>
