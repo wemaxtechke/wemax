@@ -7,6 +7,7 @@ import wemaxLogo from '../assets/wemax-logo.jpg';
 import { addToCart } from '../redux/slices/cartSlice.js';
 import SmartImage from '../components/SmartImage.jsx';
 import api from '../utils/api.js';
+import { Seo } from '../components/Seo.jsx';
 
 export default function Products() {
     const dispatch = useDispatch();
@@ -125,6 +126,10 @@ export default function Products() {
 
     return (
         <div className="relative w-full min-h-screen overflow-hidden">
+            <Seo
+                title="All Products"
+                description="Browse all Wemax products including premium electronics, church sound systems, livestream gear, accessories and more with nationwide delivery."
+            />
             {/* Background layer - gradients + subtle vignette */}
             <div
                 className="absolute inset-0 z-0"

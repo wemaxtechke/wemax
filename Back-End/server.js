@@ -47,6 +47,49 @@ app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(passport.initialize());
 
+// SEO-related constants
+// Prefer explicit CLIENT_URL, but default to planned production domain
+const PUBLIC_SITE_URL = process.env.CLIENT_URL || 'https://wemax.co.ke';
+
+// Robots.txt for crawlers
+app.get('/robots.txt', (req, res) => {
+    res.type('text/plain').send([
+        'User-agent: *',
+        'Allow: /',
+        '',
+        `Sitemap: ${PUBLIC_SITE_URL.replace(/\/+$/, '')}/sitemap.xml`,
+        '',
+    ].join('\n'));
+});
+
+// Basic sitemap.xml for primary public routes
+app.get('/sitemap.xml', (req, res) => {
+    const base = PUBLIC_SITE_URL.replace(/\/+$/, '');
+    const urls = [
+        '/',
+        '/products',
+        '/packages',
+        '/about',
+        '/contact',
+        '/terms',
+        '/privacy',
+        '/shipping',
+        '/returns',
+    ];
+
+    const xml = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        ...urls.map((path) => {
+            const loc = `${base}${path === '/' ? '' : path}`;
+            return `  <url><loc>${loc}</loc></url>`;
+        }),
+        '</urlset>',
+    ].join('\n');
+
+    res.type('application/xml').send(xml);
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);

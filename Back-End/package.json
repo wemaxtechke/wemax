@@ -29,12 +29,12 @@
     "mongoose": "^9.2.1",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^8.0.1",
-    "nodemon": "^3.1.9",
+    "nodemon": "^3.1.14",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pdfkit": "^0.17.2",
-    "socket.io": "^4.8.3",
-    "node-fetch": "^3.3.2"
+    "socket.io": "^4.8.3"
   }
 }

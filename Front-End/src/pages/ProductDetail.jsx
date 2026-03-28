@@ -8,6 +8,7 @@ import { FaStarHalfStroke } from 'react-icons/fa6';
 import wemaxLogo from '../assets/wemax-logo.jpg';
 import api from '../utils/api.js';
 import SmartImage from '../components/SmartImage.jsx';
+import { Seo } from '../components/Seo.jsx';
 
 export default function ProductDetail() {
     const { id } = useParams();
@@ -276,8 +277,48 @@ export default function ProductDetail() {
     const isInStock = currentProduct.stock > 0;
     const maxQuantity = currentProduct.stock || 999;
 
+    const productUrlBase = import.meta.env.VITE_PUBLIC_SITE_URL || 'http://localhost:5173';
+    const productUrl = `${productUrlBase}/products/${currentProduct._id}`;
+    const productImage = images[0]?.url || wemaxLogo;
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: currentProduct.name,
+        image: [productImage],
+        description: currentProduct.description,
+        sku: currentProduct._id?.slice(-8).toUpperCase(),
+        brand: currentProduct.brand
+            ? { '@type': 'Brand', name: currentProduct.brand }
+            : undefined,
+        offers: {
+            '@type': 'Offer',
+            priceCurrency: 'KES',
+            price: currentProduct.newPrice,
+            availability: currentProduct.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            url: productUrl,
+        },
+        aggregateRating:
+            currentProduct.averageRating && currentProduct.reviewsCount
+                ? {
+                      '@type': 'AggregateRating',
+                      ratingValue: currentProduct.averageRating,
+                      reviewCount: currentProduct.reviewsCount,
+                  }
+                : undefined,
+    };
+
     return (
         <div className="relative w-full min-h-screen overflow-hidden">
+            <Seo
+                title={currentProduct.name}
+                description={currentProduct.description?.slice(0, 155)}
+                type="product"
+                image={productImage}
+            >
+                <script type="application/ld+json">
+                    {JSON.stringify(jsonLd)}
+                </script>
+            </Seo>
             {/* Mobile bottom action bar */}
             <div className="fixed inset-x-0 bottom-0 z-40 md:hidden">
                 <div className={`${theme === 'dark' ? 'bg-gray-900/95 border-t border-gray-800' : 'bg-white/95 border-t border-gray-200'} backdrop-blur px-4 py-3`}>

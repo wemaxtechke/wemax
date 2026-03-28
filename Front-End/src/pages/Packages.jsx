@@ -5,6 +5,7 @@ import { fetchPackages } from '../redux/slices/packageSlice.js';
 import { FaBox } from 'react-icons/fa';
 import wemaxLogo from '../assets/wemax-logo.jpg';
 import SmartImage from '../components/SmartImage.jsx';
+import { Seo } from '../components/Seo.jsx';
 
 function Packages() {
     const dispatch = useDispatch();
@@ -74,6 +75,10 @@ function Packages() {
 
     return (
         <div className="relative w-full min-h-screen overflow-hidden">
+            <Seo
+                title="Packages & Bundles"
+                description="Explore curated Wemax packages and bundles for churches, events, livestreams and home comfort, combining multiple products at discounted prices."
+            />
             <div
                 className="absolute inset-0 z-0"
                 style={{

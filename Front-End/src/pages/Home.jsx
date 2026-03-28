@@ -6,6 +6,7 @@ import { FaShoppingCart, FaStar, FaClock, FaChevronRight, FaChevronDown } from '
 import api from '../utils/api.js';
 import { SUB_CATEGORIES, PHONE_BRANDS, LAPTOP_BRANDS } from '../constants/categories.js';
 import SmartImage from '../components/SmartImage.jsx';
+import { Seo } from '../components/Seo.jsx';
 
 export default function Home() {
     const { theme } = useSelector((state) => state?.ui || { theme: 'dark' });
@@ -183,8 +184,28 @@ export default function Home() {
 
     const categories = SUB_CATEGORIES.map((name) => ({ name }));
 
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Wemax',
+        url: (import.meta.env.VITE_PUBLIC_SITE_URL || 'http://localhost:5173'),
+        potentialAction: {
+            '@type': 'SearchAction',
+            target: `${import.meta.env.VITE_PUBLIC_SITE_URL || 'http://localhost:5173'}/products?search={search_term_string}`,
+            'query-input': 'required name=search_term_string',
+        },
+    };
+
     return (
         <div className={`w-full min-h-screen ${theme === 'dark' ? 'bg-gray-950/85' : 'bg-white/80'}`}>
+            <Seo
+                title="Premium Electronics, Church & Event Gear in Kenya"
+                description="Discover flash deals, premium electronics, church sound systems, livestream gear, home entertainment and curated bundles with fast delivery across Kenya."
+            >
+                <script type="application/ld+json">
+                    {JSON.stringify(jsonLd)}
+                </script>
+            </Seo>
             {/* Main Container */}
             <div className="max-w-7xl mx-auto">
                 {/* Categories Section - Mobile Dropdown */}
@@ -348,10 +369,10 @@ export default function Home() {
                     </div>
                 </div>
 
-                <div className="grid gap-2 grid-cols-1 md:grid-cols-4 gap-0 md:gap-6 px-3 md:px-6 py-4 md:py-8">
-                    {/* Sidebar - Categories (Desktop Only) - height matches hero, scrollable list */}
-                    <div className="hidden md:block md:col-span-1">
-                        <div className={`rounded-2xl overflow-hidden border flex flex-col max-h-[460px] ${theme === 'dark' ? 'border-gray-800 bg-gray-950/60' : 'border-gray-200 bg-white/70'} shadow-[0_18px_45px_rgba(0,0,0,0.25)] backdrop-blur`}>
+                <div className="grid gap-2 grid-cols-1 md:grid-cols-4 gap-0 md:gap-6 px-3 md:px-6 py-4 md:py-8 md:items-stretch">
+                    {/* Sidebar - Categories (Desktop Only) — stretches to Hot Deals row height; list scrolls if needed */}
+                    <div className="hidden md:flex md:col-span-1 min-h-0 h-full">
+                        <div className={`rounded-2xl overflow-hidden border flex flex-col flex-1 min-h-0 w-full h-full ${theme === 'dark' ? 'border-gray-800 bg-gray-950/60' : 'border-gray-200 bg-white/70'} shadow-[0_18px_45px_rgba(0,0,0,0.25)] backdrop-blur`}>
                             <div className={`shrink-0 ${theme === 'dark' ? 'bg-gradient-to-r from-gray-900 to-gray-800' : 'bg-gradient-to-r from-slate-100 to-slate-200'} px-4 py-4 font-semibold flex items-center justify-between`}>
                                 <span className="flex items-center gap-2 text-sm">
                                     <span className="uppercase text-[10px] tracking-[0.18em] opacity-70">
@@ -497,7 +518,7 @@ export default function Home() {
                     </div>
 
                     {/* Main Content Area */}
-                    <div className="md:col-span-3 space-y-6 md:space-y-8">
+                    <div className="md:col-span-3 space-y-6 md:space-y-8 min-h-0">
                         {/* Hot Deals Section (replaces previous hero) */}
                         <div
                             className={`rounded-3xl overflow-hidden shadow-[0_26px_70px_rgba(15,23,42,0.65)] border ${theme === 'dark' ? 'bg-gray-950/90 border-orange-900/70' : 'bg-white/90 border-orange-200'}`}
