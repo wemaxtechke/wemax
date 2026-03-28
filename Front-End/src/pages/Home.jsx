@@ -1214,55 +1214,85 @@ export default function Home() {
                     </div>
                 </div>
 
-                {/* Connect with us — social links */}
+                {/* Join us on — large visible social icons (similar to marketplace PDP / footer patterns) */}
                 <section
-                    className={`mt-10 rounded-3xl border px-4 py-8 sm:px-8 sm:py-10 ${
+                    className={`mt-10 rounded-3xl border-2 px-4 py-8 sm:px-8 sm:py-10 ${
                         theme === 'dark'
-                            ? 'border-gray-800 bg-gray-950/50 shadow-[0_20px_50px_rgba(0,0,0,0.35)]'
-                            : 'border-gray-200 bg-white/70 shadow-[0_16px_40px_rgba(15,23,42,0.08)]'
+                            ? 'border-gray-700 bg-gray-950/60 shadow-[0_20px_50px_rgba(0,0,0,0.4)]'
+                            : 'border-gray-200 bg-white/90 shadow-[0_16px_40px_rgba(15,23,42,0.1)]'
                     } backdrop-blur`}
                 >
                     <h2
-                        className={`text-center text-xl font-bold tracking-tight sm:text-2xl ${
+                        className={`text-center text-lg font-bold uppercase tracking-[0.12em] sm:text-xl ${
                             theme === 'dark' ? 'text-white' : 'text-gray-900'
                         }`}
                     >
-                        Connect with us
+                        Join us on
                     </h2>
                     <p
-                        className={`mx-auto mt-2 max-w-xl text-center text-sm ${
+                        className={`mx-auto mt-2 max-w-lg text-center text-sm ${
                             theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                         }`}
                     >
-                        Follow WEMAX for new drops, deals, and support. Message us anytime on WhatsApp.
+                        Follow WEMAX on Facebook and Instagram for deals and updates. Chat with us on WhatsApp.
                     </p>
-                    <div className="mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+                    <div className="mt-8 flex flex-wrap items-start justify-center gap-10 sm:gap-14">
                         <a
                             href={WEMAX_FACEBOOK_PAGE}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-xl bg-[#1877F2] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-[#166FE5]"
+                            className="group flex flex-col items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1877F2] focus-visible:ring-offset-2 rounded-2xl"
+                            aria-label="WEMAX on Facebook"
                         >
-                            <FaFacebook className="text-xl" />
-                            Facebook
+                            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#1877F2] text-white shadow-xl ring-4 ring-[#1877F2]/20 transition group-hover:scale-105 sm:h-20 sm:w-20">
+                                <FaFacebook className="text-[2.25rem] sm:text-[2.75rem]" />
+                            </span>
+                            <span
+                                className={`text-sm font-bold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}
+                            >
+                                Facebook
+                            </span>
+                            <span className={`max-w-[10rem] text-center text-[11px] ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                                WEMAX TECH
+                            </span>
                         </a>
                         <a
                             href={WEMAX_INSTAGRAM_PAGE}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:opacity-95"
+                            className="group flex flex-col items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 rounded-2xl"
+                            aria-label="WEMAX on Instagram"
                         >
-                            <FaInstagram className="text-xl" />
-                            Instagram
+                            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] text-white shadow-xl ring-4 ring-pink-500/15 transition group-hover:scale-105 sm:h-20 sm:w-20">
+                                <FaInstagram className="text-[2.25rem] sm:text-[2.75rem]" />
+                            </span>
+                            <span
+                                className={`text-sm font-bold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}
+                            >
+                                Instagram
+                            </span>
+                            <span className={`max-w-[10rem] text-center text-[11px] ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                                @wemax_tech
+                            </span>
                         </a>
                         <a
                             href={getStoreWhatsAppHref()}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-[#20BD5A]"
+                            className="group flex flex-col items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 rounded-2xl"
+                            aria-label="Chat on WhatsApp"
                         >
-                            <FaWhatsapp className="text-xl" />
-                            WhatsApp
+                            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl ring-4 ring-[#25D366]/25 transition group-hover:scale-105 sm:h-20 sm:w-20">
+                                <FaWhatsapp className="text-[2.25rem] sm:text-[2.75rem]" />
+                            </span>
+                            <span
+                                className={`text-sm font-bold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}
+                            >
+                                WhatsApp
+                            </span>
+                            <span className={`max-w-[10rem] text-center text-[11px] ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                                Message us
+                            </span>
                         </a>
                     </div>
                 </section>

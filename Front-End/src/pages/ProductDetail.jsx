@@ -489,6 +489,63 @@ export default function ProductDetail() {
                             </div>
                         </div>
 
+                        {/* Share this product — large circular icons (Jumia-style visibility) */}
+                        <div className="rounded-xl border-2 border-dashed px-3 py-3 sm:px-4 sm:py-4 bg-black/5 dark:bg-white/5 border-gray-300/80 dark:border-gray-600">
+                            <h2
+                                className={`mb-3 text-base font-bold sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                            >
+                                Share this product
+                            </h2>
+                            <div className="flex flex-wrap items-center gap-4 sm:gap-5">
+                                <button
+                                    type="button"
+                                    onClick={() => openShareFacebook(productUrl)}
+                                    className="group flex flex-col items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 rounded-xl"
+                                    aria-label="Share on Facebook"
+                                >
+                                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1877F2] text-white shadow-lg ring-4 ring-[#1877F2]/25 transition group-hover:scale-105 group-active:scale-95 sm:h-16 sm:w-16">
+                                        <FaFacebook className="text-3xl sm:text-[2rem]" />
+                                    </span>
+                                    <span className={`text-xs font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        Facebook
+                                    </span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        openShareWhatsApp(
+                                            `Check out ${currentProduct.name} on WEMAX — ${productUrl}`
+                                        )
+                                    }
+                                    className="group flex flex-col items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2 rounded-xl"
+                                    aria-label="Share on WhatsApp"
+                                >
+                                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg ring-4 ring-[#25D366]/25 transition group-hover:scale-105 group-active:scale-95 sm:h-16 sm:w-16">
+                                        <FaWhatsapp className="text-3xl sm:text-[2rem]" />
+                                    </span>
+                                    <span className={`text-xs font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        WhatsApp
+                                    </span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => shareProductInstagram(productUrl)}
+                                    className="group flex flex-col items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 rounded-xl"
+                                    aria-label="Copy link for Instagram"
+                                >
+                                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] text-white shadow-lg ring-4 ring-pink-500/20 transition group-hover:scale-105 group-active:scale-95 sm:h-16 sm:w-16">
+                                        <FaInstagram className="text-3xl sm:text-[2rem]" />
+                                    </span>
+                                    <span className={`text-xs font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        Instagram
+                                    </span>
+                                </button>
+                            </div>
+                            <p className={`mt-2 text-[11px] sm:text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
+                                Instagram copies your product link so you can paste it in a story or DM.
+                            </p>
+                        </div>
+
                         {/* Pricing */}
                         <div className="space-y-2">
                             <div className="flex items-baseline gap-3 flex-wrap">
@@ -611,50 +668,6 @@ export default function ProductDetail() {
                             <p className={`leading-relaxed whitespace-pre-wrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                 {currentProduct.description}
                             </p>
-                        </div>
-
-                        {/* Share this product */}
-                        <div
-                            className={`rounded-xl border p-4 sm:p-5 ${
-                                theme === 'dark' ? 'border-gray-700 bg-gray-900/40' : 'border-gray-200 bg-white/60'
-                            }`}
-                        >
-                            <h3 className={`font-bold text-lg mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                                Share this product
-                            </h3>
-                            <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                Send this listing to friends on Facebook or WhatsApp. For Instagram, we&apos;ll copy the link so you can paste it in a story or DM.
-                            </p>
-                            <div className="flex flex-wrap gap-2 sm:gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => openShareFacebook(productUrl)}
-                                    className="inline-flex flex-1 min-w-[8.5rem] items-center justify-center gap-2 rounded-lg bg-[#1877F2] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#166FE5] sm:flex-none"
-                                >
-                                    <FaFacebook className="text-lg" />
-                                    Facebook
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        openShareWhatsApp(
-                                            `Check out ${currentProduct.name} on WEMAX — ${productUrl}`
-                                        )
-                                    }
-                                    className="inline-flex flex-1 min-w-[8.5rem] items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#20BD5A] sm:flex-none"
-                                >
-                                    <FaWhatsapp className="text-lg" />
-                                    WhatsApp
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => shareProductInstagram(productUrl)}
-                                    className="inline-flex flex-1 min-w-[8.5rem] items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 sm:flex-none"
-                                >
-                                    <FaInstagram className="text-lg" />
-                                    Instagram
-                                </button>
-                            </div>
                         </div>
 
                         {/* Save (desktop / laptop) */}
