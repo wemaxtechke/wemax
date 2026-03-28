@@ -6,6 +6,16 @@ import { logout } from '../redux/slices/authSlice.js';
 import { FaShoppingCart, FaUser, FaSearch, FaMoon, FaSun, FaBars, FaTimes } from 'react-icons/fa';
 import wemaxLogo from '../assets/wemax-logo.jpg';
 
+const SEARCH_SUGGESTIONS = [
+    'Smart TV',
+    'Phones',
+    'Laptops',
+    'Sound systems',
+    'Woofers',
+    'Furniture',
+    'Packages',
+];
+
 export default function Navbar() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -43,53 +53,135 @@ export default function Navbar() {
             }`}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
-                    {/* Logo */}
-                    <Link
-                        to="/"
-                        className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity"
-                    >
-                        <img
-                            src={wemaxLogo}
-                            alt="Wemax"
-                            className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl"
-                        />
-                        <span
-                            style={{ fontFamily: '"Space Grotesk", Inter, system-ui, sans-serif' }}
-                            className={`wemax-brand font-bold text-base sm:text-xl tracking-[0.16em] uppercase ${
-                                theme === 'dark' ? 'text-gray-50' : 'text-gray-900'
-                            }`}
+                {/* Logo (left) + search + suggestions + actions — Kilimall-style row on desktop */}
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4 py-3 md:py-4">
+                    <div className="flex items-center justify-between gap-3 md:contents">
+                        <Link
+                            to="/"
+                            className="flex items-center gap-2.5 shrink-0 hover:opacity-90 transition-opacity md:mr-1"
                         >
-                            WEMAX
-                        </span>
-                    </Link>
+                            <img
+                                src={wemaxLogo}
+                                alt="Wemax"
+                                className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl object-cover"
+                            />
+                            <div className="flex flex-col leading-tight">
+                                <span
+                                    style={{ fontFamily: '"Space Grotesk", Inter, system-ui, sans-serif' }}
+                                    className={`wemax-brand font-bold text-lg sm:text-xl tracking-[0.12em] uppercase ${
+                                        theme === 'dark' ? 'text-gray-50' : 'text-gray-900'
+                                    }`}
+                                >
+                                    WEMAX
+                                </span>
+                                <span
+                                    className={`text-[11px] sm:text-xs font-normal normal-case tracking-normal ${
+                                        theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+                                    }`}
+                                >
+                                    Premium online shopping
+                                </span>
+                            </div>
+                        </Link>
 
-                    {/* Desktop Navigation Links */}
-                    <div className="hidden md:flex items-center gap-6">
-                        {[
-                            { to: '/', label: 'Home' },
-                            { to: '/products', label: 'Shop' },
-                            { to: '/packages', label: 'Packages' },
-                            { to: '/about', label: 'About' },
-                            { to: '/contact', label: 'Contact' },
-                        ].map((link) => (
-                            <Link
-                                key={link.to}
-                                to={link.to}
-                                className={`text-sm font-medium transition-colors ${
+                        <div className="flex items-center gap-2 md:hidden">
+                            <button
+                                onClick={() => dispatch(toggleTheme())}
+                                className={`p-2 rounded-full border text-sm ${
                                     theme === 'dark'
-                                        ? 'text-gray-300 hover:text-white'
-                                        : 'text-gray-700 hover:text-gray-900'
-                                }`}
+                                        ? 'border-gray-700 hover:bg-gray-900'
+                                        : 'border-gray-200 hover:bg-gray-100'
+                                } transition-colors`}
+                                aria-label="Toggle theme"
                             >
-                                {link.label}
-                            </Link>
-                        ))}
+                                {theme === 'dark' ? <FaSun className="text-lg text-yellow-400" /> : <FaMoon className="text-lg text-blue-600" />}
+                            </button>
+                            {isAuthenticated && (
+                                <Link
+                                    to="/cart"
+                                    className={`relative p-2 rounded-full border ${
+                                        theme === 'dark'
+                                            ? 'border-gray-700 hover:bg-gray-900'
+                                            : 'border-gray-200 hover:bg-gray-100'
+                                    } transition-colors`}
+                                >
+                                    <FaShoppingCart className="text-lg" />
+                                    {cartCount > 0 && (
+                                        <span className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </Link>
+                            )}
+                            <button
+                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                className={`p-2 rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
+                                aria-label="Toggle menu"
+                            >
+                                {mobileMenuOpen ? <FaTimes className="text-lg" /> : <FaBars className="text-lg" />}
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Right Actions */}
-                    <div className="flex items-center gap-3">
-                        {/* Theme Toggle */}
+                    <div className="flex min-w-0 flex-1 flex-col gap-2">
+                        <form onSubmit={handleSearchSubmit} className="min-w-0">
+                            <div
+                                className={`flex min-w-0 overflow-hidden rounded-md border-2 shadow-sm ${
+                                    theme === 'dark' ? 'border-red-500/90 bg-gray-900/80' : 'border-red-600 bg-white'
+                                }`}
+                            >
+                                <input
+                                    type="search"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="I'm looking for..."
+                                    className={`min-w-0 flex-1 border-0 bg-transparent px-3 py-2.5 text-sm outline-none sm:px-4 sm:py-3 ${
+                                        theme === 'dark'
+                                            ? 'text-gray-100 placeholder:text-gray-500'
+                                            : 'text-gray-900 placeholder:text-gray-400'
+                                    }`}
+                                    aria-label="Search products"
+                                />
+                                <button
+                                    type="submit"
+                                    className="flex shrink-0 items-center justify-center bg-red-600 px-4 py-2.5 text-white transition-colors hover:bg-red-700 sm:px-5 sm:py-3"
+                                    aria-label="Search"
+                                >
+                                    <FaSearch className="text-base sm:text-lg" />
+                                </button>
+                            </div>
+                        </form>
+                        <div
+                            className={`hidden flex-wrap gap-x-4 gap-y-1 text-xs sm:flex ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}
+                        >
+                            {SEARCH_SUGGESTIONS.map((label) => (
+                                <Link
+                                    key={label}
+                                    to={`/products?search=${encodeURIComponent(label)}`}
+                                    className={`transition-colors hover:underline ${
+                                        theme === 'dark' ? 'hover:text-gray-300' : 'hover:text-gray-800'
+                                    }`}
+                                >
+                                    {label}
+                                </Link>
+                            ))}
+                        </div>
+                        <div
+                            className={`flex flex-wrap gap-x-3 gap-y-1 text-[11px] sm:hidden ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}
+                        >
+                            {SEARCH_SUGGESTIONS.slice(0, 4).map((label) => (
+                                <Link
+                                    key={label}
+                                    to={`/products?search=${encodeURIComponent(label)}`}
+                                    className="hover:underline"
+                                >
+                                    {label}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="hidden items-center gap-3 shrink-0 md:flex">
                         <button
                             onClick={() => dispatch(toggleTheme())}
                             className={`p-2 rounded-full border text-sm ${
@@ -104,9 +196,8 @@ export default function Navbar() {
 
                         {isAuthenticated ? (
                             <>
-                                {/* Cart Link */}
-                                <Link 
-                                    to="/cart" 
+                                <Link
+                                    to="/cart"
                                     className={`relative p-2 rounded-full border ${
                                         theme === 'dark'
                                             ? 'border-gray-700 hover:bg-gray-900'
@@ -115,14 +206,13 @@ export default function Navbar() {
                                 >
                                     <FaShoppingCart className="text-lg" />
                                     {cartCount > 0 && (
-                                        <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                        <span className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                                             {cartCount}
                                         </span>
                                     )}
                                 </Link>
 
-                                {/* User Menu Dropdown - Desktop */}
-                                <div className="hidden md:block relative group">
+                                <div className="relative group">
                                     <button
                                         className={`p-2 rounded-full border ${
                                             theme === 'dark'
@@ -133,27 +223,27 @@ export default function Navbar() {
                                         <FaUser className="text-lg" />
                                     </button>
                                     <div className={`absolute right-0 mt-0 w-48 rounded-lg shadow-lg py-2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300`}>
-                                        <Link 
-                                            to="/orders" 
+                                        <Link
+                                            to="/orders"
                                             className={`block px-4 py-2 ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors`}
                                         >
                                             My Orders
                                         </Link>
-                                        <Link 
-                                            to="/wishlist" 
+                                        <Link
+                                            to="/wishlist"
                                             className={`block px-4 py-2 ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors`}
                                         >
                                             Wishlist
                                         </Link>
                                         {user?.role === 'admin' && (
-                                            <Link 
-                                                to="/admin" 
+                                            <Link
+                                                to="/admin"
                                                 className={`block px-4 py-2 ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors`}
                                             >
                                                 Admin Dashboard
                                             </Link>
                                         )}
-                                        <button 
+                                        <button
                                             onClick={handleLogout}
                                             className={`w-full text-left px-4 py-2 ${theme === 'dark' ? 'hover:bg-gray-700 text-red-400' : 'hover:bg-gray-100 text-red-600'} transition-colors`}
                                         >
@@ -164,67 +254,49 @@ export default function Navbar() {
                             </>
                         ) : (
                             <>
-                                {/* Login Button - Desktop Only */}
-                                <Link 
-                                    to="/login" 
-                                    className={`hidden md:block px-4 py-2 rounded-lg font-medium transition-colors ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+                                <Link
+                                    to="/login"
+                                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
                                 >
                                     Login
                                 </Link>
-
-                                {/* Register Button - Desktop Only */}
-                                <Link 
-                                    to="/register" 
-                                    className="hidden md:block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-grey-600 rounded-lg font-medium transition-colors"
+                                <Link
+                                    to="/register"
+                                    className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
                                 >
                                     Register
                                 </Link>
                             </>
                         )}
-
-                        {/* Mobile Menu Button */}
-                        <button
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className={`md:hidden p-2 rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
-                            aria-label="Toggle menu"
-                        >
-                            {mobileMenuOpen ? <FaTimes className="text-lg" /> : <FaBars className="text-lg" />}
-                        </button>
                     </div>
                 </div>
 
-                {/* Search bar - full width below nav, responsive */}
-                <form onSubmit={handleSearchSubmit} className="pb-3 sm:pb-4">
-                    <div className="flex rounded-lg sm:rounded-xl overflow-hidden border border-blue-500 shadow-sm min-w-0">
-                        <div className={`flex-1 flex items-center gap-2 pl-3 pr-2 py-2 sm:pl-4 sm:pr-3 sm:py-3 min-w-0 ${
-                            theme === 'dark' ? 'bg-gray-900' : 'bg-white'
-                        }`}>
-                            <FaSearch className={`shrink-0 text-base sm:text-lg ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} />
-                            <input
-                                type="search"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search products, brands and categories"
-                                className={`flex-1 min-w-0 bg-transparent text-sm outline-none ${
-                                    theme === 'dark'
-                                        ? 'text-gray-100 placeholder-gray-500'
-                                        : 'text-gray-900 placeholder-gray-400'
-                                }`}
-                                aria-label="Search products, brands and categories"
-                            />
-                        </div>
-                        <button
-                            type="submit"
-                            className={`px-4 py-2 sm:px-6 sm:py-3 font-semibold text-xs sm:text-sm transition-colors shadow-md shrink-0 ${
+                {/* Desktop nav links — below logo/search row */}
+                <div
+                    className={`hidden border-t pb-3 pt-2 md:flex md:flex-wrap md:items-center md:gap-6 ${
+                        theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
+                    }`}
+                >
+                    {[
+                        { to: '/', label: 'Home' },
+                        { to: '/products', label: 'Shop' },
+                        { to: '/packages', label: 'Packages' },
+                        { to: '/about', label: 'About' },
+                        { to: '/contact', label: 'Contact' },
+                    ].map((link) => (
+                        <Link
+                            key={link.to}
+                            to={link.to}
+                            className={`text-sm font-medium transition-colors ${
                                 theme === 'dark'
-                                    ? 'bg-gray-700 hover:bg-gray-600 text-white border-l border-gray-600'
-                                    : 'bg-gray-800 hover:bg-gray-700 text-white border-l border-gray-200'
+                                    ? 'text-gray-300 hover:text-white'
+                                    : 'text-gray-700 hover:text-gray-900'
                             }`}
                         >
-                            Search
-                        </button>
-                    </div>
-                </form>
+                            {link.label}
+                        </Link>
+                    ))}
+                </div>
 
                 {/* Mobile Menu */}
                 {mobileMenuOpen && (
