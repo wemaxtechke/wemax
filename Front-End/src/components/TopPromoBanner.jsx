@@ -104,7 +104,7 @@ export default function TopPromoBanner() {
                 <div className="ml-auto flex shrink-0 items-center sm:ml-0">
                     <Link
                         to="/products"
-                        className="promo-cta-bounce inline-block bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-900 shadow-md sm:px-4 sm:py-2 sm:text-xs"
+                        className="promo-cta-bounce inline-block bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide !text-[#FF6600] shadow-md sm:px-4 sm:py-2 sm:text-xs"
                     >
                         SHOP NOW
                     </Link>
