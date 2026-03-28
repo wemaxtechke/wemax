@@ -369,156 +369,156 @@ export default function Home() {
                     </div>
                 </div>
 
-                <div className="grid gap-2 grid-cols-1 md:grid-cols-4 gap-0 md:gap-6 px-3 md:px-6 py-4 md:py-8 md:items-stretch">
-                    {/* Sidebar - Categories (Desktop Only) — stretches to Hot Deals row height; list scrolls if needed */}
-                    <div className="hidden md:flex md:col-span-1 min-h-0 h-full">
-                        <div className={`rounded-2xl overflow-hidden border flex flex-col flex-1 min-h-0 w-full h-full ${theme === 'dark' ? 'border-gray-800 bg-gray-950/60' : 'border-gray-200 bg-white/70'} shadow-[0_18px_45px_rgba(0,0,0,0.25)] backdrop-blur`}>
-                            <div className={`shrink-0 ${theme === 'dark' ? 'bg-gradient-to-r from-gray-900 to-gray-800' : 'bg-gradient-to-r from-slate-100 to-slate-200'} px-4 py-4 font-semibold flex items-center justify-between`}>
-                                <span className="flex items-center gap-2 text-sm">
-                                    <span className="uppercase text-[10px] tracking-[0.18em] opacity-70">
-                                        Browse
+                <div className="grid gap-2 grid-cols-1 md:grid-cols-4 gap-0 md:gap-6 px-3 md:px-6 py-4 md:py-8">
+                    {/* Desktop: row height follows Hot Deals; category panel matches via absolute fill + scroll */}
+                    <div className="col-span-1 md:col-span-4 relative">
+                        <div className="hidden md:flex absolute left-0 top-0 bottom-0 z-10 w-[calc((100%_-_4.5rem)_/_4)] flex-col min-h-0">
+                            <div className={`rounded-2xl overflow-hidden border flex flex-col h-full min-h-0 w-full ${theme === 'dark' ? 'border-gray-800 bg-gray-950/60' : 'border-gray-200 bg-white/70'} shadow-[0_18px_45px_rgba(0,0,0,0.25)] backdrop-blur`}>
+                                <div className={`shrink-0 ${theme === 'dark' ? 'bg-gradient-to-r from-gray-900 to-gray-800' : 'bg-gradient-to-r from-slate-100 to-slate-200'} px-4 py-4 font-semibold flex items-center justify-between`}>
+                                    <span className="flex items-center gap-2 text-sm">
+                                        <span className="uppercase text-[10px] tracking-[0.18em] opacity-70">
+                                            Browse
+                                        </span>
+                                        <span>Premium Categories</span>
                                     </span>
-                                    <span>Premium Categories</span>
-                                </span>
-                                <span className="text-[10px] uppercase tracking-[0.18em] opacity-70">
-                                    Curated Picks
-                                </span>
-                            </div>
-                            <div className={`divide-y min-h-0 flex-1 overflow-y-auto ${theme === 'dark' ? 'divide-gray-800' : 'divide-gray-100'}`}>
-                                {categories.map((category) =>
-                                    category.name === 'Phones' ? (
-                                        <div
-                                            key={category.name}
-                                            className={`group relative ${theme === 'dark' ? 'hover:bg-gray-900/80' : 'hover:bg-gray-50'}`}
-                                        >
+                                    <span className="text-[10px] uppercase tracking-[0.18em] opacity-70">
+                                        Curated Picks
+                                    </span>
+                                </div>
+                                <div className={`divide-y min-h-0 flex-1 overflow-y-auto ${theme === 'dark' ? 'divide-gray-800' : 'divide-gray-100'}`}>
+                                    {categories.map((category) =>
+                                        category.name === 'Phones' ? (
                                             <div
-                                                className={`flex items-center justify-between px-4 py-3 transition-colors cursor-pointer ${
-                                                    theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-                                                }`}
+                                                key={category.name}
+                                                className={`group relative ${theme === 'dark' ? 'hover:bg-gray-900/80' : 'hover:bg-gray-50'}`}
                                             >
-                                                <span className="text-sm font-medium">Phones</span>
-                                                <FaChevronRight
-                                                    className={`text-xs shrink-0 transition-transform group-hover:translate-x-0.5 ${
-                                                        theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
-                                                    }`}
-                                                />
-                                            </div>
-                                            <div
-                                                className={`absolute left-0 top-full mt-1 min-w-[180px] py-2 rounded-lg shadow-xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 ${
-                                                    theme === 'dark'
-                                                        ? 'bg-gray-900 border-gray-700'
-                                                        : 'bg-white border-gray-200'
-                                                }`}
-                                            >
-                                                <Link
-                                                    to="/products?subCategory=Phones"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    className={`block px-4 py-2 text-sm font-medium rounded-t-lg ${
-                                                        theme === 'dark'
-                                                            ? 'text-gray-200 hover:bg-gray-800'
-                                                            : 'text-gray-900 hover:bg-blue-50'
+                                                <div
+                                                    className={`flex items-center justify-between px-4 py-3 transition-colors cursor-pointer ${
+                                                        theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
                                                     }`}
                                                 >
-                                                    All Phones
-                                                </Link>
-                                                {PHONE_BRANDS.map((brand) => (
-                                                    <Link
-                                                        key={brand}
-                                                        to={`/products?subCategory=Phones&brand=${encodeURIComponent(brand)}`}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        className={`block px-4 py-2 text-sm last:rounded-b-lg ${
-                                                            theme === 'dark'
-                                                                ? 'text-gray-200 hover:bg-gray-700'
-                                                                : 'text-gray-700 hover:bg-blue-50'
+                                                    <span className="text-sm font-medium">Phones</span>
+                                                    <FaChevronRight
+                                                        className={`text-xs shrink-0 transition-transform group-hover:translate-x-0.5 ${
+                                                            theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
                                                         }`}
-                                                    >
-                                                        {brand}
-                                                    </Link>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ) : category.name === 'Laptops' ? (
-                                        <div
-                                            key={category.name}
-                                            className={`group relative ${theme === 'dark' ? 'hover:bg-gray-900/80' : 'hover:bg-gray-50'}`}
-                                        >
-                                            <div
-                                                className={`flex items-center justify-between px-4 py-3 transition-colors cursor-pointer ${
-                                                    theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
-                                                }`}
-                                            >
-                                                <span className="text-sm font-medium">Laptops</span>
-                                                <FaChevronRight
-                                                    className={`text-xs shrink-0 transition-transform group-hover:translate-x-0.5 ${
-                                                        theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
-                                                    }`}
-                                                />
-                                            </div>
-                                            <div
-                                                className={`absolute left-0 top-full mt-1 min-w-[180px] py-2 rounded-lg shadow-xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 ${
-                                                    theme === 'dark'
-                                                        ? 'bg-gray-900 border-gray-700'
-                                                        : 'bg-white border-gray-200'
-                                                }`}
-                                            >
-                                                <Link
-                                                    to="/products?subCategory=Laptops"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    className={`block px-4 py-2 text-sm font-medium rounded-t-lg ${
+                                                    />
+                                                </div>
+                                                <div
+                                                    className={`absolute left-0 top-full mt-1 min-w-[180px] py-2 rounded-lg shadow-xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 ${
                                                         theme === 'dark'
-                                                            ? 'text-gray-200 hover:bg-gray-800'
-                                                            : 'text-gray-900 hover:bg-blue-50'
+                                                            ? 'bg-gray-900 border-gray-700'
+                                                            : 'bg-white border-gray-200'
                                                     }`}
                                                 >
-                                                    All Laptops
-                                                </Link>
-                                                {LAPTOP_BRANDS.map((brand) => (
                                                     <Link
-                                                        key={brand}
-                                                        to={`/products?subCategory=Laptops&brand=${encodeURIComponent(brand)}`}
+                                                        to="/products?subCategory=Phones"
                                                         onClick={(e) => e.stopPropagation()}
-                                                        className={`block px-4 py-2 text-sm last:rounded-b-lg ${
+                                                        className={`block px-4 py-2 text-sm font-medium rounded-t-lg ${
                                                             theme === 'dark'
-                                                                ? 'text-gray-200 hover:bg-gray-700'
-                                                                : 'text-gray-700 hover:bg-blue-50'
+                                                                ? 'text-gray-200 hover:bg-gray-800'
+                                                                : 'text-gray-900 hover:bg-blue-50'
                                                         }`}
                                                     >
-                                                        {brand}
+                                                        All Phones
                                                     </Link>
-                                                ))}
+                                                    {PHONE_BRANDS.map((brand) => (
+                                                        <Link
+                                                            key={brand}
+                                                            to={`/products?subCategory=Phones&brand=${encodeURIComponent(brand)}`}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className={`block px-4 py-2 text-sm last:rounded-b-lg ${
+                                                                theme === 'dark'
+                                                                    ? 'text-gray-200 hover:bg-gray-700'
+                                                                    : 'text-gray-700 hover:bg-blue-50'
+                                                            }`}
+                                                        >
+                                                            {brand}
+                                                        </Link>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <Link
-                                            key={category.name}
-                                            to={`/products?subCategory=${encodeURIComponent(category.name)}`}
-                                            className={`flex items-center justify-between px-4 py-3 transition-colors ${
-                                                theme === 'dark' ? 'hover:bg-gray-900/80' : 'hover:bg-gray-50'
-                                            }`}
-                                        >
-                                            <span
-                                                className={`text-sm font-medium ${
-                                                    theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+                                        ) : category.name === 'Laptops' ? (
+                                            <div
+                                                key={category.name}
+                                                className={`group relative ${theme === 'dark' ? 'hover:bg-gray-900/80' : 'hover:bg-gray-50'}`}
+                                            >
+                                                <div
+                                                    className={`flex items-center justify-between px-4 py-3 transition-colors cursor-pointer ${
+                                                        theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+                                                    }`}
+                                                >
+                                                    <span className="text-sm font-medium">Laptops</span>
+                                                    <FaChevronRight
+                                                        className={`text-xs shrink-0 transition-transform group-hover:translate-x-0.5 ${
+                                                            theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
+                                                        }`}
+                                                    />
+                                                </div>
+                                                <div
+                                                    className={`absolute left-0 top-full mt-1 min-w-[180px] py-2 rounded-lg shadow-xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 ${
+                                                        theme === 'dark'
+                                                            ? 'bg-gray-900 border-gray-700'
+                                                            : 'bg-white border-gray-200'
+                                                    }`}
+                                                >
+                                                    <Link
+                                                        to="/products?subCategory=Laptops"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className={`block px-4 py-2 text-sm font-medium rounded-t-lg ${
+                                                            theme === 'dark'
+                                                                ? 'text-gray-200 hover:bg-gray-800'
+                                                                : 'text-gray-900 hover:bg-blue-50'
+                                                        }`}
+                                                    >
+                                                        All Laptops
+                                                    </Link>
+                                                    {LAPTOP_BRANDS.map((brand) => (
+                                                        <Link
+                                                            key={brand}
+                                                            to={`/products?subCategory=Laptops&brand=${encodeURIComponent(brand)}`}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className={`block px-4 py-2 text-sm last:rounded-b-lg ${
+                                                                theme === 'dark'
+                                                                    ? 'text-gray-200 hover:bg-gray-700'
+                                                                    : 'text-gray-700 hover:bg-blue-50'
+                                                            }`}
+                                                        >
+                                                            {brand}
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <Link
+                                                key={category.name}
+                                                to={`/products?subCategory=${encodeURIComponent(category.name)}`}
+                                                className={`flex items-center justify-between px-4 py-3 transition-colors ${
+                                                    theme === 'dark' ? 'hover:bg-gray-900/80' : 'hover:bg-gray-50'
                                                 }`}
                                             >
-                                                {category.name}
-                                            </span>
-                                            <FaChevronRight
-                                                className={`text-xs shrink-0 ${
-                                                    theme === 'dark'
-                                                        ? 'text-gray-600'
-                                                        : 'text-gray-400'
-                                                }`}
-                                            />
-                                        </Link>
-                                    )
-                                )}
+                                                <span
+                                                    className={`text-sm font-medium ${
+                                                        theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+                                                    }`}
+                                                >
+                                                    {category.name}
+                                                </span>
+                                                <FaChevronRight
+                                                    className={`text-xs shrink-0 ${
+                                                        theme === 'dark'
+                                                            ? 'text-gray-600'
+                                                            : 'text-gray-400'
+                                                    }`}
+                                                />
+                                            </Link>
+                                        )
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Main Content Area */}
-                    <div className="md:col-span-3 space-y-6 md:space-y-8 min-h-0">
+                        <div className="md:pl-[calc((100%_-_4.5rem)_/_4_+_1.5rem)] space-y-6 md:space-y-8">
                         {/* Hot Deals Section (replaces previous hero) */}
                         <div
                             className={`rounded-3xl overflow-hidden shadow-[0_26px_70px_rgba(15,23,42,0.65)] border ${theme === 'dark' ? 'bg-gray-950/90 border-orange-900/70' : 'bg-white/90 border-orange-200'}`}
@@ -741,6 +741,7 @@ export default function Home() {
                                     </div>
                                 </div>
                             )}
+                        </div>
                         </div>
                     </div>
 
