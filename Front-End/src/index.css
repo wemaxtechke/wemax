@@ -98,3 +98,74 @@ select {
         opacity: 1;
     }
 }
+
+/* Top promo banner — vertical slide + bounce settle */
+@keyframes promo-march-up {
+    from {
+        transform: translate3d(0, 115%, 0);
+        opacity: 0.35;
+    }
+    52% {
+        transform: translate3d(0, -12px, 0);
+        opacity: 1;
+    }
+    72% {
+        transform: translate3d(0, 8px, 0);
+    }
+    86% {
+        transform: translate3d(0, -3px, 0);
+    }
+    to {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+    }
+}
+
+@keyframes promo-march-down {
+    from {
+        transform: translate3d(0, -115%, 0);
+        opacity: 0.35;
+    }
+    52% {
+        transform: translate3d(0, 12px, 0);
+        opacity: 1;
+    }
+    72% {
+        transform: translate3d(0, -8px, 0);
+    }
+    86% {
+        transform: translate3d(0, 3px, 0);
+    }
+    to {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+    }
+}
+
+@keyframes promo-cta-soft-bounce {
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+    35% {
+        transform: translateY(-4px) scale(1.04);
+    }
+    52% {
+        transform: translateY(2px) scale(1);
+    }
+    68% {
+        transform: translateY(-1px) scale(1.01);
+    }
+}
+
+.animate-promo-march-up {
+    animation: promo-march-up 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-promo-march-down {
+    animation: promo-march-down 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.promo-cta-bounce {
+    animation: promo-cta-soft-bounce 2.5s ease-in-out infinite;
+}
