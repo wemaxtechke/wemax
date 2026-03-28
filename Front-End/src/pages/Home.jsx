@@ -523,39 +523,39 @@ export default function Home() {
                         <div
                             className={`rounded-3xl overflow-hidden shadow-[0_26px_70px_rgba(15,23,42,0.65)] border ${theme === 'dark' ? 'bg-gray-950/90 border-orange-900/70' : 'bg-white/90 border-orange-200'}`}
                         >
-                            {/* Hot Deals Header */}
+                            {/* Hot Deals Header — slim bar */}
                             <div
-                                className={`px-4 md:px-8 py-5 md:py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 ${
+                                className={`px-2.5 py-1.5 sm:px-3 md:px-4 md:py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 ${
                                     theme === 'dark'
                                         ? 'bg-gradient-to-r from-orange-600 via-red-600 to-rose-600'
                                         : 'bg-gradient-to-r from-orange-400 via-red-400 to-rose-400'
                                 }`}
                             >
-                                <div className="flex items-center gap-4 text-white">
-                                    <div className="text-left">
-                                        <p className="text-[11px] md:text-xs font-semibold uppercase tracking-[0.24em] opacity-90">
+                                <div className="flex items-center gap-1.5 text-white min-w-0">
+                                    <div className="text-left min-w-0">
+                                        <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.18em] opacity-90 leading-none">
                                             Big Savings
                                         </p>
-                                        <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight">
+                                        <h1 className="text-lg sm:text-xl md:text-2xl font-extrabold leading-[1.1] tracking-tight">
                                             HOT DEALS
                                         </h1>
-                                        <p className="mt-1 text-xs md:text-sm opacity-90">
+                                        <p className="hidden sm:block mt-0.5 text-[10px] md:text-[11px] opacity-90 line-clamp-1">
                                             Limited-time offers on top tech & home essentials.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="flex flex-wrap items-center gap-3">
-                                    <div className="inline-flex items-center rounded-full bg-black/25 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-white">
-                                        <span className="mr-2 inline-flex h-2 w-2 rounded-full bg-amber-300 animate-pulse" />
+                                <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                                    <div className="inline-flex items-center rounded-full bg-black/25 px-2 py-0.5 text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-white leading-none">
+                                        <span className="mr-1 inline-flex h-1 w-1 shrink-0 rounded-full bg-amber-300 animate-pulse" />
                                         Limited Time Offers
                                     </div>
                                     <Link
                                         to="/products"
-                                        className="inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-[11px] md:text-sm font-semibold text-slate-700 shadow-[0_12px_30px_rgba(0,0,0,0.35)] hover:bg-amber-50 hover:text-slate-900 transition-all whitespace-nowrap"
+                                        className="inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[9px] sm:text-[10px] font-semibold !text-slate-800 shadow-sm hover:bg-amber-50 hover:!text-slate-900 transition-all whitespace-nowrap"
                                     >
                                         View All Hot Deals
-                                        <FaChevronRight className="text-xs" />
+                                        <FaChevronRight className="text-[9px]" />
                                     </Link>
                                 </div>
                             </div>
