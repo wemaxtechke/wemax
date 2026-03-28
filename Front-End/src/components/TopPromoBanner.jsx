@@ -55,9 +55,9 @@ export default function TopPromoBanner() {
                 aria-hidden
             />
 
-            <div className="relative z-10 mx-auto max-w-7xl px-2 py-1 sm:px-4 sm:py-2 lg:px-8">
-                {/* Mobile: two tight rows. sm+: single flowing row (contents unwraps children into flex) */}
-                <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2">
+            <div className="relative z-10 mx-auto flex w-full min-h-[3rem] items-center px-2 py-2 sm:min-h-[3.25rem] sm:px-4 sm:py-2.5 lg:px-8">
+                {/* Mobile: two tight rows. sm+: single flowing row. Outer flex centers this block vertically in the bar. */}
+                <div className="flex w-full flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2">
                     <div className="flex min-w-0 items-center gap-2 sm:contents">
                         {/* Brand */}
                         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
@@ -69,22 +69,16 @@ export default function TopPromoBanner() {
                             </span>
                         </div>
 
-                        {/* Animated headline */}
-                        <div className="relative min-h-[1.75rem] min-w-0 flex-1 overflow-hidden rounded border border-[var(--color-primary)] bg-[var(--color-surface)] px-1.5 py-px shadow-[var(--shadow-sm)] sm:min-h-[3rem] sm:max-w-[220px] sm:rounded-md sm:px-2.5 sm:py-1 md:max-w-xs lg:max-w-md">
+                        {/* Animated headline — vertically + (mobile) horizontally centered in slot */}
+                        <div className="relative flex min-h-[2.25rem] min-w-0 flex-1 items-center justify-center overflow-hidden sm:min-h-[3rem] sm:max-w-[220px] sm:justify-start md:max-w-xs lg:max-w-md">
                             <div
                                 key={index}
-                                className={slideUp ? 'animate-promo-march-up' : 'animate-promo-march-down'}
+                                className={`w-full text-center sm:w-auto sm:text-left ${slideUp ? 'animate-promo-march-up' : 'animate-promo-march-down'}`}
                             >
-                                <p
-                                    className="text-[11px] font-black uppercase leading-none tracking-tight sm:text-sm md:text-base"
-                                    style={{ color: 'var(--color-primary)' }}
-                                >
+                                <p className="text-[11px] font-black uppercase leading-none tracking-tight text-white drop-shadow-sm sm:text-sm md:text-base">
                                     {line.top}
                                 </p>
-                                <p
-                                    className="hidden text-[10px] font-semibold uppercase tracking-wide sm:block sm:text-xs"
-                                    style={{ color: 'var(--color-text-secondary)' }}
-                                >
+                                <p className="hidden text-[10px] font-semibold uppercase tracking-wide text-white/85 sm:block sm:text-xs">
                                     {line.bottom}
                                 </p>
                             </div>
