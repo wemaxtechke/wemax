@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import wemaxLogo from '../assets/wemax-logo.jpg';
-import { FaShoppingCart, FaStar, FaClock, FaChevronRight, FaChevronDown } from 'react-icons/fa';
+import { FaShoppingCart, FaStar, FaClock, FaChevronRight, FaChevronDown, FaFacebook, FaInstagram, FaWhatsapp } from 'react-icons/fa';
 import api from '../utils/api.js';
 import { SUB_CATEGORIES, PHONE_BRANDS, LAPTOP_BRANDS } from '../constants/categories.js';
+import { WEMAX_FACEBOOK_PAGE, WEMAX_INSTAGRAM_PAGE, getStoreWhatsAppHref } from '../constants/social.js';
 import SmartImage from '../components/SmartImage.jsx';
 import { Seo } from '../components/Seo.jsx';
 
@@ -1212,6 +1213,59 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
+
+                {/* Connect with us — social links */}
+                <section
+                    className={`mt-10 rounded-3xl border px-4 py-8 sm:px-8 sm:py-10 ${
+                        theme === 'dark'
+                            ? 'border-gray-800 bg-gray-950/50 shadow-[0_20px_50px_rgba(0,0,0,0.35)]'
+                            : 'border-gray-200 bg-white/70 shadow-[0_16px_40px_rgba(15,23,42,0.08)]'
+                    } backdrop-blur`}
+                >
+                    <h2
+                        className={`text-center text-xl font-bold tracking-tight sm:text-2xl ${
+                            theme === 'dark' ? 'text-white' : 'text-gray-900'
+                        }`}
+                    >
+                        Connect with us
+                    </h2>
+                    <p
+                        className={`mx-auto mt-2 max-w-xl text-center text-sm ${
+                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }`}
+                    >
+                        Follow WEMAX for new drops, deals, and support. Message us anytime on WhatsApp.
+                    </p>
+                    <div className="mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+                        <a
+                            href={WEMAX_FACEBOOK_PAGE}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-[#1877F2] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-[#166FE5]"
+                        >
+                            <FaFacebook className="text-xl" />
+                            Facebook
+                        </a>
+                        <a
+                            href={WEMAX_INSTAGRAM_PAGE}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:opacity-95"
+                        >
+                            <FaInstagram className="text-xl" />
+                            Instagram
+                        </a>
+                        <a
+                            href={getStoreWhatsAppHref()}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-[#20BD5A]"
+                        >
+                            <FaWhatsapp className="text-xl" />
+                            WhatsApp
+                        </a>
+                    </div>
+                </section>
             </div>
         </div>
     );

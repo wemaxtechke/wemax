@@ -3,12 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { fetchProductById, fetchProducts } from '../redux/slices/productSlice.js';
 import { addToCart } from '../redux/slices/cartSlice.js';
-import { FaShoppingCart, FaHeart, FaStar, FaShareAlt, FaCheckCircle, FaTruck, FaBox } from 'react-icons/fa';
+import { FaShoppingCart, FaHeart, FaStar, FaCheckCircle, FaTruck, FaBox, FaFacebook, FaWhatsapp, FaInstagram } from 'react-icons/fa';
 import { FaStarHalfStroke } from 'react-icons/fa6';
 import wemaxLogo from '../assets/wemax-logo.jpg';
 import api from '../utils/api.js';
 import SmartImage from '../components/SmartImage.jsx';
 import { Seo } from '../components/Seo.jsx';
+import { WEMAX_INSTAGRAM_PAGE } from '../constants/social.js';
 
 export default function ProductDetail() {
     const { id } = useParams();
@@ -154,26 +155,25 @@ export default function ProductDetail() {
         }
     };
 
-    const handleShare = async () => {
-        const url = window.location.href;
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: currentProduct.name,
-                    text: currentProduct.description,
-                    url: url,
-                });
-            } catch (error) {
-                // User cancelled or error occurred
-            }
-        } else {
-            // Fallback: copy to clipboard
-            try {
-                await navigator.clipboard.writeText(url);
-                showNotification('Link copied to clipboard!', 'success');
-            } catch (error) {
-                showNotification('Failed to copy link', 'error');
-            }
+    const openShareFacebook = (url) => {
+        window.open(
+            `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+            '_blank',
+            'noopener,noreferrer'
+        );
+    };
+
+    const openShareWhatsApp = (text) => {
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+    };
+
+    const shareProductInstagram = async (url) => {
+        try {
+            await navigator.clipboard.writeText(url);
+            showNotification('Link copied — paste it in your Instagram story or DM', 'success');
+            window.open(WEMAX_INSTAGRAM_PAGE, '_blank', 'noopener,noreferrer');
+        } catch {
+            showNotification('Could not copy link. Try sharing from the address bar.', 'error');
         }
     };
 
@@ -613,12 +613,56 @@ export default function ProductDetail() {
                             </p>
                         </div>
 
-                        {/* Save & Share row (desktop / laptop) */}
-                        <div className="hidden md:grid grid-cols-2 gap-3">
+                        {/* Share this product */}
+                        <div
+                            className={`rounded-xl border p-4 sm:p-5 ${
+                                theme === 'dark' ? 'border-gray-700 bg-gray-900/40' : 'border-gray-200 bg-white/60'
+                            }`}
+                        >
+                            <h3 className={`font-bold text-lg mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                Share this product
+                            </h3>
+                            <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                Send this listing to friends on Facebook or WhatsApp. For Instagram, we&apos;ll copy the link so you can paste it in a story or DM.
+                            </p>
+                            <div className="flex flex-wrap gap-2 sm:gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => openShareFacebook(productUrl)}
+                                    className="inline-flex flex-1 min-w-[8.5rem] items-center justify-center gap-2 rounded-lg bg-[#1877F2] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#166FE5] sm:flex-none"
+                                >
+                                    <FaFacebook className="text-lg" />
+                                    Facebook
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        openShareWhatsApp(
+                                            `Check out ${currentProduct.name} on WEMAX — ${productUrl}`
+                                        )
+                                    }
+                                    className="inline-flex flex-1 min-w-[8.5rem] items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#20BD5A] sm:flex-none"
+                                >
+                                    <FaWhatsapp className="text-lg" />
+                                    WhatsApp
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => shareProductInstagram(productUrl)}
+                                    className="inline-flex flex-1 min-w-[8.5rem] items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 sm:flex-none"
+                                >
+                                    <FaInstagram className="text-lg" />
+                                    Instagram
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Save (desktop / laptop) */}
+                        <div className="hidden md:block max-w-md">
                             <button
                                 onClick={handleWishlistToggle}
                                 disabled={wishlistLoading}
-                                className={`rounded-lg font-bold transition-colors flex items-center justify-center gap-2 py-3 ${
+                                className={`w-full rounded-lg font-bold transition-colors flex items-center justify-center gap-2 py-3 ${
                                     isInWishlist
                                         ? theme === 'dark'
                                             ? 'bg-red-900/30 text-red-400 hover:bg-red-900/40'
@@ -635,16 +679,6 @@ export default function ProductDetail() {
                                         <FaHeart className={isInWishlist ? 'fill-current' : ''} /> {isInWishlist ? 'Saved' : 'Save'}
                                     </>
                                 )}
-                            </button>
-                            <button
-                                onClick={handleShare}
-                                className={`py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 border ${
-                                    theme === 'dark' 
-                                        ? 'border-gray-700 text-gray-400 hover:bg-gray-800' 
-                                        : 'border-gray-300 text-gray-600 hover:bg-gray-100'
-                                }`}
-                            >
-                                <FaShareAlt /> Share Product
                             </button>
                         </div>
 
