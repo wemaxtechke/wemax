@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar.jsx';
 import TopPromoBanner from '../components/TopPromoBanner.jsx';
 import Footer from '../components/Footer.jsx';
+import StickySocialStrip from '../components/StickySocialStrip.jsx';
 import ChatWidget from '../components/ChatWidget.jsx';
 
 export default function MainLayout() {
@@ -19,10 +20,11 @@ export default function MainLayout() {
                 <TopPromoBanner />
                 <Navbar />
             </header>
-            <main className="flex-1 w-full">
+            <main className="flex-1 w-full pb-[calc(3.25rem+env(safe-area-inset-bottom,0px))]">
                 <Outlet />
             </main>
             <Footer />
+            <StickySocialStrip />
             <ChatWidget />
         </div>
     );

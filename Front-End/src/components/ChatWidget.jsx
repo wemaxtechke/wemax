@@ -162,9 +162,9 @@ export default function ChatWidget() {
             <button
                 onClick={() => setIsOpen(true)}
                 className={cn(
-                    'fixed z-40 rounded-full shadow-lg transition-all duration-300 hover:scale-105 active:scale-95',
+                    'fixed z-[50] rounded-full shadow-lg transition-all duration-300 hover:scale-105 active:scale-95',
                     'bg-blue-600 hover:bg-blue-700 text-white',
-                    'bottom-4 right-4 w-14 h-14 sm:bottom-6 sm:right-6 sm:w-16 sm:h-16',
+                    'bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] right-4 w-14 h-14 sm:bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:right-6 sm:w-16 sm:h-16',
                     'flex items-center justify-center'
                 )}
                 aria-label="Open chat"
@@ -175,7 +175,7 @@ export default function ChatWidget() {
             {/* Backdrop - mobile only, for closing */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 z-[39] bg-black/40 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none"
+                    className="fixed inset-0 z-[55] bg-black/40 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none"
                     aria-hidden
                     onClick={() => setIsOpen(false)}
                 />
@@ -185,7 +185,7 @@ export default function ChatWidget() {
             {isOpen && (
                 <div
                     className={cn(
-                        'fixed z-40 overflow-hidden flex flex-col',
+                        'fixed z-[56] overflow-hidden flex flex-col',
                         'bgClass border',
                         // Mobile: bottom sheet, full width, rounded top, safe area
                         'inset-x-0 bottom-0 rounded-t-2xl sm:rounded-t-none',

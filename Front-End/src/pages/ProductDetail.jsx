@@ -320,7 +320,7 @@ export default function ProductDetail() {
                 </script>
             </Seo>
             {/* Mobile bottom action bar */}
-            <div className="fixed inset-x-0 bottom-0 z-40 md:hidden">
+            <div className="fixed inset-x-0 bottom-[calc(3.25rem+env(safe-area-inset-bottom,0px))] z-[48] md:hidden">
                 <div className={`${theme === 'dark' ? 'bg-gray-900/95 border-t border-gray-800' : 'bg-white/95 border-t border-gray-200'} backdrop-blur px-4 py-3`}>
                     <div className="max-w-7xl mx-auto flex gap-3">
                         <button
@@ -372,7 +372,7 @@ export default function ProductDetail() {
                     backgroundSize: 'cover',
                 }}
             />
-            <div className={`relative z-10 w-full min-h-screen py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-8 pb-28 md:pb-16 ${theme === 'dark' ? 'bg-gray-950/35' : 'bg-white/45'} backdrop-blur-[3px]`}>
+            <div className={`relative z-10 w-full min-h-screen py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-8 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] md:pb-16 ${theme === 'dark' ? 'bg-gray-950/35' : 'bg-white/45'} backdrop-blur-[3px]`}>
             {/* Notification Toast */}
             {notification.show && (
                 <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
