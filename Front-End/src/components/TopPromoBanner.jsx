@@ -38,19 +38,27 @@ export default function TopPromoBanner() {
     const line = PROMO_LINES[index];
 
     return (
-        <div className="relative w-full overflow-hidden bg-[#FF9900] text-white shadow-[0_2px_12px_rgba(0,0,0,0.12)]">
+        <div
+            className="relative w-full overflow-hidden text-white shadow-[var(--shadow-md)]"
+            style={{
+                background: 'linear-gradient(100deg, var(--color-primary) 0%, var(--color-primary-dark) 55%, var(--color-primary-dark) 100%)',
+            }}
+        >
+            {/* Themed accent wedge (replaces fixed teal) */}
             <div
-                className="pointer-events-none absolute inset-y-0 right-0 w-[min(42%,220px)] bg-[#99D6D1] sm:w-[min(38%,260px)]"
+                className="pointer-events-none absolute inset-y-0 right-0 w-[min(42%,220px)] sm:w-[min(38%,260px)]"
                 style={{
                     clipPath: 'polygon(32% 0, 100% 0, 100% 100%, 0 100%)',
+                    background:
+                        'linear-gradient(145deg, color-mix(in srgb, var(--color-surface) 28%, transparent), color-mix(in srgb, var(--color-text-tertiary) 22%, transparent))',
                 }}
                 aria-hidden
             />
 
             <div className="relative z-10 mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2 sm:gap-x-4 sm:px-4 sm:py-2.5 lg:px-8">
-                {/* Brand */}
+                {/* Brand — high contrast on primary gradient */}
                 <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-                    <span className="text-sm font-black uppercase tracking-wide sm:text-base">WEMAX</span>
+                    <span className="text-sm font-black uppercase tracking-wide sm:text-base text-white drop-shadow-sm">WEMAX</span>
                     <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white/90 bg-white/10 sm:h-7 sm:w-7">
                         <FaStar className="text-[11px] text-white sm:text-xs" />
                     </span>
@@ -77,10 +85,20 @@ export default function TopPromoBanner() {
                     </div>
                 </div>
 
-                {/* Discount pill */}
-                <div className="flex shrink-0 items-center rounded-full bg-white px-2.5 py-1 shadow-sm sm:px-3 sm:py-1.5">
-                    <span className="text-[9px] font-bold uppercase text-[#FF9900] sm:text-[10px]">Up to</span>
-                    <span className="ml-1 text-xs font-black text-[#FF9900] sm:text-sm">60% OFF</span>
+                {/* Discount pill — surface + primary text */}
+                <div className="flex shrink-0 items-center rounded-full bg-[var(--color-surface)] px-2.5 py-1 shadow-[var(--shadow-sm)] sm:px-3 sm:py-1.5">
+                    <span
+                        className="text-[9px] font-bold uppercase sm:text-[10px]"
+                        style={{ color: 'var(--color-primary)' }}
+                    >
+                        Up to
+                    </span>
+                    <span
+                        className="ml-1 text-xs font-black sm:text-sm"
+                        style={{ color: 'var(--color-primary)' }}
+                    >
+                        60% OFF
+                    </span>
                 </div>
 
                 {/* Contact — hide on very small screens */}
@@ -90,7 +108,7 @@ export default function TopPromoBanner() {
                         href={whatsAppHref(phoneDisplay)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-bold underline decoration-white/70 underline-offset-2 hover:decoration-white"
+                        className="font-bold text-white underline decoration-white/70 underline-offset-2 hover:decoration-white"
                     >
                         {phoneDisplay}
                     </a>{' '}
@@ -110,7 +128,7 @@ export default function TopPromoBanner() {
                 <div className="ml-auto flex shrink-0 items-center sm:ml-0">
                     <Link
                         to="/products"
-                        className="promo-cta-bounce inline-block bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide !text-[#FF6600] shadow-md sm:px-4 sm:py-2 sm:text-xs"
+                        className="promo-cta-bounce inline-block bg-[var(--color-surface)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide shadow-[var(--shadow-md)] sm:px-4 sm:py-2 sm:text-xs !text-[var(--color-primary)]"
                     >
                         SHOP NOW
                     </Link>
