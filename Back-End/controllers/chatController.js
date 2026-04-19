@@ -1,18 +1,31 @@
-import Chat from '../models/Chat.js';
-import Message from '../models/Message.js';
-import User from '../models/User.js';
+import { prisma } from '../lib/prisma.js';
+import { parseIntId } from '../lib/parseId.js';
+import { formatChat, formatMessage } from '../lib/apiFormatters.js';
+import { bumpChatAfterMessage } from '../services/chatThread.js';
+
+const chatInclude = {
+    user: { select: { id: true, name: true, email: true } },
+};
+
+const messageInclude = {
+    sender: { select: { id: true, name: true } },
+    attachments: true,
+};
 
 export const getChats = async (req, res) => {
     try {
         if (req.user.role === 'admin') {
-            const chats = await Chat.find()
-                .populate('user', 'name email')
-                .sort('-lastMessageAt');
-            res.json(chats);
+            const chats = await prisma.chat.findMany({
+                include: chatInclude,
+                orderBy: { lastMessageAt: 'desc' },
+            });
+            res.json(chats.map((c) => formatChat(c)));
         } else {
-            const chat = await Chat.findOne({ user: req.user._id })
-                .populate('user', 'name email');
-            res.json(chat ? [chat] : []);
+            const chat = await prisma.chat.findUnique({
+                where: { userId: req.user.id },
+                include: chatInclude,
+            });
+            res.json(chat ? [formatChat(chat)] : []);
         }
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -21,14 +34,21 @@ export const getChats = async (req, res) => {
 
 export const getMyChat = async (req, res) => {
     try {
-        let chat = await Chat.findOne({ user: req.user._id });
+        let chat = await prisma.chat.findUnique({
+            where: { userId: req.user.id },
+        });
 
         if (!chat) {
-            chat = await Chat.create({ user: req.user._id });
+            chat = await prisma.chat.create({
+                data: { userId: req.user.id },
+            });
         }
 
-        const populatedChat = await Chat.findById(chat._id).populate('user', 'name email');
-        res.json(populatedChat);
+        const populatedChat = await prisma.chat.findUnique({
+            where: { id: chat.id },
+            include: chatInclude,
+        });
+        res.json(formatChat(populatedChat));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -36,31 +56,39 @@ export const getMyChat = async (req, res) => {
 
 export const getMessages = async (req, res) => {
     try {
-        const { chatId } = req.params;
-        const chat = await Chat.findById(chatId);
+        const chatId = parseIntId(req.params.chatId);
+        if (!chatId) {
+            return res.status(404).json({ message: 'Chat not found' });
+        }
 
+        const chat = await prisma.chat.findUnique({ where: { id: chatId } });
         if (!chat) {
             return res.status(404).json({ message: 'Chat not found' });
         }
 
-        // Check access
-        if (req.user.role === 'customer' && chat.user.toString() !== req.user._id.toString()) {
+        if (req.user.role === 'customer' && chat.userId !== req.user.id) {
             return res.status(403).json({ message: 'Access denied' });
         }
 
-        const messages = await Message.find({ chat: chatId })
-            .populate('sender', 'name')
-            .sort('createdAt');
+        const messages = await prisma.message.findMany({
+            where: { chatId },
+            include: messageInclude,
+            orderBy: { createdAt: 'asc' },
+        });
 
-        // Mark messages as read
         if (req.user.role === 'admin') {
-            chat.unreadForAdmin = 0;
+            await prisma.chat.update({
+                where: { id: chatId },
+                data: { unreadForAdmin: 0 },
+            });
         } else {
-            chat.unreadForUser = 0;
+            await prisma.chat.update({
+                where: { id: chatId },
+                data: { unreadForUser: 0 },
+            });
         }
-        await chat.save();
 
-        res.json(messages);
+        res.json(messages.map((m) => formatMessage(m)));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -68,34 +96,43 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
     try {
-        const { chatId, content } = req.body;
+        let { chatId, content } = req.body;
+        chatId = chatId != null ? parseIntId(String(chatId)) : null;
 
-        let chat = await Chat.findById(chatId);
+        let chat = chatId ? await prisma.chat.findUnique({ where: { id: chatId } }) : null;
 
         if (!chat) {
-            // For customers, create chat if it doesn't exist
             if (req.user.role === 'customer') {
-                chat = await Chat.create({ user: req.user._id });
+                chat = await prisma.chat.create({
+                    data: { userId: req.user.id },
+                });
             } else {
                 return res.status(404).json({ message: 'Chat not found' });
             }
         }
 
-        // Check access
-        if (req.user.role === 'customer' && chat.user.toString() !== req.user._id.toString()) {
+        if (req.user.role === 'customer' && chat.userId !== req.user.id) {
             return res.status(403).json({ message: 'Access denied' });
         }
 
-        const message = await Message.create({
-            chat: chat._id,
-            senderRole: req.user.role,
-            sender: req.user._id,
-            content,
+        const message = await prisma.message.create({
+            data: {
+                chatId: chat.id,
+                senderRole: req.user.role,
+                senderId: req.user.id,
+                content,
+            },
+            include: messageInclude,
         });
 
-        const populatedMessage = await Message.findById(message._id).populate('sender', 'name');
+        await bumpChatAfterMessage(chat.id, req.user.role, message.createdAt);
 
-        res.status(201).json(populatedMessage);
+        const populatedMessage = await prisma.message.findUnique({
+            where: { id: message.id },
+            include: messageInclude,
+        });
+
+        res.status(201).json(formatMessage(populatedMessage));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

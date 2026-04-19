@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import { prisma } from '../lib/prisma.js';
+import { formatUserPublic } from '../lib/apiFormatters.js';
 
 export const requireAuth = async (req, res, next) => {
     try {
@@ -10,13 +11,19 @@ export const requireAuth = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.userId).select('-passwordHash');
+        const userId = Number(decoded.userId);
+        if (!Number.isInteger(userId) || userId < 1) {
+            return res.status(401).json({ message: 'Invalid token' });
+        }
+
+        const user = await prisma.user.findUnique({ where: { id: userId } });
 
         if (!user || !user.isActive) {
             return res.status(401).json({ message: 'Invalid or inactive user' });
         }
 
-        req.user = user;
+        req.user = formatUserPublic(user);
+        req.user.id = user.id;
         next();
     } catch (error) {
         return res.status(401).json({ message: 'Invalid token' });

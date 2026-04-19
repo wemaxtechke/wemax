@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import { prisma } from '../lib/prisma.js';
 
 export const initializeSocket = (httpServer) => {
     const io = new Server(httpServer, {
@@ -10,23 +10,27 @@ export const initializeSocket = (httpServer) => {
         },
     });
 
-    // Socket authentication middleware
     io.use(async (socket, next) => {
         try {
             const token = socket.handshake.auth.token || socket.handshake.headers.cookie?.split('token=')[1]?.split(';')[0];
-            
+
             if (!token) {
                 return next(new Error('Authentication error'));
             }
 
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            const user = await User.findById(decoded.userId).select('-passwordHash');
+            const userId = Number(decoded.userId);
+            if (!Number.isInteger(userId) || userId < 1) {
+                return next(new Error('Authentication error'));
+            }
+
+            const user = await prisma.user.findUnique({ where: { id: userId } });
 
             if (!user) {
                 return next(new Error('User not found'));
             }
 
-            socket.userId = user._id.toString();
+            socket.userId = String(user.id);
             socket.userRole = user.role;
             next();
         } catch (error) {
@@ -37,10 +41,8 @@ export const initializeSocket = (httpServer) => {
     io.on('connection', (socket) => {
         console.log(`User connected: ${socket.userId}`);
 
-        // Join user-specific room
         socket.join(`user_${socket.userId}`);
 
-        // Admin joins admin room
         if (socket.userRole === 'admin') {
             socket.join('admin');
         }

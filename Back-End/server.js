@@ -4,12 +4,10 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import http from 'http';
-
-// Initialize Cloudinary after loading environment
-import { initializeCloudinary } from './config/cloudinary.js';
-initializeCloudinary();
+import path from 'path';
 
 import { connectDB } from './config/db.js';
+import { ensureUploadsDir, getUploadsRoot } from './config/storage.js';
 import passport from './config/passport.js';
 import { initializeSocket } from './config/socket.js';
 import { setupChatSocket } from './sockets/chatSocket.js';
@@ -46,6 +44,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(passport.initialize());
+
+const uploadsAbsolute = path.resolve(getUploadsRoot());
+app.use('/uploads', express.static(uploadsAbsolute, { maxAge: '7d', fallthrough: true }));
 
 // SEO-related constants
 // Prefer explicit CLIENT_URL, but default to planned production domain
@@ -127,10 +128,13 @@ app.use((req, res) => {
 // Database connection and server start
 const PORT = process.env.PORT || 5000;
 
-connectDB().then(() => {
-    server.listen(PORT, () => {
-        console.log(`🚀 Server is running on port ${PORT}`);
+connectDB()
+    .then(() => ensureUploadsDir())
+    .then(() => {
+        server.listen(PORT, () => {
+            console.log(`🚀 Server is running on port ${PORT}`);
+            console.log(`📁 Local uploads: ${uploadsAbsolute} → /uploads/...`);
+        });
     });
-});
 
 export { io };

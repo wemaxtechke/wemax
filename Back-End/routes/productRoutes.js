@@ -1,7 +1,7 @@
 import express from 'express';
 import * as productController from '../controllers/productController.js';
 import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js';
-import { upload } from '../config/cloudinary.js';
+import { upload } from '../config/storage.js';
 
 const router = express.Router();
 

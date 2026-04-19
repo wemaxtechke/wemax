@@ -85,7 +85,7 @@ export async function sendOrderConfirmationSMS(order, quotationLink) {
 
     const fullName = order.shippingAddress?.name || order.customer?.name;
     const customerName = getFirstName(fullName);
-    const orderId = String(order._id).slice(-8).toUpperCase();
+    const orderId = String(order._id ?? order.id).slice(-8).toUpperCase();
     const paybillNumber = process.env.BANK_PAYBILL_NUMBER || '123456';
     const accountNumber = process.env.BANK_ACCOUNT_NUMBER || 'WEMAX001';
 
@@ -128,7 +128,7 @@ export async function sendOrderProcessingSMS(order, trackingLink) {
 
     const fullName = order.shippingAddress?.name || order.customer?.name;
     const customerName = getFirstName(fullName);
-    const orderId = String(order._id).slice(-8).toUpperCase();
+    const orderId = String(order._id ?? order.id).slice(-8).toUpperCase();
 
     const message = `Hello ${customerName},\n\nYour Wemax Tech order (${orderId}) has been successfully confirmed and is now being processed.\n\nYou can track your parcel using the link below:\n${trackingLink}\n\nThank you for choosing Wemax Tech - Smart Tech. Smart Living.`;
 

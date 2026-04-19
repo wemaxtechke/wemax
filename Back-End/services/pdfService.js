@@ -57,7 +57,8 @@ export async function generateQuotationPDF(order) {
             doc.text(`Website: ${companyWebsite}`, 400, headerStartY + 30, { align: 'right' });
 
             // Quotation details
-            const quotationNumber = `QT-${String(order._id).slice(-8).toUpperCase()}`;
+            const orderKey = order._id ?? order.id;
+            const quotationNumber = `QT-${String(orderKey).slice(-8).toUpperCase()}`;
             const dateIssued = new Date(order.createdAt).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',

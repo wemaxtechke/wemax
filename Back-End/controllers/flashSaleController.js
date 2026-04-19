@@ -1,23 +1,31 @@
-import FlashSaleSettings from '../models/FlashSaleSettings.js';
+import { prisma } from '../lib/prisma.js';
+import { formatFlashSale } from '../lib/apiFormatters.js';
+
+async function getOrCreateSettings() {
+    let settings = await prisma.flashSaleSettings.findFirst();
+    if (!settings) {
+        settings = await prisma.flashSaleSettings.create({
+            data: { hours: 1, minutes: 45, seconds: 30, isActive: true },
+        });
+    }
+    return settings;
+}
 
 export const getFlashSaleSettings = async (req, res) => {
     try {
-        const settings = await FlashSaleSettings.getSettings();
-        res.json(settings);
+        const settings = await getOrCreateSettings();
+        res.json(formatFlashSale(settings));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// Public: get remaining time based on last update (admin "reset")
 export const getFlashSaleRemaining = async (req, res) => {
     try {
-        const settings = await FlashSaleSettings.getSettings();
+        const settings = await getOrCreateSettings();
 
         const durationSeconds =
-            (settings.hours || 0) * 3600 +
-            (settings.minutes || 0) * 60 +
-            (settings.seconds || 0);
+            (settings.hours || 0) * 3600 + (settings.minutes || 0) * 60 + (settings.seconds || 0);
 
         let remainingSeconds = 0;
 
@@ -46,23 +54,29 @@ export const updateFlashSaleSettings = async (req, res) => {
     try {
         const { hours, minutes, seconds, isActive } = req.body;
 
-        let settings = await FlashSaleSettings.findOne();
+        let settings = await prisma.flashSaleSettings.findFirst();
         if (!settings) {
-            settings = await FlashSaleSettings.create({
-                hours: hours || 1,
-                minutes: minutes || 45,
-                seconds: seconds || 30,
-                isActive: isActive !== undefined ? isActive : true,
+            settings = await prisma.flashSaleSettings.create({
+                data: {
+                    hours: hours != null ? Math.max(0, Math.min(23, Number(hours))) : 1,
+                    minutes: minutes != null ? Math.max(0, Math.min(59, Number(minutes))) : 45,
+                    seconds: seconds != null ? Math.max(0, Math.min(59, Number(seconds))) : 30,
+                    isActive: isActive !== undefined ? Boolean(isActive) : true,
+                },
             });
         } else {
-            if (hours !== undefined) settings.hours = Math.max(0, Math.min(23, Number(hours)));
-            if (minutes !== undefined) settings.minutes = Math.max(0, Math.min(59, Number(minutes)));
-            if (seconds !== undefined) settings.seconds = Math.max(0, Math.min(59, Number(seconds)));
-            if (isActive !== undefined) settings.isActive = Boolean(isActive);
-            await settings.save();
+            const data = {};
+            if (hours !== undefined) data.hours = Math.max(0, Math.min(23, Number(hours)));
+            if (minutes !== undefined) data.minutes = Math.max(0, Math.min(59, Number(minutes)));
+            if (seconds !== undefined) data.seconds = Math.max(0, Math.min(59, Number(seconds)));
+            if (isActive !== undefined) data.isActive = Boolean(isActive);
+            settings = await prisma.flashSaleSettings.update({
+                where: { id: settings.id },
+                data,
+            });
         }
 
-        res.json(settings);
+        res.json(formatFlashSale(settings));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

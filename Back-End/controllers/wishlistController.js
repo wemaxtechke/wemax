@@ -1,10 +1,14 @@
-import User from '../models/User.js';
-import Product from '../models/Product.js';
+import { prisma } from '../lib/prisma.js';
+import { parseIntId } from '../lib/parseId.js';
+import { formatProduct, productDetailInclude } from '../lib/apiFormatters.js';
 
 export const getWishlist = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id).populate('wishlist');
-        res.json(user.wishlist || []);
+        const rows = await prisma.wishlistItem.findMany({
+            where: { userId: req.user.id },
+            include: { product: { include: productDetailInclude } },
+        });
+        res.json(rows.map((r) => formatProduct(r.product)));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -12,27 +16,32 @@ export const getWishlist = async (req, res) => {
 
 export const addToWishlist = async (req, res) => {
     try {
-        const { productId } = req.body;
-        const user = await User.findById(req.user._id);
-
-        if (!user.wishlist) {
-            user.wishlist = [];
+        const productId = parseIntId(req.body.productId);
+        if (!productId) {
+            return res.status(400).json({ message: 'Invalid product ID' });
         }
 
-        if (user.wishlist.includes(productId)) {
-            return res.status(400).json({ message: 'Product already in wishlist' });
-        }
-
-        const product = await Product.findById(productId);
+        const product = await prisma.product.findUnique({ where: { id: productId } });
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        user.wishlist.push(productId);
-        await user.save();
+        try {
+            await prisma.wishlistItem.create({
+                data: { userId: req.user.id, productId },
+            });
+        } catch (e) {
+            if (e.code === 'P2002') {
+                return res.status(400).json({ message: 'Product already in wishlist' });
+            }
+            throw e;
+        }
 
-        const populatedUser = await User.findById(user._id).populate('wishlist');
-        res.json(populatedUser.wishlist);
+        const rows = await prisma.wishlistItem.findMany({
+            where: { userId: req.user.id },
+            include: { product: { include: productDetailInclude } },
+        });
+        res.json(rows.map((r) => formatProduct(r.product)));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -40,16 +49,20 @@ export const addToWishlist = async (req, res) => {
 
 export const removeFromWishlist = async (req, res) => {
     try {
-        const { productId } = req.params;
-        const user = await User.findById(req.user._id);
+        const productId = parseIntId(req.params.productId);
+        if (!productId) {
+            return res.status(400).json({ message: 'Invalid product ID' });
+        }
 
-        user.wishlist = user.wishlist.filter(
-            id => id.toString() !== productId
-        );
-        await user.save();
+        await prisma.wishlistItem.deleteMany({
+            where: { userId: req.user.id, productId },
+        });
 
-        const populatedUser = await User.findById(user._id).populate('wishlist');
-        res.json(populatedUser.wishlist);
+        const rows = await prisma.wishlistItem.findMany({
+            where: { userId: req.user.id },
+            include: { product: { include: productDetailInclude } },
+        });
+        res.json(rows.map((r) => formatProduct(r.product)));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

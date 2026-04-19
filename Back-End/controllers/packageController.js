@@ -1,6 +1,7 @@
-import Package from '../models/Package.js';
-import { uploadToCloudinary } from '../config/cloudinary.js';
-import cloudinary from '../config/cloudinary.js';
+import { prisma } from '../lib/prisma.js';
+import { parseIntId } from '../lib/parseId.js';
+import { formatPackage, packageDetailInclude, parseSort } from '../lib/apiFormatters.js';
+import { saveUploadBuffer, deleteStoredFile } from '../config/storage.js';
 
 function parsePackageBody(body) {
     let items = [];
@@ -25,30 +26,35 @@ export const getPackages = async (req, res) => {
     try {
         const { search, category, tag, sort = '-createdAt', page = 1, limit = 20 } = req.query;
 
-        const query = {};
+        const where = { AND: [] };
 
         if (search) {
-            query.$or = [
-                { name: { $regex: search, $options: 'i' } },
-                { description: { $regex: search, $options: 'i' } },
-            ];
+            const q = String(search);
+            where.AND.push({
+                OR: [{ name: { contains: q } }, { description: { contains: q } }],
+            });
         }
 
-        if (category) query.category = category;
-        if (tag) query.tag = tag;
+        if (category) where.AND.push({ category });
+        if (tag) where.AND.push({ tag });
 
+        const whereFinal = where.AND.length ? where : {};
         const skip = (Number(page) - 1) * Number(limit);
+        const orderBy = parseSort(sort);
 
-        const packages = await Package.find(query)
-            .populate('items.product')
-            .sort(sort)
-            .skip(skip)
-            .limit(Number(limit));
-
-        const total = await Package.countDocuments(query);
+        const [rows, total] = await Promise.all([
+            prisma.package.findMany({
+                where: whereFinal,
+                orderBy,
+                skip,
+                take: Number(limit),
+                include: packageDetailInclude,
+            }),
+            prisma.package.count({ where: whereFinal }),
+        ]);
 
         res.json({
-            packages,
+            packages: rows.map(formatPackage),
             totalPages: Math.ceil(total / Number(limit)),
             currentPage: Number(page),
             total,
@@ -60,11 +66,19 @@ export const getPackages = async (req, res) => {
 
 export const getPackageById = async (req, res) => {
     try {
-        const packageDoc = await Package.findById(req.params.id).populate('items.product');
+        const id = parseIntId(req.params.id);
+        if (!id) {
+            return res.status(400).json({ message: 'Invalid package ID' });
+        }
+
+        const packageDoc = await prisma.package.findUnique({
+            where: { id },
+            include: packageDetailInclude,
+        });
         if (!packageDoc) {
             return res.status(404).json({ message: 'Package not found' });
         }
-        res.json(packageDoc);
+        res.json(formatPackage(packageDoc));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -73,26 +87,49 @@ export const getPackageById = async (req, res) => {
 export const createPackage = async (req, res) => {
     try {
         const images = [];
-        
-        // Handle file uploads
+
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
                 try {
-                    console.log(`Uploading file: ${file.originalname} (${file.size} bytes) to Cloudinary...`);
-                    const result = await uploadToCloudinary(file.buffer, 'wemax/packages');
-                    console.log(`Successfully uploaded: ${file.originalname} -> ${result.secure_url}`);
+                    const result = await saveUploadBuffer(file.buffer, 'wemax/packages', file.originalname);
                     images.push({ url: result.secure_url, publicId: result.public_id });
                 } catch (err) {
-                    console.error(`Cloudinary upload FAILED for ${file.originalname}:`, err);
                     return res.status(400).json({ message: `Image upload failed: ${err.message}` });
                 }
             }
         }
-        
+
         const data = parsePackageBody(req.body);
-        const packageDoc = await Package.create({ ...data, images });
-        const populatedPackage = await Package.findById(packageDoc._id).populate('items.product');
-        res.status(201).json(populatedPackage);
+
+        const packageDoc = await prisma.package.create({
+            data: {
+                name: data.name,
+                description: data.description,
+                totalPrice: data.totalPrice,
+                oldTotalPrice: data.oldTotalPrice,
+                freeShipping: data.freeShipping,
+                category: data.category,
+                tag: data.tag,
+                items: {
+                    create: data.items
+                        .filter((it) => it && it.product)
+                        .map((it) => ({
+                            productId: Number(it.product),
+                            quantity: Number(it.quantity) || 1,
+                        })),
+                },
+                images: {
+                    create: images.map((im, i) => ({
+                        url: im.url,
+                        publicId: im.publicId,
+                        sortOrder: i,
+                    })),
+                },
+            },
+            include: packageDetailInclude,
+        });
+
+        res.status(201).json(formatPackage(packageDoc));
     } catch (error) {
         console.error('Create package error:', error);
         res.status(500).json({ message: error.message });
@@ -101,35 +138,69 @@ export const createPackage = async (req, res) => {
 
 export const updatePackage = async (req, res) => {
     try {
-        const packageDoc = await Package.findById(req.params.id);
+        const id = parseIntId(req.params.id);
+        if (!id) {
+            return res.status(400).json({ message: 'Invalid package ID' });
+        }
+
+        const packageDoc = await prisma.package.findUnique({
+            where: { id },
+            include: { images: true },
+        });
         if (!packageDoc) {
             return res.status(404).json({ message: 'Package not found' });
         }
-        
-        const images = [...(packageDoc.images || [])];
-        
-        // Handle file uploads
+
+        const newUploads = [];
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
                 try {
-                    console.log(`Uploading file: ${file.originalname} (${file.size} bytes) to Cloudinary...`);
-                    const result = await uploadToCloudinary(file.buffer, 'wemax/packages');
-                    console.log(`Successfully uploaded: ${file.originalname} -> ${result.secure_url}`);
-                    images.push({ url: result.secure_url, publicId: result.public_id });
+                    const result = await saveUploadBuffer(file.buffer, 'wemax/packages', file.originalname);
+                    newUploads.push({ url: result.secure_url, publicId: result.public_id });
                 } catch (err) {
-                    console.error(`Cloudinary upload FAILED for ${file.originalname}:`, err);
                     return res.status(400).json({ message: `Image upload failed: ${err.message}` });
                 }
             }
         }
-        
+
         const data = parsePackageBody(req.body);
-        const updatedPackage = await Package.findByIdAndUpdate(
-            req.params.id,
-            { ...data, images },
-            { new: true, runValidators: true }
-        ).populate('items.product');
-        res.json(updatedPackage);
+        const mergedImages = [...(packageDoc.images || []).map((i) => ({ url: i.url, publicId: i.publicId })), ...newUploads];
+
+        await prisma.$transaction([
+            prisma.packageItem.deleteMany({ where: { packageId: id } }),
+            prisma.packageImage.deleteMany({ where: { packageId: id } }),
+        ]);
+
+        const updated = await prisma.package.update({
+            where: { id },
+            data: {
+                name: data.name,
+                description: data.description,
+                totalPrice: data.totalPrice,
+                oldTotalPrice: data.oldTotalPrice,
+                freeShipping: data.freeShipping,
+                category: data.category,
+                tag: data.tag,
+                items: {
+                    create: data.items
+                        .filter((it) => it && it.product)
+                        .map((it) => ({
+                            productId: Number(it.product),
+                            quantity: Number(it.quantity) || 1,
+                        })),
+                },
+                images: {
+                    create: mergedImages.map((im, i) => ({
+                        url: im.url,
+                        publicId: im.publicId || null,
+                        sortOrder: i,
+                    })),
+                },
+            },
+            include: packageDetailInclude,
+        });
+
+        res.json(formatPackage(updated));
     } catch (error) {
         console.error('Update package error:', error);
         res.status(500).json({ message: error.message });
@@ -138,21 +209,28 @@ export const updatePackage = async (req, res) => {
 
 export const deletePackage = async (req, res) => {
     try {
-        const packageDoc = await Package.findById(req.params.id);
+        const id = parseIntId(req.params.id);
+        if (!id) {
+            return res.status(400).json({ message: 'Invalid package ID' });
+        }
+
+        const packageDoc = await prisma.package.findUnique({
+            where: { id },
+            include: { images: true },
+        });
         if (!packageDoc) {
             return res.status(404).json({ message: 'Package not found' });
         }
 
-        // Delete images from Cloudinary
         for (const image of packageDoc.images || []) {
             if (image.publicId) {
                 try {
-                    await cloudinary.uploader.destroy(image.publicId);
+                    await deleteStoredFile(image.publicId);
                 } catch (_) {}
             }
         }
 
-        await Package.findByIdAndDelete(req.params.id);
+        await prisma.package.delete({ where: { id } });
         res.json({ message: 'Package deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });

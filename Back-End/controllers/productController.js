@@ -1,7 +1,7 @@
-import mongoose from 'mongoose';
-import Product from '../models/Product.js';
-import { uploadToCloudinary } from '../config/cloudinary.js';
-import cloudinary from '../config/cloudinary.js';
+import { prisma } from '../lib/prisma.js';
+import { parseIntId } from '../lib/parseId.js';
+import { formatProduct, parseSort, productDetailInclude } from '../lib/apiFormatters.js';
+import { saveUploadBuffer, deleteStoredFile } from '../config/storage.js';
 
 export const getProducts = async (req, res) => {
     try {
@@ -20,39 +20,52 @@ export const getProducts = async (req, res) => {
             createdByEmail,
         } = req.query;
 
-        const query = {};
+        const where = { AND: [] };
 
         if (search) {
-            query.$or = [
-                { name: { $regex: search, $options: 'i' } },
-                { description: { $regex: search, $options: 'i' } },
-                { brand: { $regex: search, $options: 'i' } },
-            ];
+            const q = String(search);
+            where.AND.push({
+                OR: [
+                    { name: { contains: q } },
+                    { description: { contains: q } },
+                    { brand: { contains: q } },
+                ],
+            });
         }
 
-        if (category) query.category = category;
-        if (subCategory) query.subCategory = subCategory;
-        if (brand) query.brand = { $regex: new RegExp(`^${String(brand).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') };
-        if (minPrice || maxPrice) {
-            query.newPrice = {};
-            if (minPrice) query.newPrice.$gte = Number(minPrice);
-            if (maxPrice) query.newPrice.$lte = Number(maxPrice);
+        if (category) where.AND.push({ category });
+        if (subCategory) where.AND.push({ subCategory });
+        if (brand) {
+            where.AND.push({ brand: String(brand) });
         }
-        if (flashDeal === 'true') query.isFlashDeal = true;
-        if (freeShipping === 'true') query.freeShipping = true;
-        if (createdByEmail) query.createdByEmail = createdByEmail;
+        if (minPrice || maxPrice) {
+            const np = {};
+            if (minPrice) np.gte = Number(minPrice);
+            if (maxPrice) np.lte = Number(maxPrice);
+            where.AND.push({ newPrice: np });
+        }
+        if (flashDeal === 'true') where.AND.push({ isFlashDeal: true });
+        if (freeShipping === 'true') where.AND.push({ freeShipping: true });
+        if (createdByEmail) where.AND.push({ createdByEmail });
+
+        const whereFinal = where.AND.length ? where : {};
 
         const skip = (Number(page) - 1) * Number(limit);
+        const orderBy = parseSort(sort);
 
-        const products = await Product.find(query)
-            .sort(sort)
-            .skip(skip)
-            .limit(Number(limit));
-
-        const total = await Product.countDocuments(query);
+        const [rows, total] = await Promise.all([
+            prisma.product.findMany({
+                where: whereFinal,
+                orderBy,
+                skip,
+                take: Number(limit),
+                include: productDetailInclude,
+            }),
+            prisma.product.count({ where: whereFinal }),
+        ]);
 
         res.json({
-            products,
+            products: rows.map(formatProduct),
             totalPages: Math.ceil(total / Number(limit)),
             currentPage: Number(page),
             total,
@@ -64,21 +77,35 @@ export const getProducts = async (req, res) => {
 
 export const getProductById = async (req, res) => {
     try {
-        // Validate MongoDB ObjectId format
-        if (!req.params.id || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+        const id = parseIntId(req.params.id);
+        if (!id) {
             return res.status(400).json({ message: 'Invalid product ID' });
         }
 
-        const product = await Product.findById(req.params.id);
+        const product = await prisma.product.findUnique({
+            where: { id },
+            include: productDetailInclude,
+        });
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
-        res.json(product);
+        res.json(formatProduct(product));
     } catch (error) {
         console.error('Error fetching product by ID:', error);
         res.status(500).json({ message: error.message });
     }
 };
+
+function parseLocationShipping(body) {
+    const raw = body.locationShipping;
+    if (raw === undefined || raw === '') return undefined;
+    try {
+        const v = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        return v && typeof v === 'object' && !Array.isArray(v) ? v : undefined;
+    } catch {
+        return undefined;
+    }
+}
 
 function parseProductBody(body) {
     const specRaw = body.specifications;
@@ -101,23 +128,23 @@ function parseProductBody(body) {
         isFeatured: body.isFeatured === 'true' || body.isFeatured === true,
         isFlashDeal: body.isFlashDeal === 'true' || body.isFlashDeal === true,
         specifications: Array.isArray(specifications) ? specifications : [],
+        locationShipping: parseLocationShipping(body),
     };
 }
 
 export const createProduct = async (req, res) => {
     try {
         const images = [];
-        
-        // Handle file uploads
+
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
                 try {
-                    console.log(`Uploading file: ${file.originalname} (${file.size} bytes) to Cloudinary...`);
-                    const result = await uploadToCloudinary(file.buffer, 'wemax/products');
-                    console.log(`Successfully uploaded: ${file.originalname} -> ${result.secure_url}`);
+                    console.log(`Saving file: ${file.originalname} (${file.size} bytes) locally...`);
+                    const result = await saveUploadBuffer(file.buffer, 'wemax/products', file.originalname);
+                    console.log(`Successfully saved: ${file.originalname} -> ${result.secure_url}`);
                     images.push({ url: result.secure_url, publicId: result.public_id });
                 } catch (err) {
-                    console.error(`Cloudinary upload FAILED for ${file.originalname}:`, err);
+                    console.error(`Image upload FAILED for ${file.originalname}:`, err);
                     return res.status(400).json({ message: `Image upload failed: ${err.message}` });
                 }
             }
@@ -125,14 +152,40 @@ export const createProduct = async (req, res) => {
 
         const data = parseProductBody(req.body);
         const creator = req.user || null;
-        const product = await Product.create({
-            ...data,
-            images,
-            createdBy: creator?._id,
-            createdByEmail: creator?.email || undefined,
+
+        const product = await prisma.product.create({
+            data: {
+                name: data.name,
+                description: data.description,
+                category: data.category,
+                subCategory: data.subCategory,
+                brand: data.brand,
+                newPrice: data.newPrice,
+                oldPrice: data.oldPrice,
+                freeShipping: data.freeShipping,
+                stock: data.stock,
+                isFeatured: data.isFeatured,
+                isFlashDeal: data.isFlashDeal,
+                locationShipping: data.locationShipping ?? undefined,
+                createdById: creator?.id,
+                createdByEmail: creator?.email || undefined,
+                images: {
+                    create: images.map((im, i) => ({
+                        url: im.url,
+                        publicId: im.publicId,
+                        sortOrder: i,
+                    })),
+                },
+                specifications: {
+                    create: data.specifications
+                        .filter((s) => s && s.key)
+                        .map((s) => ({ key: s.key, value: s.value || '' })),
+                },
+            },
+            include: productDetailInclude,
         });
 
-        res.status(201).json(product);
+        res.status(201).json(formatProduct(product));
     } catch (error) {
         console.error('Create product error:', error);
         res.status(500).json({ message: error.message });
@@ -141,36 +194,71 @@ export const createProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
-        if (!product) {
+        const id = parseIntId(req.params.id);
+        if (!id) {
+            return res.status(400).json({ message: 'Invalid product ID' });
+        }
+
+        const existing = await prisma.product.findUnique({
+            where: { id },
+            include: { images: true },
+        });
+        if (!existing) {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        const images = [...(product.images || [])];
-        
-        // Handle file uploads
+        const newUploads = [];
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
                 try {
-                    console.log(`Uploading file: ${file.originalname} (${file.size} bytes) to Cloudinary...`);
-                    const result = await uploadToCloudinary(file.buffer, 'wemax/products');
-                    console.log(`Successfully uploaded: ${file.originalname} -> ${result.secure_url}`);
-                    images.push({ url: result.secure_url, publicId: result.public_id });
+                    const result = await saveUploadBuffer(file.buffer, 'wemax/products', file.originalname);
+                    newUploads.push({ url: result.secure_url, publicId: result.public_id });
                 } catch (err) {
-                    console.error(`Cloudinary upload FAILED for ${file.originalname}:`, err);
                     return res.status(400).json({ message: `Image upload failed: ${err.message}` });
                 }
             }
         }
-        
-        const data = parseProductBody(req.body);
-        const updatedProduct = await Product.findByIdAndUpdate(
-            req.params.id,
-            { ...data, images },
-            { new: true, runValidators: true }
-        );
 
-        res.json(updatedProduct);
+        const data = parseProductBody(req.body);
+        const mergedImages = [...(existing.images || []).map((i) => ({ url: i.url, publicId: i.publicId })), ...newUploads];
+
+        await prisma.$transaction([
+            prisma.productImage.deleteMany({ where: { productId: id } }),
+            prisma.productSpec.deleteMany({ where: { productId: id } }),
+        ]);
+
+        const product = await prisma.product.update({
+            where: { id },
+            data: {
+                name: data.name,
+                description: data.description,
+                category: data.category,
+                subCategory: data.subCategory,
+                brand: data.brand,
+                newPrice: data.newPrice,
+                oldPrice: data.oldPrice,
+                freeShipping: data.freeShipping,
+                stock: data.stock,
+                isFeatured: data.isFeatured,
+                isFlashDeal: data.isFlashDeal,
+                ...(data.locationShipping !== undefined ? { locationShipping: data.locationShipping } : {}),
+                images: {
+                    create: mergedImages.map((im, i) => ({
+                        url: im.url,
+                        publicId: im.publicId || null,
+                        sortOrder: i,
+                    })),
+                },
+                specifications: {
+                    create: data.specifications
+                        .filter((s) => s && s.key)
+                        .map((s) => ({ key: s.key, value: s.value || '' })),
+                },
+            },
+            include: productDetailInclude,
+        });
+
+        res.json(formatProduct(product));
     } catch (error) {
         console.error('Update product error:', error);
         res.status(500).json({ message: error.message });
@@ -179,7 +267,15 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const id = parseIntId(req.params.id);
+        if (!id) {
+            return res.status(400).json({ message: 'Invalid product ID' });
+        }
+
+        const product = await prisma.product.findUnique({
+            where: { id },
+            include: { images: true },
+        });
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
@@ -187,12 +283,12 @@ export const deleteProduct = async (req, res) => {
         for (const image of product.images || []) {
             if (image.publicId) {
                 try {
-                    await cloudinary.uploader.destroy(image.publicId);
+                    await deleteStoredFile(image.publicId);
                 } catch (_) {}
             }
         }
 
-        await Product.findByIdAndDelete(req.params.id);
+        await prisma.product.delete({ where: { id } });
         res.json({ message: 'Product deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -201,18 +297,22 @@ export const deleteProduct = async (req, res) => {
 
 export const removeProductImage = async (req, res) => {
     try {
-        const { productId, publicId } = req.params;
-        const product = await Product.findById(productId);
+        const productId = parseIntId(req.params.productId);
+        const publicId = decodeURIComponent(req.params.publicId || '');
+        if (!productId) {
+            return res.status(400).json({ message: 'Invalid product ID' });
+        }
 
+        const product = await prisma.product.findUnique({ where: { id: productId } });
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
 
         try {
-            await cloudinary.uploader.destroy(publicId);
+            await deleteStoredFile(publicId);
         } catch (_) {}
-        product.images = (product.images || []).filter(img => img.publicId !== publicId);
-        await product.save();
+
+        await prisma.productImage.deleteMany({ where: { productId, publicId } });
 
         res.json({ message: 'Image removed successfully' });
     } catch (error) {

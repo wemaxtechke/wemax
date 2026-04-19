@@ -1,49 +1,56 @@
-import Order from '../models/Order.js';
-import User from '../models/User.js';
-import Product from '../models/Product.js';
-import Package from '../models/Package.js';
+import { prisma } from '../lib/prisma.js';
+import { formatOrder, formatProduct, prismaOrderInclude, productDetailInclude } from '../lib/apiFormatters.js';
 
 export const getDashboardStats = async (req, res) => {
     try {
-        const totalOrders = await Order.countDocuments();
-        const totalRevenue = await Order.aggregate([
-            { $match: { status: { $ne: 'Cancelled' } } },
-            { $group: { _id: null, total: { $sum: '$total' } } },
-        ]);
-        const totalCustomers = await Order.distinct('customer').then(ids => ids.length);
-        const pendingPayments = await Order.countDocuments({ status: 'PendingPayment' });
+        const totalOrders = await prisma.order.count();
 
-        const recentOrders = await Order.find()
-            .populate('customer', 'name email')
-            .sort('-createdAt')
-            .limit(10);
+        const revenueAgg = await prisma.order.aggregate({
+            where: { status: { not: 'Cancelled' } },
+            _sum: { total: true },
+        });
 
-        const topProducts = await Order.aggregate([
-            { $unwind: '$items' },
-            {
-                $group: {
-                    _id: '$items.product',
-                    totalSold: { $sum: '$items.quantity' },
-                },
-            },
-            { $sort: { totalSold: -1 } },
-            { $limit: 5 },
-        ]);
+        const distinctCustomers = await prisma.order.groupBy({
+            by: ['customerId'],
+            _count: { _all: true },
+        });
+        const totalCustomers = distinctCustomers.length;
 
-        const productIds = topProducts.map(p => p._id);
-        const products = await Product.find({ _id: { $in: productIds } });
+        const pendingPayments = await prisma.order.count({
+            where: { paymentStatus: 'Pending' },
+        });
 
-        const topProductsWithDetails = topProducts.map(tp => {
-            const product = products.find(p => p._id.toString() === tp._id.toString());
+        const recentOrderRows = await prisma.order.findMany({
+            include: prismaOrderInclude,
+            orderBy: { createdAt: 'desc' },
+            take: 10,
+        });
+        const recentOrders = recentOrderRows.map(formatOrder);
+
+        const topProductGroups = await prisma.orderItem.groupBy({
+            by: ['productId'],
+            _sum: { quantity: true },
+            orderBy: { _sum: { quantity: 'desc' } },
+            take: 5,
+        });
+
+        const productIds = topProductGroups.map((p) => p.productId);
+        const products = await prisma.product.findMany({
+            where: { id: { in: productIds } },
+            include: productDetailInclude,
+        });
+
+        const topProductsWithDetails = topProductGroups.map((tp) => {
+            const product = products.find((p) => p.id === tp.productId);
             return {
-                product: product || null,
-                totalSold: tp.totalSold,
+                product: product ? formatProduct(product) : null,
+                totalSold: tp._sum.quantity || 0,
             };
         });
 
         res.json({
             totalOrders,
-            totalRevenue: totalRevenue[0]?.total || 0,
+            totalRevenue: revenueAgg._sum.total || 0,
             totalCustomers,
             pendingPayments,
             recentOrders,

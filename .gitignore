@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# Local uploads (product/package/payment images)
+Back-End/uploads/
+
 # Build outputs
 dist
 build

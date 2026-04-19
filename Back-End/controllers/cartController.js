@@ -1,11 +1,11 @@
-import User from '../models/User.js';
-import Product from '../models/Product.js';
-import Package from '../models/Package.js';
+import { prisma } from '../lib/prisma.js';
+import { parseIntId } from '../lib/parseId.js';
+import { formatCart } from '../lib/apiFormatters.js';
 
 export const getCart = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id).populate('cart.items.product').populate('cart.packages.package');
-        res.json(user.cart || { items: [], packages: [], subtotal: 0 });
+        const cart = await formatCart(prisma, req.user.id);
+        res.json(cart);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -14,70 +14,72 @@ export const getCart = async (req, res) => {
 export const addToCart = async (req, res) => {
     try {
         const { productId, packageId, quantity = 1 } = req.body;
-        const user = await User.findById(req.user._id);
-
-        if (!user.cart) {
-            user.cart = { items: [], packages: [], subtotal: 0 };
-        }
+        const userId = req.user.id;
 
         if (productId) {
-            const product = await Product.findById(productId);
+            const pid = parseIntId(productId);
+            if (!pid) {
+                return res.status(400).json({ message: 'Invalid product ID' });
+            }
+            const product = await prisma.product.findUnique({ where: { id: pid } });
             if (!product) {
                 return res.status(404).json({ message: 'Product not found' });
             }
 
-            const existingItem = user.cart.items.find(
-                item => item.product.toString() === productId
-            );
+            const existing = await prisma.cartProductLine.findFirst({
+                where: { userId, productId: pid },
+            });
 
-            if (existingItem) {
-                existingItem.quantity += Number(quantity);
+            if (existing) {
+                await prisma.cartProductLine.update({
+                    where: { id: existing.id },
+                    data: { quantity: existing.quantity + Number(quantity) },
+                });
             } else {
-                user.cart.items.push({
-                    product: productId,
-                    quantity: Number(quantity),
-                    price: product.newPrice,
+                await prisma.cartProductLine.create({
+                    data: {
+                        userId,
+                        productId: pid,
+                        quantity: Number(quantity),
+                        price: product.newPrice,
+                    },
                 });
             }
         }
 
         if (packageId) {
-            const packageDoc = await Package.findById(packageId);
+            const pkgId = parseIntId(packageId);
+            if (!pkgId) {
+                return res.status(400).json({ message: 'Invalid package ID' });
+            }
+            const packageDoc = await prisma.package.findUnique({ where: { id: pkgId } });
             if (!packageDoc) {
                 return res.status(404).json({ message: 'Package not found' });
             }
 
-            const existingPackage = user.cart.packages.find(
-                pkg => pkg.package.toString() === packageId
-            );
+            const existing = await prisma.cartPackageLine.findFirst({
+                where: { userId, packageId: pkgId },
+            });
 
-            if (existingPackage) {
-                existingPackage.quantity += Number(quantity);
+            if (existing) {
+                await prisma.cartPackageLine.update({
+                    where: { id: existing.id },
+                    data: { quantity: existing.quantity + Number(quantity) },
+                });
             } else {
-                user.cart.packages.push({
-                    package: packageId,
-                    quantity: Number(quantity),
-                    price: packageDoc.totalPrice,
+                await prisma.cartPackageLine.create({
+                    data: {
+                        userId,
+                        packageId: pkgId,
+                        quantity: Number(quantity),
+                        price: packageDoc.totalPrice,
+                    },
                 });
             }
         }
 
-        // Calculate subtotal
-        let subtotal = 0;
-        for (const item of user.cart.items) {
-            subtotal += item.price * item.quantity;
-        }
-        for (const pkg of user.cart.packages) {
-            subtotal += pkg.price * pkg.quantity;
-        }
-        user.cart.subtotal = subtotal;
-
-        await user.save();
-        const populatedUser = await User.findById(user._id)
-            .populate('cart.items.product')
-            .populate('cart.packages.package');
-
-        res.json(populatedUser.cart);
+        const cart = await formatCart(prisma, userId);
+        res.json(cart);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -85,40 +87,39 @@ export const addToCart = async (req, res) => {
 
 export const updateCartItem = async (req, res) => {
     try {
-        const { itemId } = req.params;
-        const { quantity, type } = req.body; // type: 'product' or 'package'
-        const user = await User.findById(req.user._id);
+        const lineId = parseIntId(req.params.itemId);
+        if (!lineId) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
+        const { quantity, type } = req.body;
+        const userId = req.user.id;
 
         if (type === 'product') {
-            const item = user.cart.items.id(itemId);
+            const item = await prisma.cartProductLine.findFirst({
+                where: { id: lineId, userId },
+            });
             if (!item) {
                 return res.status(404).json({ message: 'Item not found' });
             }
-            item.quantity = Number(quantity);
+            await prisma.cartProductLine.update({
+                where: { id: lineId },
+                data: { quantity: Number(quantity) },
+            });
         } else if (type === 'package') {
-            const pkg = user.cart.packages.id(itemId);
+            const pkg = await prisma.cartPackageLine.findFirst({
+                where: { id: lineId, userId },
+            });
             if (!pkg) {
                 return res.status(404).json({ message: 'Package not found' });
             }
-            pkg.quantity = Number(quantity);
+            await prisma.cartPackageLine.update({
+                where: { id: lineId },
+                data: { quantity: Number(quantity) },
+            });
         }
 
-        // Recalculate subtotal
-        let subtotal = 0;
-        for (const item of user.cart.items) {
-            subtotal += item.price * item.quantity;
-        }
-        for (const pkg of user.cart.packages) {
-            subtotal += pkg.price * pkg.quantity;
-        }
-        user.cart.subtotal = subtotal;
-
-        await user.save();
-        const populatedUser = await User.findById(user._id)
-            .populate('cart.items.product')
-            .populate('cart.packages.package');
-
-        res.json(populatedUser.cart);
+        const cart = await formatCart(prisma, userId);
+        res.json(cart);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -126,31 +127,19 @@ export const updateCartItem = async (req, res) => {
 
 export const removeFromCart = async (req, res) => {
     try {
-        const { itemId } = req.params;
-        const { type } = req.body; // type: 'product' or 'package'
-        const user = await User.findById(req.user._id);
+        const lineId = parseIntId(req.params.itemId);
+        if (!lineId) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
+        const { type } = req.body;
+        const userId = req.user.id;
 
         if (type === 'product') {
-            user.cart.items = user.cart.items.filter(
-                item => item._id.toString() !== itemId
-            );
+            await prisma.cartProductLine.deleteMany({ where: { id: lineId, userId } });
         } else if (type === 'package') {
-            user.cart.packages = user.cart.packages.filter(
-                pkg => pkg._id.toString() !== itemId
-            );
+            await prisma.cartPackageLine.deleteMany({ where: { id: lineId, userId } });
         }
 
-        // Recalculate subtotal
-        let subtotal = 0;
-        for (const item of user.cart.items) {
-            subtotal += item.price * item.quantity;
-        }
-        for (const pkg of user.cart.packages) {
-            subtotal += pkg.price * pkg.quantity;
-        }
-        user.cart.subtotal = subtotal;
-
-        await user.save();
         res.json({ message: 'Item removed from cart' });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -159,9 +148,11 @@ export const removeFromCart = async (req, res) => {
 
 export const clearCart = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id);
-        user.cart = { items: [], packages: [], subtotal: 0 };
-        await user.save();
+        const userId = req.user.id;
+        await prisma.$transaction([
+            prisma.cartProductLine.deleteMany({ where: { userId } }),
+            prisma.cartPackageLine.deleteMany({ where: { userId } }),
+        ]);
         res.json({ message: 'Cart cleared' });
     } catch (error) {
         res.status(500).json({ message: error.message });
