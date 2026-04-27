@@ -55,27 +55,27 @@ export default function Navbar() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Logo (left) + search + suggestions + actions — Kilimall-style row on desktop */}
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:gap-4 py-3 md:py-4">
-                    <div className="flex items-center justify-between gap-3 md:contents">
+                    <div className="flex items-center justify-between gap-2.5 md:contents">
                         <Link
                             to="/"
-                            className="flex items-center gap-2.5 shrink-0 hover:opacity-90 transition-opacity md:mr-1"
+                            className="flex items-center gap-0 sm:gap-2.5 shrink-0 hover:opacity-90 transition-opacity md:mr-1"
                         >
                             <img
                                 src={wemaxLogo}
                                 alt="Wemax"
-                                className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl object-cover"
+                                className="block h-[1.875rem] w-auto max-w-[8.25rem] shrink-0 object-contain sm:h-[5.25rem] sm:max-w-[15rem] rounded-lg sm:rounded-xl"
                             />
-                            <div className="flex flex-col leading-tight">
+                            <div className="hidden flex-col leading-tight sm:flex">
                                 <span
                                     style={{ fontFamily: '"Space Grotesk", Inter, system-ui, sans-serif' }}
-                                    className={`wemax-brand font-bold text-lg sm:text-xl tracking-[0.12em] uppercase ${
+                                    className={`wemax-brand font-bold text-base sm:text-lg tracking-[0.12em] uppercase ${
                                         theme === 'dark' ? 'text-gray-50' : 'text-gray-900'
                                     }`}
                                 >
                                     WEMAX
                                 </span>
                                 <span
-                                    className={`text-[11px] sm:text-xs font-normal normal-case tracking-normal ${
+                                    className={`text-[9px] sm:text-[11px] font-normal normal-case tracking-normal ${
                                         theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
                                     }`}
                                 >
@@ -84,30 +84,34 @@ export default function Navbar() {
                             </div>
                         </Link>
 
-                        <div className="flex items-center gap-2 md:hidden">
+                        <div className="flex items-center gap-1.5 md:hidden">
                             <button
                                 onClick={() => dispatch(toggleTheme())}
-                                className={`p-2 rounded-full border text-sm ${
+                                className={`rounded-full border p-1.5 text-sm ${
                                     theme === 'dark'
                                         ? 'border-gray-700 hover:bg-gray-900'
                                         : 'border-gray-200 hover:bg-gray-100'
                                 } transition-colors`}
                                 aria-label="Toggle theme"
                             >
-                                {theme === 'dark' ? <FaSun className="text-lg text-yellow-400" /> : <FaMoon className="text-lg text-blue-600" />}
+                                {theme === 'dark' ? (
+                                    <FaSun className="text-[0.84375rem] text-white" />
+                                ) : (
+                                    <FaMoon className="text-[0.84375rem] text-black" />
+                                )}
                             </button>
                             {isAuthenticated && (
                                 <Link
                                     to="/cart"
-                                    className={`relative p-2 rounded-full border ${
+                                    className={`relative rounded-full border p-1.5 ${
                                         theme === 'dark'
                                             ? 'border-gray-700 hover:bg-gray-900'
                                             : 'border-gray-200 hover:bg-gray-100'
                                     } transition-colors`}
                                 >
-                                    <FaShoppingCart className="text-lg" />
+                                    <FaShoppingCart className="text-[0.84375rem]" />
                                     {cartCount > 0 && (
-                                        <span className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                        <span className="absolute right-0 top-0 flex h-2.5 min-w-2.5 items-center justify-center rounded-full bg-red-600 px-[2px] text-[7px] font-bold leading-none text-white">
                                             {cartCount}
                                         </span>
                                     )}
@@ -115,10 +119,14 @@ export default function Navbar() {
                             )}
                             <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                className={`p-2 rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
+                                className={`rounded-lg p-1.5 ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
                                 aria-label="Toggle menu"
                             >
-                                {mobileMenuOpen ? <FaTimes className="text-lg" /> : <FaBars className="text-lg" />}
+                                {mobileMenuOpen ? (
+                                    <FaTimes className="text-[0.84375rem]" />
+                                ) : (
+                                    <FaBars className="text-[0.84375rem]" />
+                                )}
                             </button>
                         </div>
                     </div>
@@ -128,7 +136,7 @@ export default function Navbar() {
                         <div className="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:gap-3">
                             <form onSubmit={handleSearchSubmit} className="min-w-0 w-full md:flex-1">
                                 <div
-                                    className={`flex min-w-0 overflow-hidden rounded-md border-2 shadow-sm ${
+                                    className={`flex min-w-0 overflow-hidden rounded-[0.28125rem] border-[1.5px] shadow-sm ${
                                         theme === 'dark' ? 'border-red-500/90 bg-gray-900/80' : 'border-red-600 bg-white'
                                     }`}
                                 >
@@ -137,7 +145,7 @@ export default function Navbar() {
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder="I'm looking for..."
-                                        className={`min-w-0 flex-1 border-0 bg-transparent px-3 py-2.5 text-sm outline-none sm:px-4 sm:py-3 ${
+                                        className={`min-w-0 flex-1 border-0 bg-transparent px-[0.5625rem] py-[0.46875rem] text-[0.65625rem] leading-snug outline-none sm:px-3 sm:py-[0.5625rem] ${
                                             theme === 'dark'
                                                 ? 'text-gray-100 placeholder:text-gray-500'
                                                 : 'text-gray-900 placeholder:text-gray-400'
@@ -146,10 +154,10 @@ export default function Navbar() {
                                     />
                                     <button
                                         type="submit"
-                                        className="flex shrink-0 items-center justify-center self-stretch bg-red-600 px-4 py-2.5 text-white transition-colors hover:bg-red-700 sm:px-5 sm:py-3"
+                                        className="flex shrink-0 items-center justify-center self-stretch bg-red-600 px-3 py-[0.46875rem] text-white transition-colors hover:bg-red-700 sm:px-[0.9375rem] sm:py-[0.5625rem]"
                                         aria-label="Search"
                                     >
-                                        <FaSearch className="text-base sm:text-lg" />
+                                        <FaSearch className="text-xs sm:text-[0.84375rem]" />
                                     </button>
                                 </div>
                             </form>
@@ -164,7 +172,7 @@ export default function Navbar() {
                                     } transition-colors`}
                                     aria-label="Toggle theme"
                                 >
-                                    {theme === 'dark' ? <FaSun className="text-lg text-yellow-400" /> : <FaMoon className="text-lg text-blue-600" />}
+                                    {theme === 'dark' ? <FaSun className="text-lg text-white" /> : <FaMoon className="text-lg text-black" />}
                                 </button>
 
                                 {isAuthenticated ? (
@@ -230,13 +238,13 @@ export default function Navbar() {
                                     <>
                                         <Link
                                             to="/login"
-                                            className={`flex h-10 shrink-0 items-center rounded-lg px-3 text-sm font-medium transition-colors ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+                                            className={`flex h-[1.875rem] shrink-0 items-center rounded-lg px-2.5 text-[0.8125rem] font-medium transition-colors ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
                                         >
                                             Login
                                         </Link>
                                         <Link
                                             to="/register"
-                                            className="flex h-10 shrink-0 items-center rounded-lg bg-blue-600 px-3 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                                            className="flex h-[1.875rem] shrink-0 items-center rounded-lg bg-blue-600 px-2.5 text-[0.8125rem] font-medium text-white transition-colors hover:bg-blue-700"
                                         >
                                             Register
                                         </Link>
@@ -245,7 +253,7 @@ export default function Navbar() {
                             </div>
                         </div>
                         <div
-                            className={`hidden flex-wrap gap-x-4 gap-y-1 text-xs sm:flex ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}
+                            className={`hidden w-full flex-wrap justify-center gap-x-3 gap-y-1 text-[10px] sm:flex ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}
                         >
                             {SEARCH_SUGGESTIONS.map((label) => (
                                 <Link
@@ -260,7 +268,7 @@ export default function Navbar() {
                             ))}
                         </div>
                         <div
-                            className={`flex flex-wrap gap-x-3 gap-y-1 text-[11px] sm:hidden ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}
+                            className={`flex w-full flex-wrap justify-center gap-x-2.5 gap-y-1 text-[9px] sm:hidden ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}
                         >
                             {SEARCH_SUGGESTIONS.slice(0, 4).map((label) => (
                                 <Link
@@ -302,43 +310,43 @@ export default function Navbar() {
                     ))}
                 </div>
 
-                {/* Mobile Menu */}
+                {/* Mobile Menu — compact (~50% smaller footprint: type + padding) */}
                 {mobileMenuOpen && (
-                    <div className={`md:hidden pb-4 border-t ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
+                    <div className={`md:hidden border-t pb-2 ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
                         {/* Mobile Navigation Links */}
-                        <div className="space-y-2 py-4">
+                        <div className="space-y-1 py-2">
                             <Link 
                                 to="/" 
                                 onClick={() => setMobileMenuOpen(false)}
-                                className={`block px-4 py-2 rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors font-medium`}
+                                className={`block rounded-md px-2 py-1 text-[10px] font-medium leading-tight ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
                             >
                                 Home
                             </Link>
                             <Link 
                                 to="/products" 
                                 onClick={() => setMobileMenuOpen(false)}
-                                className={`block px-4 py-2 rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors font-medium`}
+                                className={`block rounded-md px-2 py-1 text-[10px] font-medium leading-tight ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
                             >
                                 Shop
                             </Link>
                             <Link 
                                 to="/packages" 
                                 onClick={() => setMobileMenuOpen(false)}
-                                className={`block px-4 py-2 rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors font-medium`}
+                                className={`block rounded-md px-2 py-1 text-[10px] font-medium leading-tight ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
                             >
                                 Packages
                             </Link>
                             <Link 
                                 to="/about" 
                                 onClick={() => setMobileMenuOpen(false)}
-                                className={`block px-4 py-2 rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors font-medium`}
+                                className={`block rounded-md px-2 py-1 text-[10px] font-medium leading-tight ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
                             >
                                 About
                             </Link>
                             <Link 
                                 to="/contact" 
                                 onClick={() => setMobileMenuOpen(false)}
-                                className={`block px-4 py-2 rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors font-medium`}
+                                className={`block rounded-md px-2 py-1 text-[10px] font-medium leading-tight ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
                             >
                                 Contact
                             </Link>
@@ -347,18 +355,18 @@ export default function Navbar() {
                         {/* Mobile User Menu */}
                         {isAuthenticated && (
                             <>
-                                <div className={`border-t ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'} my-4 py-4 space-y-2`}>
+                                <div className={`space-y-1 border-t py-2 ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
                                     <Link 
                                         to="/orders" 
                                         onClick={() => setMobileMenuOpen(false)}
-                                        className={`block px-4 py-2 rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
+                                        className={`block rounded-md px-2 py-1 text-[10px] font-medium leading-tight ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
                                     >
                                         My Orders
                                     </Link>
                                     <Link 
                                         to="/wishlist" 
                                         onClick={() => setMobileMenuOpen(false)}
-                                        className={`block px-4 py-2 rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
+                                        className={`block rounded-md px-2 py-1 text-[10px] font-medium leading-tight ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
                                     >
                                         Wishlist
                                     </Link>
@@ -366,14 +374,14 @@ export default function Navbar() {
                                         <Link 
                                             to="/admin" 
                                             onClick={() => setMobileMenuOpen(false)}
-                                            className={`block px-4 py-2 rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
+                                            className={`block rounded-md px-2 py-1 text-[10px] font-medium leading-tight ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
                                         >
                                             Admin Dashboard
                                         </Link>
                                     )}
                                     <button 
                                         onClick={handleLogout}
-                                        className={`w-full text-left px-4 py-2 rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800 text-red-400' : 'hover:bg-gray-100 text-red-600'} transition-colors`}
+                                        className={`w-full rounded-md px-2 py-1 text-left text-[10px] font-medium leading-tight ${theme === 'dark' ? 'hover:bg-gray-800 text-red-400' : 'hover:bg-gray-100 text-red-600'} transition-colors`}
                                     >
                                         Logout
                                     </button>
@@ -383,18 +391,18 @@ export default function Navbar() {
 
                         {/* Mobile Auth Buttons */}
                         {!isAuthenticated && (
-                            <div className={`border-t ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'} my-4 py-4 space-y-2`}>
+                            <div className={`space-y-1 border-t py-2 ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
                                 <Link 
                                     to="/login" 
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className={`block px-4 py-2 rounded-lg text-center font-medium ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
+                                    className={`block rounded-md px-2 py-1 text-center text-[10px] font-medium leading-tight ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
                                 >
                                     Login
                                 </Link>
                                 <Link 
                                     to="/register" 
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className="block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-center"
+                                    className="block rounded-md bg-blue-600 px-2 py-1 text-center text-[10px] font-medium leading-tight text-white transition-colors hover:bg-blue-700"
                                 >
                                     Register
                                 </Link>

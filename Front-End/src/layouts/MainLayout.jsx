@@ -20,7 +20,7 @@ export default function MainLayout() {
                 <TopPromoBanner />
                 <Navbar />
             </header>
-            <main className="flex-1 w-full pb-[calc(3.25rem+env(safe-area-inset-bottom,0px))]">
+            <main className="w-full pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] sm:pb-[calc(3.25rem+env(safe-area-inset-bottom,0px))]">
                 <Outlet />
             </main>
             <Footer />

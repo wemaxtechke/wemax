@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { fetchProductById, fetchProducts } from '../redux/slices/productSlice.js';
 import { addToCart } from '../redux/slices/cartSlice.js';
-import { FaShoppingCart, FaHeart, FaStar, FaCheckCircle, FaTruck, FaBox, FaFacebook, FaWhatsapp, FaInstagram } from 'react-icons/fa';
+import { FaShoppingCart, FaHeart, FaStar, FaCheckCircle, FaBox, FaFacebook, FaWhatsapp, FaInstagram } from 'react-icons/fa';
 import { FaStarHalfStroke } from 'react-icons/fa6';
 import wemaxLogo from '../assets/wemax-logo.jpg';
 import api from '../utils/api.js';
@@ -320,42 +320,42 @@ export default function ProductDetail() {
                 </script>
             </Seo>
             {/* Mobile bottom action bar */}
-            <div className="fixed inset-x-0 bottom-[calc(3.25rem+env(safe-area-inset-bottom,0px))] z-[105] md:hidden">
-                <div className={`${theme === 'dark' ? 'bg-gray-900/95 border-t border-gray-800' : 'bg-white/95 border-t border-gray-200'} backdrop-blur px-4 py-3`}>
-                    <div className="max-w-7xl mx-auto flex gap-3">
+            <div className="fixed inset-x-0 bottom-[calc(2.5rem+env(safe-area-inset-bottom,0px))] z-[105] sm:bottom-[calc(3.25rem+env(safe-area-inset-bottom,0px))] md:hidden">
+                <div className={`${theme === 'dark' ? 'bg-gray-900/95 border-t border-gray-800' : 'bg-white/95 border-t border-gray-200'} backdrop-blur px-3 py-2`}>
+                    <div className="mx-auto flex max-w-7xl gap-2">
                         <button
                             onClick={handleAddToCart}
                             disabled={!isInStock || cartLoading}
-                            className={`flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 ${
-                                !isInStock || cartLoading ? 'opacity-50 cursor-not-allowed' : ''
+                            className={`flex flex-1 items-center justify-center gap-1.5 rounded-md bg-orange-500 py-[0.46875rem] text-[0.65625rem] font-semibold text-white hover:bg-orange-600 ${
+                                !isInStock || cartLoading ? 'cursor-not-allowed opacity-50' : ''
                             }`}
                         >
                             {cartLoading ? (
                                 <>
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
                                     Adding...
                                 </>
                             ) : (
                                 <>
-                                    <FaShoppingCart className="text-xs" /> Add to Cart
+                                    <FaShoppingCart className="text-[0.5625rem]" /> Add to Cart
                                 </>
                             )}
                         </button>
                         <button
                             onClick={handleBuyNow}
                             disabled={!isInStock || cartLoading}
-                            className={`flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 ${
-                                !isInStock || cartLoading ? 'opacity-50 cursor-not-allowed' : ''
+                            className={`flex flex-1 items-center justify-center gap-1.5 rounded-md bg-blue-600 py-[0.46875rem] text-[0.65625rem] font-semibold text-white hover:bg-blue-700 ${
+                                !isInStock || cartLoading ? 'cursor-not-allowed opacity-50' : ''
                             }`}
                         >
                             {cartLoading ? (
                                 <>
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
                                     Processing...
                                 </>
                             ) : (
                                 <>
-                                    <FaShoppingCart className="text-xs" /> Buy Now
+                                    <FaShoppingCart className="text-[0.5625rem]" /> Buy Now
                                 </>
                             )}
                         </button>
@@ -372,7 +372,7 @@ export default function ProductDetail() {
                     backgroundSize: 'cover',
                 }}
             />
-            <div className={`relative z-10 w-full min-h-screen py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-8 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] md:pb-16 ${theme === 'dark' ? 'bg-gray-950/35' : 'bg-white/45'} backdrop-blur-[3px]`}>
+            <div className={`relative z-10 w-full min-h-screen px-4 pt-3 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:px-6 sm:pt-8 sm:pb-[calc(6.25rem+env(safe-area-inset-bottom,0px))] md:px-8 md:pt-12 md:pb-16 lg:pt-16 ${theme === 'dark' ? 'bg-gray-950/35' : 'bg-white/45'} backdrop-blur-[3px]`}>
             {/* Notification Toast */}
             {notification.show && (
                 <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
@@ -386,35 +386,43 @@ export default function ProductDetail() {
 
             <div className="max-w-7xl mx-auto">
                 {/* Breadcrumb */}
-                <nav className="mb-6 text-sm">
-                    <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        <Link to="/" className="hover:text-blue-600">Home</Link>
-                        <span>/</span>
-                        <Link to="/products" className="hover:text-blue-600">Products</Link>
-                        <span>/</span>
-                        <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}>
+                <nav className="mb-3 py-0.5 text-[11px] leading-tight sm:mb-4 sm:py-1 sm:text-xs">
+                    <div className={`flex flex-wrap items-center gap-1 sm:gap-1.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <Link to="/" className="hover:text-blue-600">
+                            Home
+                        </Link>
+                        <span className="opacity-70" aria-hidden>
+                            /
+                        </span>
+                        <Link to="/products" className="hover:text-blue-600">
+                            Products
+                        </Link>
+                        <span className="opacity-70" aria-hidden>
+                            /
+                        </span>
+                        <span className={`line-clamp-2 sm:line-clamp-none ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
                             {currentProduct.name}
                         </span>
                     </div>
                 </nav>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mb-12">
+                <div className="mb-12 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-10">
                     {/* Images Section */}
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                         {/* Main Image */}
-                        <div className={`relative rounded-lg overflow-hidden h-80 sm:h-96 md:h-[500px] ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} flex items-center justify-center`}>
+                        <div className={`relative rounded-lg overflow-hidden h-60 sm:h-96 md:h-[500px] ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} flex items-center justify-center`}>
                             <SmartImage
                                 src={images[selectedImage]?.url || wemaxLogo}
                                 alt={currentProduct.name}
-                                className="w-full h-full object-contain p-4"
+                                className="h-full w-full object-contain p-3 sm:p-4"
                             />
                             {discount > 0 && (
-                                <div className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-lg">
+                                <div className="absolute right-1.5 top-1.5 rounded bg-red-500 px-[0.46875rem] py-[0.28125rem] text-[0.65625rem] font-bold leading-none text-white sm:right-3 sm:top-3 sm:rounded-md sm:px-[0.75rem] sm:py-1 sm:text-[0.84375rem] md:right-4 md:top-4 md:rounded-lg md:px-3 md:py-1.5 md:text-base">
                                     -{discount}%
                                 </div>
                             )}
                             {currentProduct.isFlashDeal && (
-                                <div className="absolute top-4 left-4 bg-orange-500 text-white px-3 py-1 rounded-lg font-bold text-sm">
+                                <div className="absolute left-2 top-2 rounded-md bg-orange-500 px-2 py-0.5 text-xs font-bold text-white sm:left-4 sm:top-4 sm:rounded-lg sm:px-3 sm:py-1 sm:text-sm">
                                     Flash Deal
                                 </div>
                             )}
@@ -422,12 +430,12 @@ export default function ProductDetail() {
 
                         {/* Thumbnail Images */}
                         {images.length > 1 && (
-                            <div className="flex gap-3 overflow-x-auto pb-2">
+                            <div className="flex gap-2 overflow-x-auto pb-2 sm:gap-3">
                                 {images.map((img, idx) => (
                                     <button
                                         key={idx}
                                         onClick={() => setSelectedImage(idx)}
-                                        className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                                        className={`h-[3.75rem] w-[3.75rem] flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all sm:h-20 sm:w-20 ${
                                             selectedImage === idx 
                                                 ? 'border-blue-600 ring-2 ring-blue-400' 
                                                 : theme === 'dark' 
@@ -447,19 +455,19 @@ export default function ProductDetail() {
                     </div>
 
                     {/* Product Details */}
-                    <div className="space-y-6">
+                    <div className="space-y-1.5 sm:space-y-5 md:space-y-6">
                         {/* Brand and Category */}
-                        <div className="flex items-center gap-3 flex-wrap">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-3">
                             {currentProduct.brand && (
-                                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${theme === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
+                                <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold sm:px-3 sm:py-1 sm:text-sm ${theme === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
                                     {currentProduct.brand}
                                 </span>
                             )}
-                            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
+                            <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold sm:px-3 sm:py-1 sm:text-sm ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
                                 {currentProduct.category}
                             </span>
                             {currentProduct.subCategory && (
-                                <span className={`px-3 py-1 rounded-full text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                <span className={`rounded-full px-2 py-0.5 text-[11px] sm:px-3 sm:py-1 sm:text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                     {currentProduct.subCategory}
                                 </span>
                             )}
@@ -467,98 +475,41 @@ export default function ProductDetail() {
 
                         {/* Title */}
                         <div>
-                            <h1 className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                            <h1 className={`mb-1.5 text-xl font-bold sm:mb-3 sm:text-3xl md:text-4xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                 {currentProduct.name}
                             </h1>
-                            <div className="flex items-center gap-3 flex-wrap">
-                                <div className="flex items-center gap-1">
+                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-3">
+                                <div className="flex items-center gap-0.5 [&_svg]:h-3.5 [&_svg]:w-3.5 sm:gap-1 sm:[&_svg]:h-4 sm:[&_svg]:w-4">
                                     {renderStars(currentProduct.averageRating || 0)}
                                 </div>
-                                <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                <span className={`text-xs font-semibold sm:text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                     ({currentProduct.reviewsCount || 0} {currentProduct.reviewsCount === 1 ? 'review' : 'reviews'})
                                 </span>
                                 {isInStock ? (
-                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-800'}`}>
-                                        <FaCheckCircle className="inline mr-1" /> In Stock ({currentProduct.stock} available)
+                                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold sm:px-3 sm:py-1 sm:text-sm ${theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-800'}`}>
+                                        <FaCheckCircle className="mr-0.5 inline text-[0.65rem] sm:mr-1 sm:text-sm" /> In Stock ({currentProduct.stock} available)
                                     </span>
                                 ) : (
-                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-800">
+                                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-800 sm:px-3 sm:py-1 sm:text-sm">
                                         Out of Stock
                                     </span>
                                 )}
                             </div>
                         </div>
 
-                        {/* Share this product — large circular icons (Jumia-style visibility) */}
-                        <div className="rounded-xl border-2 border-dashed px-3 py-3 sm:px-4 sm:py-4 bg-black/5 dark:bg-white/5 border-gray-300/80 dark:border-gray-600">
-                            <h2
-                                className={`mb-3 text-base font-bold sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
-                            >
-                                Share this product
-                            </h2>
-                            <div className="flex flex-wrap items-center gap-4 sm:gap-5">
-                                <button
-                                    type="button"
-                                    onClick={() => openShareFacebook(productUrl)}
-                                    className="group flex flex-col items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 rounded-xl"
-                                    aria-label="Share on Facebook"
-                                >
-                                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1877F2] text-white shadow-lg ring-4 ring-[#1877F2]/25 transition group-hover:scale-105 group-active:scale-95 sm:h-16 sm:w-16">
-                                        <FaFacebook className="text-3xl sm:text-[2rem]" />
-                                    </span>
-                                    <span className={`text-xs font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                        Facebook
-                                    </span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        openShareWhatsApp(
-                                            `Check out ${currentProduct.name} on WEMAX — ${productUrl}`
-                                        )
-                                    }
-                                    className="group flex flex-col items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2 rounded-xl"
-                                    aria-label="Share on WhatsApp"
-                                >
-                                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg ring-4 ring-[#25D366]/25 transition group-hover:scale-105 group-active:scale-95 sm:h-16 sm:w-16">
-                                        <FaWhatsapp className="text-3xl sm:text-[2rem]" />
-                                    </span>
-                                    <span className={`text-xs font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                        WhatsApp
-                                    </span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => shareProductInstagram(productUrl)}
-                                    className="group flex flex-col items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 rounded-xl"
-                                    aria-label="Copy link for Instagram"
-                                >
-                                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] text-white shadow-lg ring-4 ring-pink-500/20 transition group-hover:scale-105 group-active:scale-95 sm:h-16 sm:w-16">
-                                        <FaInstagram className="text-3xl sm:text-[2rem]" />
-                                    </span>
-                                    <span className={`text-xs font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                        Instagram
-                                    </span>
-                                </button>
-                            </div>
-                            <p className={`mt-2 text-[11px] sm:text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
-                                Instagram copies your product link so you can paste it in a story or DM.
-                            </p>
-                        </div>
-
                         {/* Pricing */}
-                        <div className="space-y-2">
-                            <div className="flex items-baseline gap-3 flex-wrap">
-                                <p className="text-3xl md:text-4xl font-bold text-blue-500">
+                        <div className="space-y-0.5 sm:space-y-2">
+                            <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-3">
+                                <p className="text-xl font-bold text-blue-500 sm:text-3xl md:text-4xl">
                                     KES {currentProduct.newPrice?.toLocaleString()}
                                 </p>
                                 {currentProduct.oldPrice && currentProduct.oldPrice > currentProduct.newPrice && (
                                     <>
-                                        <p className={`text-xl line-through ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                                        <p className={`text-sm line-through sm:text-xl ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
                                             KES {currentProduct.oldPrice?.toLocaleString()}
                                         </p>
                                         {discount > 0 && (
-                                            <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                            <span className="rounded-full bg-red-500 px-2 py-0.5 text-[0.65625rem] font-bold leading-none text-white sm:px-2.5 sm:py-[0.28125rem] sm:text-[0.84375rem] md:px-3 md:py-1 md:text-sm">
                                                 Save {discount}%
                                             </span>
                                         )}
@@ -566,25 +517,25 @@ export default function ProductDetail() {
                                 )}
                             </div>
                             {discount > 0 && (
-                                <p className={`font-semibold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
+                                <p className={`text-[10px] font-semibold leading-tight sm:text-sm ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
                                     You save KES {(currentProduct.oldPrice - currentProduct.newPrice)?.toLocaleString()}
                                 </p>
                             )}
                         </div>
 
                         {/* Quantity and primary actions (desktop/laptop) */}
-                        <div className="space-y-4 pt-4 border-t border-gray-300">
+                        <div className="space-y-1.5 border-t border-gray-300 pt-2 sm:space-y-4 sm:pt-4">
                             {/* Quantity */}
                             {isInStock && (
-                                <div className="flex items-center gap-4">
-                                    <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                <div className="flex items-center gap-1.5 sm:gap-4">
+                                    <span className={`text-xs font-semibold sm:text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                         Quantity:
                                     </span>
-                                    <div className={`flex items-center gap-3 px-4 py-2 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                    <div className={`flex items-center gap-1.5 rounded-md px-2 py-1 sm:gap-3 sm:rounded-lg sm:px-4 sm:py-2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
                                         <button
                                             onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                             disabled={quantity <= 1}
-                                            className={`text-xl font-bold transition-colors ${
+                                            className={`text-base font-bold transition-colors sm:text-xl ${
                                                 quantity <= 1
                                                     ? 'opacity-50 cursor-not-allowed'
                                                     : theme === 'dark' 
@@ -594,13 +545,13 @@ export default function ProductDetail() {
                                         >
                                             −
                                         </button>
-                                        <span className={`min-w-[40px] text-center font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                        <span className={`min-w-[1.75rem] text-center text-xs font-bold sm:min-w-[2.5rem] sm:text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                             {quantity}
                                         </span>
                                         <button
                                             onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
                                             disabled={quantity >= maxQuantity}
-                                            className={`text-xl font-bold transition-colors ${
+                                            className={`text-base font-bold transition-colors sm:text-xl ${
                                                 quantity >= maxQuantity
                                                     ? 'opacity-50 cursor-not-allowed'
                                                     : theme === 'dark' 
@@ -612,7 +563,7 @@ export default function ProductDetail() {
                                         </button>
                                     </div>
                                     {currentProduct.stock < 10 && currentProduct.stock > 0 && (
-                                        <span className={`text-sm ${theme === 'dark' ? 'text-orange-400' : 'text-orange-600'}`}>
+                                        <span className={`text-xs sm:text-sm ${theme === 'dark' ? 'text-orange-400' : 'text-orange-600'}`}>
                                             Only {currentProduct.stock} left!
                                         </span>
                                     )}
@@ -662,10 +613,10 @@ export default function ProductDetail() {
 
                         {/* Description */}
                         <div>
-                            <h3 className={`font-bold text-lg mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                            <h3 className={`mb-0.5 text-xs font-bold sm:mb-2 sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                 Description
                             </h3>
-                            <p className={`leading-relaxed whitespace-pre-wrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <p className={`whitespace-pre-wrap text-xs leading-snug sm:text-base sm:leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                 {currentProduct.description}
                             </p>
                         </div>
@@ -698,11 +649,11 @@ export default function ProductDetail() {
                         {/* Specifications as table */}
                         {currentProduct.specifications && currentProduct.specifications.length > 0 && (
                             <div>
-                                <h3 className={`font-bold text-lg mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                <h3 className={`mb-1 text-xs font-bold sm:mb-3 sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                     Specifications
                                 </h3>
-                                <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} rounded-lg overflow-hidden`}>
-                                    <table className="min-w-full text-sm">
+                                <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} overflow-hidden rounded-lg`}>
+                                    <table className="min-w-full text-[10px] sm:text-sm">
                                         <tbody>
                                             {currentProduct.specifications.map((spec, idx) => (
                                                 spec.key && spec.value && (
@@ -711,13 +662,13 @@ export default function ProductDetail() {
                                                         className={theme === 'dark' ? 'border-b border-gray-700 last:border-b-0' : 'border-b border-gray-200 last:border-b-0'}
                                                     >
                                                         <th
-                                                            className={`w-1/3 px-4 py-2 text-left font-semibold ${
+                                                            className={`w-1/3 px-2 py-1 text-left font-semibold sm:px-4 sm:py-2 ${
                                                                 theme === 'dark' ? 'text-gray-200 bg-gray-900/40' : 'text-gray-700 bg-gray-200/40'
                                                             }`}
                                                         >
                                                             {spec.key}
                                                         </th>
-                                                        <td className={`px-4 py-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                        <td className={`px-2 py-1 sm:px-4 sm:py-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                                             {spec.value}
                                                         </td>
                                                     </tr>
@@ -729,34 +680,76 @@ export default function ProductDetail() {
                             </div>
                         )}
 
-                        {/* Shipping Info */}
-                        <div className={`p-4 rounded-lg space-y-2 ${theme === 'dark' ? 'bg-blue-900/20 border border-blue-800/30' : 'bg-blue-50 border border-blue-200'}`}>
-                            <p className={`font-semibold flex items-center gap-2 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-800'}`}>
-                                <FaTruck className="text-lg" /> {currentProduct.freeShipping ? 'Free Shipping' : 'Shipping Available'}
-                            </p>
-                            <p className={`text-sm ${theme === 'dark' ? 'text-blue-400/70' : 'text-blue-700'}`}>
-                                {currentProduct.freeShipping 
-                                    ? 'This item qualifies for free shipping'
-                                    : 'Free shipping on orders over KES 5,000. Delivery within 3-5 business days'
-                                }
-                            </p>
-                        </div>
-
                         {/* Additional Info */}
-                        <div className={`p-4 rounded-lg space-y-2 ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-gray-100'}`}>
-                            <div className="flex items-center gap-2 text-sm">
-                                <FaBox className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
+                        <div className={`space-y-0.5 rounded-lg p-2 sm:space-y-2 sm:p-4 ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-gray-100'}`}>
+                            <div className="flex items-center gap-1 text-[10px] sm:gap-2 sm:text-sm">
+                                <FaBox className={`shrink-0 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} />
                                 <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
                                     SKU: {currentProduct._id?.slice(-8).toUpperCase()}
                                 </span>
                             </div>
                             {currentProduct.isFeatured && (
-                                <div className={`text-sm font-semibold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+                                <div className={`text-[10px] font-semibold sm:text-sm ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
                                     ⭐ Featured Product
                                 </div>
                             )}
                         </div>
                     </div>
+                </div>
+
+                {/* Share this product — end of detail content; ~25% smaller than original */}
+                <div className="mt-6 rounded-lg border-[1.5px] border-dashed border-gray-300/80 bg-black/5 px-2.5 py-2.5 text-center dark:border-gray-600 dark:bg-white/5 sm:mt-8 sm:px-3 sm:py-3">
+                    <h2
+                        className={`mb-2 text-xs font-bold sm:text-[0.9375rem] ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                    >
+                        Share this product
+                    </h2>
+                    <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-[0.9375rem]">
+                        <button
+                            type="button"
+                            onClick={() => openShareFacebook(productUrl)}
+                            className="group flex flex-col items-center gap-1 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                            aria-label="Share on Facebook"
+                        >
+                            <span className="flex h-[2.625rem] w-[2.625rem] items-center justify-center rounded-full bg-[#1877F2] text-white shadow-md ring-[3px] ring-[#1877F2]/25 transition group-hover:scale-105 group-active:scale-95 sm:h-12 sm:w-12">
+                                <FaFacebook className="text-[1.35rem] sm:text-2xl" />
+                            </span>
+                            <span className={`text-[10px] font-semibold sm:text-[11px] ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                Facebook
+                            </span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() =>
+                                openShareWhatsApp(`Check out ${currentProduct.name} on WEMAX — ${productUrl}`)
+                            }
+                            className="group flex flex-col items-center gap-1 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1"
+                            aria-label="Share on WhatsApp"
+                        >
+                            <span className="flex h-[2.625rem] w-[2.625rem] items-center justify-center rounded-full bg-[#25D366] text-white shadow-md ring-[3px] ring-[#25D366]/25 transition group-hover:scale-105 group-active:scale-95 sm:h-12 sm:w-12">
+                                <FaWhatsapp className="text-[1.35rem] sm:text-2xl" />
+                            </span>
+                            <span className={`text-[10px] font-semibold sm:text-[11px] ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                WhatsApp
+                            </span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => shareProductInstagram(productUrl)}
+                            className="group flex flex-col items-center gap-1 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-1"
+                            aria-label="Copy link for Instagram"
+                        >
+                            <span className="flex h-[2.625rem] w-[2.625rem] items-center justify-center rounded-full bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] text-white shadow-md ring-[3px] ring-pink-500/20 transition group-hover:scale-105 group-active:scale-95 sm:h-12 sm:w-12">
+                                <FaInstagram className="text-[1.35rem] sm:text-2xl" />
+                            </span>
+                            <span className={`text-[10px] font-semibold sm:text-[11px] ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                Instagram
+                            </span>
+                        </button>
+                    </div>
+                    <p className={`mx-auto mt-1.5 max-w-md text-[10px] leading-snug sm:text-[11px] ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
+                        Instagram copies your product link so you can paste it in a story or DM.
+                    </p>
                 </div>
 
                 {/* Related Products */}

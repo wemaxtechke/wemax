@@ -109,18 +109,16 @@ export default function AdminShippingRates() {
 
     return (
         <div>
-            <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b-2", borderClass)}>
-                <div>
-                    <h1 className={cn("text-2xl md:text-3xl font-bold", textClass)}>Shipping Rates</h1>
-                    <p className={cn("mt-1 text-sm", textSecondaryClass)}>Set delivery pricing per carrier and location, and control cash-on-delivery.</p>
+            <div className={cn('mb-2 flex flex-col justify-between gap-3 border-b-2 pb-3 sm:flex-row sm:items-center sm:gap-4 sm:pb-4', borderClass)}>
+                <div className="min-w-0">
+                    <h1 className={cn('text-xl font-bold sm:text-2xl md:text-3xl', textClass)}>Shipping Rates</h1>
+                    <p className={cn('mt-0.5 text-xs sm:mt-1 sm:text-sm', textSecondaryClass)}>Set delivery pricing per carrier and location, and control cash-on-delivery.</p>
                 </div>
                 <button
                     type="button"
                     onClick={openAdd}
                     className={cn(
-                        "px-4 py-2 rounded-lg font-semibold transition-all",
-                        "bg-gradient-to-r from-blue-600 to-blue-800 text-white",
-                        "hover:shadow-lg hover:-translate-y-0.5"
+                        'shrink-0 rounded-lg bg-gradient-to-r from-blue-600 to-blue-800 px-3 py-1.5 text-xs font-semibold !text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:!text-white sm:px-4 sm:py-2 sm:text-sm',
                     )}
                 >
                     Add Rate
@@ -128,63 +126,63 @@ export default function AdminShippingRates() {
             </div>
 
             {error && (
-                <div className="p-4 mb-6 rounded-lg border-l-4 flex items-center gap-2 bg-rose-500/15 border-rose-500 text-rose-400" role="alert">
+                <div className="mb-4 flex items-center gap-2 rounded-lg border-l-4 border-rose-500 bg-rose-500/15 p-3 text-sm text-rose-400 sm:mb-6 sm:p-4" role="alert">
                     {error}
                 </div>
             )}
 
             {loading ? (
-                <div className="flex justify-center items-center min-h-[320px]">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+                <div className="flex min-h-[240px] items-center justify-center sm:min-h-[300px]">
+                    <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600 sm:h-12 sm:w-12" />
                 </div>
             ) : (
                 <>
                     {/* Mobile cards */}
-                    <div className="md:hidden space-y-3">
+                    <div className="space-y-3 md:hidden">
                         {rates.length === 0 ? (
-                            <div className={cn("rounded-2xl border p-6 text-center shadow-sm", bgClass, borderClass, textSecondaryClass)}>
+                            <div className={cn('rounded-xl border p-4 text-center text-sm shadow-sm sm:rounded-2xl sm:p-6', bgClass, borderClass, textSecondaryClass)}>
                                 No shipping rates. Add one for checkout to work.
                             </div>
                         ) : rates.map((r) => (
-                            <div key={r._id} className={cn("rounded-2xl border p-4 shadow-sm", bgClass, borderClass)}>
-                                <div className="flex items-start justify-between gap-3">
+                            <div key={r._id} className={cn('rounded-xl border p-3 shadow-sm sm:rounded-2xl sm:p-4', bgClass, borderClass)}>
+                                <div className="flex items-start justify-between gap-2 sm:gap-3">
                                     <div className="min-w-0">
-                                        <div className={cn("font-bold text-base truncate", textClass)}>{r.locationName}</div>
-                                        <div className={cn("mt-1 text-sm", textSecondaryClass)}>
+                                        <div className={cn('truncate text-sm font-bold sm:text-base', textClass)}>{r.locationName}</div>
+                                        <div className={cn('mt-0.5 text-xs sm:text-sm', textSecondaryClass)}>
                                             Region: {r.regionCode || '—'}
                                         </div>
-                                        <div className={cn("mt-1 text-xs", textSecondaryClass)}>
+                                        <div className={cn('mt-1 text-[11px] sm:text-xs', textSecondaryClass)}>
                                             Carrier: <span className={cn("font-semibold", textClass)}>{r.carrier || '—'}</span>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-end gap-1">
+                                    <div className="flex max-w-[52%] shrink-0 flex-col items-end gap-1">
                                         {r.isDefault && (
-                                            <span className="shrink-0 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border bg-emerald-500/15 text-emerald-400 border-emerald-500/30">
+                                            <span className="inline-flex shrink-0 items-center rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 sm:px-3 sm:py-1 sm:text-xs">
                                                 Default
                                             </span>
                                         )}
                                         <span className={cn(
-                                            "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border",
+                                            'inline-flex max-w-full items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold sm:px-3 sm:py-1 sm:text-xs',
                                             r.allowCashOnDelivery
                                                 ? "bg-blue-500/10 text-blue-400 border-blue-500/30"
                                                 : "bg-gray-500/10 text-gray-400 border-gray-500/30"
                                         )}>
-                                            {r.allowCashOnDelivery ? 'Cash on delivery: On' : 'Cash on delivery: Off'}
+                                            <span className="truncate">{r.allowCashOnDelivery ? 'COD: On' : 'COD: Off'}</span>
                                         </span>
                                     </div>
                                 </div>
 
-                                <div className="mt-4 flex items-center justify-between gap-3">
-                                    <div className={cn("text-sm", textSecondaryClass)}>
+                                <div className="mt-3 flex items-center justify-between gap-2 sm:mt-4 sm:gap-3">
+                                    <div className={cn('text-xs sm:text-sm', textSecondaryClass)}>
                                         Price
-                                        <div className={cn("text-lg font-extrabold", textClass)}>KES {r.price?.toLocaleString()}</div>
+                                        <div className={cn('text-base font-bold tabular-nums sm:text-lg', textClass)}>KES {r.price?.toLocaleString()}</div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-2">
+                                    <div className="grid w-[min(100%,11rem)] grid-cols-2 gap-2 sm:w-auto">
                                         <button
                                             type="button"
                                             onClick={() => openEdit(r)}
                                             className={cn(
-                                                "px-3 py-2 rounded-xl text-sm font-semibold transition-all border",
+                                                'rounded-lg border px-2 py-1.5 text-xs font-semibold transition-all sm:rounded-xl sm:px-3 sm:py-2 sm:text-sm',
                                                 theme === 'dark'
                                                     ? "bg-gray-900 text-gray-200 border-gray-700 hover:bg-gray-800"
                                                     : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
@@ -196,8 +194,7 @@ export default function AdminShippingRates() {
                                             type="button"
                                             onClick={() => handleDelete(r._id)}
                                             className={cn(
-                                                "px-3 py-2 rounded-xl text-sm font-semibold transition-all border",
-                                                "bg-rose-500/15 text-rose-400 border-rose-500/30 hover:bg-rose-500 hover:text-white"
+                                                'rounded-lg border border-rose-500/30 bg-rose-500/15 px-2 py-1.5 text-xs font-semibold text-rose-400 transition-all hover:bg-rose-500 hover:text-white sm:rounded-xl sm:px-3 sm:py-2 sm:text-sm',
                                             )}
                                         >
                                             Delete
@@ -227,10 +224,10 @@ export default function AdminShippingRates() {
                                     ))}
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="text-sm">
                                 {rates.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className={cn("px-4 md:px-6 py-10 text-center", textSecondaryClass)}>
+                                        <td colSpan={7} className={cn("px-4 md:px-6 py-10 text-center", textSecondaryClass)}>
                                             No shipping rates. Add one for checkout to work.
                                         </td>
                                     </tr>
@@ -302,13 +299,13 @@ export default function AdminShippingRates() {
                         borderClass,
                         "animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200"
                     )}>
-                        <div className={cn("px-5 sm:px-6 py-4 border-b", borderClass)}>
-                            <h2 className={cn("text-lg sm:text-xl font-bold", textClass)}>{editingId ? 'Edit Shipping Rate' : 'Add Shipping Rate'}</h2>
-                            <p className={cn("mt-1 text-sm", textSecondaryClass)}>Set a price for a location (and optionally mark as default).</p>
+                        <div className={cn('border-b px-4 py-3 sm:px-6 sm:py-4', borderClass)}>
+                            <h2 className={cn('text-base font-bold sm:text-lg md:text-xl', textClass)}>{editingId ? 'Edit Shipping Rate' : 'Add Shipping Rate'}</h2>
+                            <p className={cn('mt-0.5 text-xs sm:mt-1 sm:text-sm', textSecondaryClass)}>Set a price for a location (and optionally mark as default).</p>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="flex flex-col max-h-[calc(92vh-70px)]">
-                            <div className="px-5 sm:px-6 py-5 overflow-y-auto space-y-4">
+                        <form onSubmit={handleSubmit} className="flex max-h-[calc(92vh-70px)] flex-col">
+                            <div className="max-h-[calc(92vh-140px)] space-y-3 overflow-y-auto px-4 py-4 sm:space-y-4 sm:px-6 sm:py-5">
                                 <label className="block">
                                     <span className={cn("font-semibold mb-1 block", textClass)}>Carrier *</span>
                                     <select
@@ -419,7 +416,7 @@ export default function AdminShippingRates() {
                                 </label>
                             </div>
 
-                            <div className={cn("px-5 sm:px-6 py-4 border-t flex flex-col sm:flex-row gap-3", borderClass)}>
+                            <div className={cn('flex flex-col gap-2 border-t px-4 py-3 sm:flex-row sm:gap-3 sm:px-6 sm:py-4', borderClass)}>
                             <button
                                 type="button"
                                 onClick={() => setFormOpen(false)}

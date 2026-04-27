@@ -95,17 +95,17 @@ export default function AdminOrders() {
 
     return (
         <div>
-            <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b-2", borderClass)}>
-                <h1 className={cn("text-2xl md:text-3xl font-bold", textClass)}>Orders</h1>
-                <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+            <div className={cn('mb-2 flex flex-col gap-3 border-b-2 pb-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pb-4', borderClass)}>
+                <h1 className={cn('text-xl font-bold sm:text-2xl md:text-3xl', textClass)}>Orders</h1>
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
                     <label className="sr-only" htmlFor="statusFilter">Status filter</label>
                     <select
                         id="statusFilter"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                         className={cn(
-                            "w-full sm:w-[220px] px-4 py-2 rounded-lg border transition-all",
-                            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                            'w-full rounded-lg border px-3 py-2 text-sm transition-all sm:w-[220px] sm:px-4 sm:text-base',
+                            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
                             inputBgClass,
                             borderClass,
                             textClass
@@ -118,53 +118,53 @@ export default function AdminOrders() {
             </div>
 
             {error && (
-                <div className="p-4 mb-6 rounded-lg border-l-4 flex items-center gap-2 bg-rose-500/15 border-rose-500 text-rose-400" role="alert">
+                <div className="mb-4 flex items-center gap-2 rounded-lg border-l-4 border-rose-500 bg-rose-500/15 p-3 text-sm text-rose-400 sm:mb-6 sm:p-4" role="alert">
                     {error}
                 </div>
             )}
 
             {loading ? (
-                <div className="flex justify-center items-center min-h-[320px]">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+                <div className="flex min-h-[240px] items-center justify-center sm:min-h-[300px]">
+                    <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600 sm:h-12 sm:w-12" />
                 </div>
             ) : (
                 <>
                     {/* Mobile cards */}
-                    <div className="md:hidden space-y-3">
+                    <div className="space-y-3 md:hidden">
                         {orders.length === 0 ? (
-                            <div className={cn("rounded-2xl border p-6 text-center shadow-sm", bgClass, borderClass, textSecondaryClass)}>
+                            <div className={cn('rounded-xl border p-4 text-center text-sm shadow-sm sm:rounded-2xl sm:p-6', bgClass, borderClass, textSecondaryClass)}>
                                 No orders.
                             </div>
                         ) : orders.map((o) => (
-                            <div key={o._id} className={cn("rounded-2xl border p-4 shadow-sm", bgClass, borderClass)}>
-                                <div className="flex items-start justify-between gap-3">
+                            <div key={o._id} className={cn('rounded-xl border p-3 shadow-sm sm:rounded-2xl sm:p-4', bgClass, borderClass)}>
+                                <div className="flex items-start justify-between gap-2 sm:gap-3">
                                     <div className="min-w-0">
-                                        <div className={cn("font-bold text-base", textClass)}>Order #{String(o._id).slice(-8)}</div>
-                                        <div className={cn("mt-1 text-sm truncate", textSecondaryClass)}>
+                                        <div className={cn('text-sm font-bold sm:text-base', textClass)}>Order #{String(o._id).slice(-8)}</div>
+                                        <div className={cn('mt-0.5 truncate text-xs sm:text-sm', textSecondaryClass)}>
                                             {o.customer?.name || '—'} · {o.customer?.email || '—'}
                                         </div>
-                                        <div className={cn("mt-1 text-xs", textSecondaryClass)}>{formatDate(o.createdAt)}</div>
+                                        <div className={cn('mt-1 text-[11px] sm:text-xs', textSecondaryClass)}>{formatDate(o.createdAt)}</div>
                                     </div>
-                                    <div className="flex flex-col items-end gap-1">
-                                        <span className={cn("inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border", statusBadgeClass(o.payment?.status || (o.payment?.paidAt ? 'Paid' : 'Pending')))}>
-                                            Payment: {o.payment?.status || (o.payment?.paidAt ? 'Paid' : 'Pending')}
+                                    <div className="flex max-w-[48%] shrink-0 flex-col items-end gap-1">
+                                        <span className={cn('inline-flex max-w-full items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold sm:px-3 sm:py-1 sm:text-xs', statusBadgeClass(o.payment?.status || (o.payment?.paidAt ? 'Paid' : 'Pending')))}>
+                                            <span className="truncate">Pay: {o.payment?.status || (o.payment?.paidAt ? 'Paid' : 'Pending')}</span>
                                         </span>
-                                        <span className={cn("inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border", statusBadgeClass(o.status))}>
-                                            Tracking: {o.status}
+                                        <span className={cn('inline-flex max-w-full items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold sm:px-3 sm:py-1 sm:text-xs', statusBadgeClass(o.status))}>
+                                            <span className="truncate">Track: {o.status}</span>
                                         </span>
                                     </div>
                                 </div>
 
-                                <div className="mt-4 flex items-center justify-between gap-3">
-                                    <div className={cn("text-sm", textSecondaryClass)}>
+                                <div className="mt-3 flex items-center justify-between gap-2 sm:mt-4 sm:gap-3">
+                                    <div className={cn('text-xs sm:text-sm', textSecondaryClass)}>
                                         Total
-                                        <div className={cn("text-lg font-extrabold", textClass)}>KES {o.total?.toLocaleString()}</div>
+                                        <div className={cn('text-base font-bold tabular-nums sm:text-lg', textClass)}>KES {o.total?.toLocaleString()}</div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-2">
+                                    <div className="grid w-[min(100%,11rem)] grid-cols-2 gap-2 sm:w-auto">
                                         <button
                                             type="button"
                                             className={cn(
-                                                "px-3 py-2 rounded-xl text-sm font-semibold transition-all border",
+                                                'rounded-lg border px-2 py-1.5 text-xs font-semibold transition-all sm:rounded-xl sm:px-3 sm:py-2 sm:text-sm',
                                                 theme === 'dark'
                                                     ? "bg-gray-900 text-gray-200 border-gray-700 hover:bg-gray-800"
                                                     : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
@@ -177,9 +177,7 @@ export default function AdminOrders() {
                                             <button
                                                 type="button"
                                                 className={cn(
-                                                    "px-3 py-2 rounded-xl text-sm font-semibold transition-all border",
-                                                    "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500 hover:text-white",
-                                                    "disabled:opacity-60 disabled:cursor-not-allowed"
+                                                    'rounded-lg border border-emerald-500/30 bg-emerald-500/15 px-2 py-1.5 text-xs font-semibold text-emerald-400 transition-all hover:bg-emerald-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60 sm:rounded-xl sm:px-3 sm:py-2 sm:text-sm',
                                                 )}
                                                 onClick={() => confirmPayment(o._id)}
                                                 disabled={updating}
@@ -214,10 +212,10 @@ export default function AdminOrders() {
                                     ))}
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="text-sm">
                                 {orders.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className={cn("px-4 md:px-6 py-10 text-center", textSecondaryClass)}>
+                                        <td colSpan={7} className={cn("px-4 md:px-6 py-10 text-center", textSecondaryClass)}>
                                             No orders.
                                         </td>
                                     </tr>
@@ -289,12 +287,12 @@ export default function AdminOrders() {
                         borderClass,
                         "animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
                     )}>
-                        <div className={cn("flex items-start justify-between gap-4 px-5 sm:px-6 py-4 border-b", borderClass)}>
-                            <div>
-                                <h2 className={cn("text-lg sm:text-xl font-bold", textClass)}>
+                        <div className={cn('flex items-start justify-between gap-3 border-b px-4 py-3 sm:gap-4 sm:px-6 sm:py-4', borderClass)}>
+                            <div className="min-w-0">
+                                <h2 className={cn('text-base font-bold sm:text-lg md:text-xl', textClass)}>
                                     Order #{String(selectedOrder._id).slice(-8)}
                                 </h2>
-                                <div className={cn("mt-1 text-sm", textSecondaryClass)}>
+                                <div className={cn('mt-0.5 text-xs sm:mt-1 sm:text-sm', textSecondaryClass)}>
                                     {formatDate(selectedOrder.createdAt)}
                                 </div>
                             </div>
@@ -302,7 +300,7 @@ export default function AdminOrders() {
                                 type="button"
                                 onClick={() => setSelectedOrder(null)}
                                 className={cn(
-                                    "shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-xl border transition-all",
+                                    'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-all sm:h-10 sm:w-10 sm:rounded-xl',
                                     theme === 'dark'
                                         ? "bg-gray-900 border-gray-700 text-gray-200 hover:bg-gray-800"
                                         : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
@@ -344,12 +342,12 @@ export default function AdminOrders() {
                                 </div>
                             </div>
 
-                            <div className={cn("mt-4 rounded-xl border p-4", borderClass, theme === 'dark' ? 'bg-gray-900/50' : 'bg-gray-50')}>
-                                <div className={cn("text-xs uppercase tracking-wider font-semibold", textSecondaryClass)}>Delivery</div>
-                                <div className={cn("mt-2 text-sm", textSecondaryClass)}>
+                            <div className={cn('mt-3 rounded-lg border p-3 sm:mt-4 sm:rounded-xl sm:p-4', borderClass, theme === 'dark' ? 'bg-gray-900/50' : 'bg-gray-50')}>
+                                <div className={cn('text-[10px] font-semibold uppercase tracking-wider sm:text-xs', textSecondaryClass)}>Delivery</div>
+                                <div className={cn('mt-1.5 text-xs sm:mt-2 sm:text-sm', textSecondaryClass)}>
                                     <span className={cn("font-semibold", textClass)}>Shipping location:</span> {selectedOrder.shippingLocation || '—'}
                                 </div>
-                                <div className={cn("mt-1 text-sm", textSecondaryClass)}>
+                                <div className={cn('mt-1 text-xs sm:text-sm', textSecondaryClass)}>
                                     <span className={cn("font-semibold", textClass)}>Address:</span>{' '}
                                     {selectedOrder.shippingAddress?.name ? `${selectedOrder.shippingAddress.name}, ` : ''}
                                     {selectedOrder.shippingAddress?.addressLine ? `${selectedOrder.shippingAddress.addressLine}, ` : ''}
@@ -359,8 +357,8 @@ export default function AdminOrders() {
                             </div>
 
                             {selectedOrder.payment?.proofImage?.url && (
-                                <div className={cn("mt-4 rounded-xl border p-4", borderClass, theme === 'dark' ? 'bg-gray-900/50' : 'bg-gray-50')}>
-                                    <div className={cn("text-xs uppercase tracking-wider font-semibold", textSecondaryClass)}>Proof of payment</div>
+                                <div className={cn('mt-3 rounded-lg border p-3 sm:mt-4 sm:rounded-xl sm:p-4', borderClass, theme === 'dark' ? 'bg-gray-900/50' : 'bg-gray-50')}>
+                                    <div className={cn('text-[10px] font-semibold uppercase tracking-wider sm:text-xs', textSecondaryClass)}>Proof of payment</div>
                                     <a
                                         href={selectedOrder.payment.proofImage.url}
                                         target="_blank"
@@ -372,11 +370,11 @@ export default function AdminOrders() {
                                 </div>
                             )}
 
-                            <div className={cn("mt-4 rounded-xl border p-4", borderClass, theme === 'dark' ? 'bg-gray-900/50' : 'bg-gray-50')}>
-                                <div className={cn("text-xs uppercase tracking-wider font-semibold mb-2", textSecondaryClass)}>Items</div>
+                            <div className={cn('mt-3 rounded-lg border p-3 sm:mt-4 sm:rounded-xl sm:p-4', borderClass, theme === 'dark' ? 'bg-gray-900/50' : 'bg-gray-50')}>
+                                <div className={cn('mb-2 text-[10px] font-semibold uppercase tracking-wider sm:text-xs', textSecondaryClass)}>Items</div>
                                 <div className="space-y-2">
                                     {(selectedOrder.items || []).map((item, i) => (
-                                        <div key={i} className={cn("flex items-start justify-between gap-3 text-sm", textSecondaryClass)}>
+                                        <div key={i} className={cn('flex items-start justify-between gap-2 text-xs sm:gap-3 sm:text-sm', textSecondaryClass)}>
                                             <div>
                                                 <div className={cn("font-semibold", textClass)}>{item.product?.name || 'Product'}</div>
                                                 <div className="text-xs">Qty {item.quantity}</div>
@@ -387,7 +385,7 @@ export default function AdminOrders() {
                                         </div>
                                     ))}
                                     {(selectedOrder.packages || []).map((pkg, i) => (
-                                        <div key={`p-${i}`} className={cn("flex items-start justify-between gap-3 text-sm", textSecondaryClass)}>
+                                        <div key={`p-${i}`} className={cn('flex items-start justify-between gap-2 text-xs sm:gap-3 sm:text-sm', textSecondaryClass)}>
                                             <div>
                                                 <div className={cn("font-semibold", textClass)}>{pkg.package?.name || 'Package'}</div>
                                                 <div className="text-xs">Qty {pkg.quantity}</div>
@@ -401,7 +399,7 @@ export default function AdminOrders() {
                             </div>
                         </div>
 
-                            <div className={cn("px-5 sm:px-6 py-4 border-t flex flex-col sm:flex-row gap-3", borderClass)}>
+                            <div className={cn('flex flex-col gap-2 border-t px-4 py-3 sm:flex-row sm:gap-3 sm:px-6 sm:py-4', borderClass)}>
                             <div className="flex-1">
                                 <label className="sr-only" htmlFor="orderStatusSelect">Update tracking status</label>
                                 <select
@@ -410,7 +408,7 @@ export default function AdminOrders() {
                                     onChange={(e) => updateStatus(selectedOrder._id, e.target.value)}
                                     disabled={updating}
                                     className={cn(
-                                        "w-full px-4 py-2 rounded-lg border transition-all",
+                                        'w-full rounded-lg border px-3 py-2 text-sm transition-all sm:px-4 sm:text-base',
                                         "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                                         inputBgClass,
                                         borderClass,
@@ -427,8 +425,7 @@ export default function AdminOrders() {
                                     onClick={() => confirmPayment(selectedOrder._id)}
                                     disabled={updating}
                                     className={cn(
-                                        "px-6 py-2 rounded-lg font-semibold transition-all",
-                                        "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white",
+                                        'rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-2 text-sm font-semibold !text-white transition-all hover:!text-white sm:px-6 sm:text-base',
                                         "hover:shadow-lg hover:-translate-y-0.5",
                                         "disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
                                     )}
@@ -440,7 +437,7 @@ export default function AdminOrders() {
                                 type="button"
                                 onClick={() => setSelectedOrder(null)}
                                 className={cn(
-                                    "px-6 py-2 rounded-lg font-medium transition-all border",
+                                    'rounded-lg border px-4 py-2 text-sm font-medium transition-all sm:px-6 sm:text-base',
                                     theme === 'dark'
                                         ? "bg-gray-900 border-gray-700 text-gray-200 hover:bg-gray-800"
                                         : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"

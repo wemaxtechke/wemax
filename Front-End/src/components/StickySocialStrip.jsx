@@ -9,12 +9,11 @@ export default function StickySocialStrip() {
 
     const bar = (
         <div
-            className={`pointer-events-auto fixed inset-x-0 bottom-0 z-[90] flex items-center justify-center gap-4 border-t px-3 py-2 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] backdrop-blur-md sm:gap-6 sm:px-4 ${
+            className={`pointer-events-auto fixed inset-x-0 bottom-0 z-[90] flex items-center justify-center gap-2 border-t px-2 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] shadow-[0_-2px_12px_rgba(0,0,0,0.08)] backdrop-blur-md sm:gap-6 sm:px-4 sm:pt-2 sm:pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:shadow-[0_-4px_20px_rgba(0,0,0,0.12)] ${
                 theme === 'dark'
                     ? 'border-gray-800 bg-gray-950/95 text-gray-100'
                     : 'border-gray-200 bg-white/95 text-gray-900'
             }`}
-            style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
             role="region"
             aria-label="Connect with us on social media"
         >
@@ -30,28 +29,28 @@ export default function StickySocialStrip() {
                     href={WEMAX_FACEBOOK_PAGE}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1877F2] text-white shadow-md transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1877F2] focus-visible:ring-offset-2"
+                    className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1877F2] text-white shadow-sm transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1877F2] focus-visible:ring-offset-1 sm:h-9 sm:w-9 sm:shadow-md sm:focus-visible:ring-offset-2"
                     aria-label="Facebook"
                 >
-                    <FaFacebook className="text-lg" />
+                    <FaFacebook className="text-sm sm:text-lg" />
                 </a>
                 <a
                     href={WEMAX_INSTAGRAM_PAGE}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] text-white shadow-md transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2"
+                    className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] text-white shadow-sm transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-1 sm:h-9 sm:w-9 sm:shadow-md sm:focus-visible:ring-offset-2"
                     aria-label="Instagram"
                 >
-                    <FaInstagram className="text-lg" />
+                    <FaInstagram className="text-sm sm:text-lg" />
                 </a>
                 <a
                     href={getStoreWhatsAppHref()}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-[#25D366] text-white shadow-md transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2"
+                    className="flex h-7 w-7 items-center justify-center rounded-full bg-[#25D366] text-white shadow-sm transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-1 sm:h-9 sm:w-9 sm:shadow-md sm:focus-visible:ring-offset-2"
                     aria-label="WhatsApp"
                 >
-                    <FaWhatsapp className="text-lg" />
+                    <FaWhatsapp className="text-sm sm:text-lg" />
                 </a>
             </div>
         </div>

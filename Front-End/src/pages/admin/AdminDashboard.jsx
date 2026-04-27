@@ -29,10 +29,28 @@ export default function AdminDashboard() {
     const textSecondaryClass = theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
     const hoverBorderClass = theme === 'dark' ? 'hover:border-blue-600' : 'hover:border-blue-500';
 
+    const statCardClass = cn(
+        'group relative overflow-hidden rounded-lg border p-4 transition-all duration-300 sm:rounded-xl sm:p-6 md:p-8',
+        'hover:-translate-y-0.5 hover:shadow-lg md:hover:-translate-y-1',
+        bgClass,
+        borderClass,
+        hoverBorderClass,
+    );
+    const statIconClass = cn(
+        'pointer-events-none absolute top-3 right-3 text-3xl opacity-10 sm:top-4 sm:right-4 sm:text-4xl md:text-5xl',
+        theme === 'dark' ? 'text-blue-400' : 'text-blue-600',
+    );
+    const statLabelClass = cn(
+        'mb-1 text-[10px] font-semibold uppercase tracking-wide sm:mb-2 sm:text-xs sm:tracking-wider md:mb-3',
+        textSecondaryClass,
+    );
+    const statValueClass =
+        'break-words bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-xl font-bold tabular-nums leading-none tracking-tight text-transparent sm:text-2xl md:text-3xl lg:text-4xl';
+
     if (loading) {
         return (
-            <div className="flex justify-center items-center min-h-[400px]">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+            <div className="flex min-h-[240px] items-center justify-center sm:min-h-[320px]">
+                <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600 sm:h-14 sm:w-14 md:h-16 md:w-16" />
             </div>
         );
     }
@@ -40,99 +58,39 @@ export default function AdminDashboard() {
     return (
         <div>
             <h1 className={cn(
-                "text-2xl md:text-3xl font-bold mb-6 md:mb-8 flex items-center gap-3",
-                textClass
+                'mb-4 text-xl font-bold sm:mb-6 sm:text-2xl md:mb-8 md:text-3xl',
+                textClass,
             )}>
                 Dashboard
             </h1>
             {stats ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-                    <div className={cn(
-                        "relative p-6 md:p-8 rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group overflow-hidden",
-                        bgClass,
-                        borderClass,
-                        hoverBorderClass
-                    )}>
-                        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-600 to-blue-800 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300" />
-                        <FaShoppingBag className={cn(
-                            "absolute top-4 right-4 text-4xl md:text-5xl opacity-10",
-                            theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
-                        )} />
-                        <h3 className={cn(
-                            "text-xs uppercase tracking-wider font-semibold mb-3",
-                            textSecondaryClass
-                        )}>
-                            Total Orders
-                        </h3>
-                        <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                            {stats.totalOrders || 0}
-                        </p>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-6">
+                    <div className={statCardClass}>
+                        <div className="absolute top-0 left-0 h-full w-1 origin-top scale-y-0 bg-gradient-to-b from-blue-600 to-blue-800 transition-transform duration-300 group-hover:scale-y-100" />
+                        <FaShoppingBag className={statIconClass} aria-hidden />
+                        <h3 className={statLabelClass}>Total Orders</h3>
+                        <p className={statValueClass}>{stats.totalOrders || 0}</p>
                     </div>
 
-                    <div className={cn(
-                        "relative p-6 md:p-8 rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group overflow-hidden",
-                        bgClass,
-                        borderClass,
-                        hoverBorderClass
-                    )}>
-                        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-600 to-blue-800 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300" />
-                        <FaDollarSign className={cn(
-                            "absolute top-4 right-4 text-4xl md:text-5xl opacity-10",
-                            theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
-                        )} />
-                        <h3 className={cn(
-                            "text-xs uppercase tracking-wider font-semibold mb-3",
-                            textSecondaryClass
-                        )}>
-                            Total Revenue
-                        </h3>
-                        <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                            KES {stats.totalRevenue?.toLocaleString() || '0'}
-                        </p>
+                    <div className={statCardClass}>
+                        <div className="absolute top-0 left-0 h-full w-1 origin-top scale-y-0 bg-gradient-to-b from-blue-600 to-blue-800 transition-transform duration-300 group-hover:scale-y-100" />
+                        <FaDollarSign className={statIconClass} aria-hidden />
+                        <h3 className={statLabelClass}>Total Revenue</h3>
+                        <p className={statValueClass}>KES {stats.totalRevenue?.toLocaleString() || '0'}</p>
                     </div>
 
-                    <div className={cn(
-                        "relative p-6 md:p-8 rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group overflow-hidden",
-                        bgClass,
-                        borderClass,
-                        hoverBorderClass
-                    )}>
-                        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-600 to-blue-800 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300" />
-                        <FaUsers className={cn(
-                            "absolute top-4 right-4 text-4xl md:text-5xl opacity-10",
-                            theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
-                        )} />
-                        <h3 className={cn(
-                            "text-xs uppercase tracking-wider font-semibold mb-3",
-                            textSecondaryClass
-                        )}>
-                            Total Customers
-                        </h3>
-                        <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                            {stats.totalCustomers || 0}
-                        </p>
+                    <div className={statCardClass}>
+                        <div className="absolute top-0 left-0 h-full w-1 origin-top scale-y-0 bg-gradient-to-b from-blue-600 to-blue-800 transition-transform duration-300 group-hover:scale-y-100" />
+                        <FaUsers className={statIconClass} aria-hidden />
+                        <h3 className={statLabelClass}>Total Customers</h3>
+                        <p className={statValueClass}>{stats.totalCustomers || 0}</p>
                     </div>
 
-                    <div className={cn(
-                        "relative p-6 md:p-8 rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group overflow-hidden",
-                        bgClass,
-                        borderClass,
-                        hoverBorderClass
-                    )}>
-                        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-600 to-blue-800 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300" />
-                        <FaClock className={cn(
-                            "absolute top-4 right-4 text-4xl md:text-5xl opacity-10",
-                            theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
-                        )} />
-                        <h3 className={cn(
-                            "text-xs uppercase tracking-wider font-semibold mb-3",
-                            textSecondaryClass
-                        )}>
-                            Pending Payments
-                        </h3>
-                        <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                            {stats.pendingPayments || 0}
-                        </p>
+                    <div className={statCardClass}>
+                        <div className="absolute top-0 left-0 h-full w-1 origin-top scale-y-0 bg-gradient-to-b from-blue-600 to-blue-800 transition-transform duration-300 group-hover:scale-y-100" />
+                        <FaClock className={statIconClass} aria-hidden />
+                        <h3 className={statLabelClass}>Pending Payments</h3>
+                        <p className={statValueClass}>{stats.pendingPayments || 0}</p>
                     </div>
                 </div>
             ) : (

@@ -119,18 +119,16 @@ export default function AdminPackages() {
 
     return (
         <div>
-            <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b-2", borderClass)}>
-                <div>
-                    <h1 className={cn("text-2xl md:text-3xl font-bold", textClass)}>Packages</h1>
-                    <p className={cn("mt-1 text-sm", textSecondaryClass)}>Bundle products and offer package pricing.</p>
+            <div className={cn('mb-2 flex flex-col justify-between gap-3 border-b-2 pb-3 sm:flex-row sm:items-center sm:gap-4 sm:pb-4', borderClass)}>
+                <div className="min-w-0">
+                    <h1 className={cn('text-xl font-bold sm:text-2xl md:text-3xl', textClass)}>Packages</h1>
+                    <p className={cn('mt-0.5 text-xs sm:mt-1 sm:text-sm', textSecondaryClass)}>Bundle products and offer package pricing.</p>
                 </div>
                 <button
                     type="button"
                     onClick={openAdd}
                     className={cn(
-                        "px-4 py-2 rounded-lg font-semibold transition-all",
-                        "bg-gradient-to-r from-blue-600 to-blue-800 text-white",
-                        "hover:shadow-lg hover:-translate-y-0.5"
+                        'shrink-0 rounded-lg bg-gradient-to-r from-blue-600 to-blue-800 px-3 py-1.5 text-xs font-semibold !text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:!text-white sm:px-4 sm:py-2 sm:text-sm',
                     )}
                 >
                     Add Package
@@ -138,27 +136,27 @@ export default function AdminPackages() {
             </div>
 
             {error && (
-                <div className="p-4 mb-6 rounded-lg border-l-4 flex items-center gap-2 bg-rose-500/15 border-rose-500 text-rose-400" role="alert">
+                <div className="mb-4 flex items-center gap-2 rounded-lg border-l-4 border-rose-500 bg-rose-500/15 p-3 text-sm text-rose-400 sm:mb-6 sm:p-4" role="alert">
                     {error}
                 </div>
             )}
 
             {loading ? (
-                <div className="flex justify-center items-center min-h-[320px]">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+                <div className="flex min-h-[240px] items-center justify-center sm:min-h-[300px]">
+                    <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600 sm:h-12 sm:w-12" />
                 </div>
             ) : (
                 <>
                     {/* Mobile cards */}
-                    <div className="md:hidden space-y-3">
+                    <div className="space-y-3 md:hidden">
                         {packages.length === 0 ? (
-                            <div className={cn("rounded-2xl border p-6 text-center shadow-sm", bgClass, borderClass, textSecondaryClass)}>
+                            <div className={cn('rounded-xl border p-4 text-center text-sm shadow-sm sm:rounded-2xl sm:p-6', bgClass, borderClass, textSecondaryClass)}>
                                 No packages yet.
                             </div>
                         ) : packages.map((pkg) => (
-                            <div key={pkg._id} className={cn("rounded-2xl border p-4 shadow-sm", bgClass, borderClass)}>
-                                <div className="flex items-start gap-3">
-                                    <div className="w-14 h-14 rounded-xl overflow-hidden border border-white/10 shrink-0">
+                            <div key={pkg._id} className={cn('rounded-xl border p-3 shadow-sm sm:rounded-2xl sm:p-4', bgClass, borderClass)}>
+                                <div className="flex items-start gap-2.5 sm:gap-3">
+                                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-white/10 sm:h-14 sm:w-14 sm:rounded-xl">
                                         {pkg.images?.[0]?.url ? (
                                             <SmartImage src={pkg.images[0].url} alt="" className="w-full h-full object-cover" />
                                         ) : (
@@ -195,8 +193,7 @@ export default function AdminPackages() {
                                         type="button"
                                         onClick={() => handleDelete(pkg._id)}
                                         className={cn(
-                                            "px-3 py-2 rounded-xl text-sm font-semibold transition-all border",
-                                            "bg-rose-500/15 text-rose-400 border-rose-500/30 hover:bg-rose-500 hover:text-white"
+                                            'rounded-lg border border-rose-500/30 bg-rose-500/15 px-2.5 py-1.5 text-xs font-semibold text-rose-400 transition-all hover:bg-rose-500 hover:text-white sm:rounded-xl sm:px-3 sm:py-2 sm:text-sm',
                                         )}
                                     >
                                         Delete
@@ -225,7 +222,7 @@ export default function AdminPackages() {
                                     ))}
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="text-sm">
                                 {packages.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className={cn("px-4 md:px-6 py-10 text-center", textSecondaryClass)}>

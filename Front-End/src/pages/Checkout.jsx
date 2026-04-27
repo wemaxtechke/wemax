@@ -94,63 +94,63 @@ export default function Checkout() {
     };
 
     return (
-        <div className={`w-full min-h-screen ${theme === 'dark' ? 'bg-gray-950' : 'bg-gray-50'} py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-8`}>
-            <div className="max-w-6xl mx-auto">
+        <div className={`w-full ${theme === 'dark' ? 'bg-gray-950' : 'bg-gray-50'} py-3 px-2.5 sm:py-12 sm:px-6 md:py-16 md:px-8`}>
+            <div className="mx-auto max-w-6xl">
                 {/* Header */}
-                <h1 className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-8 flex items-center gap-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    <FaTruck className="text-blue-600" /> Checkout
+                <h1 className={`mb-3 flex items-center gap-1.5 text-lg font-bold sm:mb-8 sm:gap-3 sm:text-4xl md:text-5xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    <FaTruck className="shrink-0 text-sm text-blue-600 sm:text-3xl md:text-4xl" /> Checkout
                 </h1>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+                <div className="grid grid-cols-1 gap-3 md:gap-8 lg:grid-cols-3">
                     {/* Shipping Form */}
                     <div className="lg:col-span-2">
-                        <div className={`rounded-lg p-6 md:p-8 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                            <h2 className={`text-xl sm:text-2xl font-bold mb-6 flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                                <FaMapMarkerAlt className="text-blue-600" /> Shipping Address
+                        <div className={`rounded-lg border p-3 sm:p-6 md:p-8 ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+                            <h2 className={`mb-2 flex items-center gap-1 text-sm font-bold sm:mb-6 sm:gap-2 sm:text-2xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                <FaMapMarkerAlt className="shrink-0 text-xs text-blue-600 sm:text-xl" /> Shipping Address
                             </h2>
 
-                            <form onSubmit={handleSubmit} className="space-y-5">
+                            <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-5">
                                 {/* Name */}
                                 <div>
-                                    <label className={`block text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <label className={`mb-0.5 block text-[11px] font-semibold sm:mb-2 sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                         Full Name
                                     </label>
                                     <div className="relative">
-                                        <FaUser className={`absolute left-3 top-3 text-lg ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} />
+                                        <FaUser className={`pointer-events-none absolute left-2 top-1.5 text-xs sm:left-3 sm:top-2.5 sm:text-lg ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} />
                                         <input
                                             type="text"
                                             placeholder="John Doe"
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             required
-                                            className={`w-full pl-10 pr-4 py-2.5 rounded-lg border transition-colors ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-600'} focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-600/50' : 'focus:ring-blue-500/50'}`}
+                                            className={`w-full rounded-md border py-1.5 pl-8 pr-2.5 text-xs transition-colors sm:rounded-lg sm:py-2.5 sm:pl-10 sm:pr-4 sm:text-sm ${theme === 'dark' ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500' : 'border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-400 focus:border-blue-600'} focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-600/50' : 'focus:ring-blue-500/50'}`}
                                         />
                                     </div>
                                 </div>
 
                                 {/* Phone */}
                                 <div>
-                                    <label className={`block text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <label className={`mb-0.5 block text-[11px] font-semibold sm:mb-2 sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                         Phone Number
                                     </label>
                                     <div className="relative">
-                                        <FaPhone className={`absolute left-3 top-3 text-lg ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} />
+                                        <FaPhone className={`pointer-events-none absolute left-2 top-1.5 text-xs sm:left-3 sm:top-2.5 sm:text-lg ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} />
                                         <input
                                             type="tel"
                                             placeholder="+254 712 345 678"
                                             value={formData.phone}
                                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                             required
-                                            className={`w-full pl-10 pr-4 py-2.5 rounded-lg border transition-colors ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-600'} focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-600/50' : 'focus:ring-blue-500/50'}`}
+                                            className={`w-full rounded-md border py-1.5 pl-8 pr-2.5 text-xs transition-colors sm:rounded-lg sm:py-2.5 sm:pl-10 sm:pr-4 sm:text-sm ${theme === 'dark' ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500' : 'border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-400 focus:border-blue-600'} focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-600/50' : 'focus:ring-blue-500/50'}`}
                                         />
                                     </div>
                                 </div>
 
                                 {/* City and Region Grid */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-4">
                                     {/* City */}
                                     <div>
-                                        <label className={`block text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        <label className={`mb-0.5 block text-[11px] font-semibold sm:mb-2 sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                             City
                                         </label>
                                         <input
@@ -163,13 +163,13 @@ export default function Checkout() {
                                                 recomputeShipping(carrier, value);
                                             }}
                                             required
-                                            className={`w-full px-4 py-2.5 rounded-lg border transition-colors ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-600'} focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-600/50' : 'focus:ring-blue-500/50'}`}
+                                            className={`w-full rounded-md border px-2.5 py-1.5 text-xs transition-colors sm:rounded-lg sm:px-4 sm:py-2.5 sm:text-sm ${theme === 'dark' ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500' : 'border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-400 focus:border-blue-600'} focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-600/50' : 'focus:ring-blue-500/50'}`}
                                         />
                                     </div>
 
                                     {/* Region */}
                                     <div>
-                                        <label className={`block text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        <label className={`mb-0.5 block text-[11px] font-semibold sm:mb-2 sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                             Region
                                         </label>
                                         <input
@@ -178,14 +178,14 @@ export default function Checkout() {
                                             value={formData.region}
                                             onChange={(e) => setFormData({ ...formData, region: e.target.value })}
                                             required
-                                            className={`w-full px-4 py-2.5 rounded-lg border transition-colors ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-600'} focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-600/50' : 'focus:ring-blue-500/50'}`}
+                                            className={`w-full rounded-md border px-2.5 py-1.5 text-xs transition-colors sm:rounded-lg sm:px-4 sm:py-2.5 sm:text-sm ${theme === 'dark' ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500' : 'border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-400 focus:border-blue-600'} focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-600/50' : 'focus:ring-blue-500/50'}`}
                                         />
                                     </div>
                                 </div>
 
                                 {/* Address */}
                                 <div>
-                                    <label className={`block text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <label className={`mb-0.5 block text-[11px] font-semibold sm:mb-2 sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                         Address
                                     </label>
                                     <textarea
@@ -193,14 +193,14 @@ export default function Checkout() {
                                         value={formData.addressLine}
                                         onChange={(e) => setFormData({ ...formData, addressLine: e.target.value })}
                                         required
-                                        rows="4"
-                                        className={`w-full px-4 py-2.5 rounded-lg border transition-colors ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-600'} focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-600/50' : 'focus:ring-blue-500/50'} resize-none`}
+                                        rows={3}
+                                        className={`w-full resize-none rounded-md border px-2.5 py-1.5 text-xs transition-colors sm:min-h-[6.5rem] sm:rounded-lg sm:px-4 sm:py-2.5 sm:text-sm ${theme === 'dark' ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500' : 'border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-400 focus:border-blue-600'} focus:outline-none focus:ring-2 ${theme === 'dark' ? 'focus:ring-blue-600/50' : 'focus:ring-blue-500/50'}`}
                                     />
                                 </div>
 
                                 {/* Carrier selection */}
-                                <div className="pt-4 border-t border-gray-700/40 mt-6">
-                                    <h3 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                <div className={`mt-3 border-t pt-2 sm:mt-6 sm:pt-4 ${theme === 'dark' ? 'border-gray-700/40' : 'border-gray-200'}`}>
+                                    <h3 className={`mb-1.5 text-sm font-semibold sm:mb-3 sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                         Delivery carrier
                                     </h3>
                                     <select
@@ -213,10 +213,10 @@ export default function Checkout() {
                                                 setPaymentMethod('bank');
                                             }
                                         }}
-                                        className={`w-full px-4 py-2.5 rounded-lg border transition-colors ${
+                                        className={`w-full rounded-md border px-2.5 py-1.5 text-xs transition-colors sm:rounded-lg sm:px-4 sm:py-2.5 sm:text-sm ${
                                             theme === 'dark'
-                                                ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500'
-                                                : 'bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-600'
+                                                ? 'border-gray-600 bg-gray-700 text-white focus:border-blue-500'
+                                                : 'border-gray-300 bg-gray-50 text-gray-900 focus:border-blue-600'
                                         } focus:outline-none focus:ring-2 ${
                                             theme === 'dark' ? 'focus:ring-blue-600/50' : 'focus:ring-blue-500/50'
                                         }`}
@@ -228,19 +228,19 @@ export default function Checkout() {
                                         ))}
                                     </select>
                                     {shippingError && (
-                                        <p className="mt-2 text-sm text-rose-400">
+                                        <p className="mt-1.5 text-[11px] text-rose-400 sm:mt-2 sm:text-sm">
                                             {shippingError}
                                         </p>
                                     )}
                                 </div>
 
                                 {/* Payment method selection */}
-                                <div className="pt-4 border-t border-gray-700/40 mt-6">
-                                    <h3 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                <div className={`mt-4 border-t pt-3 sm:mt-6 sm:pt-4 ${theme === 'dark' ? 'border-gray-700/40' : 'border-gray-200'}`}>
+                                    <h3 className={`mb-2 text-base font-semibold sm:mb-3 sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                         Payment method
                                     </h3>
-                                    <div className="space-y-3">
-                                        <label className={`flex items-center gap-3 cursor-pointer p-3 rounded-lg border transition-colors ${
+                                    <div className="space-y-2 sm:space-y-3">
+                                        <label className={`flex cursor-pointer items-center gap-2 rounded-lg border p-2 transition-colors sm:gap-3 sm:p-3 ${
                                             paymentMethod === 'bank'
                                                 ? theme === 'dark'
                                                     ? 'bg-blue-900/30 border-blue-500'
@@ -257,12 +257,12 @@ export default function Checkout() {
                                                 onChange={(e) => setPaymentMethod(e.target.value)}
                                                 className="w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                             />
-                                            <span className={`font-medium ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
+                                            <span className={`text-xs font-medium sm:text-base ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
                                                 Pay now
                                             </span>
                                         </label>
                                         {carrier !== 'Shuttles and bus services' && allowCodForSelection && (
-                                            <label className={`flex items-center gap-3 cursor-pointer p-3 rounded-lg border transition-colors ${
+                                            <label className={`flex cursor-pointer items-center gap-1.5 rounded-md border p-1.5 transition-colors sm:gap-3 sm:rounded-lg sm:p-3 ${
                                                 paymentMethod === 'cod'
                                                     ? theme === 'dark'
                                                         ? 'bg-emerald-900/30 border-emerald-500'
@@ -279,13 +279,13 @@ export default function Checkout() {
                                                     onChange={(e) => setPaymentMethod(e.target.value)}
                                                     className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                                                 />
-                                                <span className={`font-medium ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
+                                                <span className={`text-xs font-medium sm:text-base ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
                                                     Pay on delivery
                                                 </span>
                                             </label>
                                         )}
                                         {carrier !== 'Shuttles and bus services' && !allowCodForSelection && formData.city && (
-                                            <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                            <p className={`text-[11px] sm:text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                                 Pay on delivery is not available for this carrier and location combination.
                                             </p>
                                         )}
@@ -296,7 +296,7 @@ export default function Checkout() {
                                 <button 
                                     type="submit"
                                     disabled={shippingLoading}
-                                    className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 rounded-lg font-bold transition-all duration-300 text-sm sm:text-base mt-8 disabled:opacity-60 disabled:cursor-not-allowed"
+                                    className="mt-4 w-full rounded-md bg-gradient-to-r from-green-600 to-green-700 py-2 text-xs font-bold text-white transition-all duration-300 hover:from-green-700 hover:to-green-800 disabled:cursor-not-allowed disabled:opacity-60 sm:mt-8 sm:rounded-lg sm:py-3 sm:text-base"
                                 >
                                     Place Order
                                 </button>
@@ -305,13 +305,13 @@ export default function Checkout() {
                     </div>
 
                     {/* Order Summary */}
-                    <div className={`rounded-lg p-6 h-fit ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                        <h2 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    <div className={`h-fit rounded-lg border p-3 sm:p-6 ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+                        <h2 className={`mb-3 text-sm font-bold sm:mb-6 sm:text-xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                             Order Summary
                         </h2>
 
-                        <div className="space-y-4 pb-6 border-b border-gray-300">
-                            <div className="flex justify-between">
+                        <div className="space-y-1.5 border-b border-gray-300 pb-3 sm:space-y-4 sm:pb-6">
+                            <div className="flex justify-between text-xs sm:text-base">
                                 <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
                                     Subtotal
                                 </span>
@@ -319,7 +319,7 @@ export default function Checkout() {
                                     KES {subtotal?.toLocaleString() || '0'}
                                 </span>
                             </div>
-                            <div className="flex justify-between">
+                            <div className="flex justify-between text-xs sm:text-base">
                                 <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
                                     Shipping
                                 </span>
@@ -327,7 +327,7 @@ export default function Checkout() {
                                     {shippingCost != null ? `KES ${shippingCost.toLocaleString()}` : 'TBD'}
                                 </span>
                             </div>
-                            <div className="flex justify-between">
+                            <div className="flex justify-between text-xs sm:text-base">
                                 <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
                                     Tax
                                 </span>
@@ -337,15 +337,15 @@ export default function Checkout() {
                             </div>
                         </div>
 
-                        <div className="flex justify-between my-6">
-                            <span className="font-bold">Total</span>
-                            <span className="text-2xl font-bold text-blue-600">
+                        <div className="my-3 flex justify-between sm:my-6">
+                            <span className={`text-xs font-bold sm:text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Total</span>
+                            <span className={`text-base font-bold sm:text-2xl ${theme === 'dark' ? 'text-white' : 'text-blue-600'}`}>
                                 KES {(subtotal + (shippingCost || 0))?.toLocaleString() || '0'}
                             </span>
                         </div>
 
                         {/* Info */}
-                        <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-blue-900/20 border-blue-800' : 'bg-blue-50 border-blue-200'} border text-sm ${theme === 'dark' ? 'text-blue-400' : 'text-blue-800'}`}>
+                        <div className={`rounded-md border p-2.5 text-[10px] leading-snug sm:rounded-lg sm:p-4 sm:text-sm sm:leading-normal ${theme === 'dark' ? 'border-blue-800 bg-blue-900/20 text-blue-400' : 'border-blue-200 bg-blue-50 text-blue-800'}`}>
                             <p>✓ Secure payment processing</p>
                             <p>✓ Fast delivery available</p>
                             <p>✓ 30-day return guarantee</p>
