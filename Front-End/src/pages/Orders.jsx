@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchOrders } from '../redux/slices/orderSlice.js';
-import { FaBox, FaCheckCircle, FaHourglassHalf, FaInfoCircle, FaFilePdf } from 'react-icons/fa';
+import { FaBox, FaInfoCircle, FaFilePdf } from 'react-icons/fa';
 import api from '../utils/api.js';
 
 export default function Orders() {
@@ -44,12 +44,12 @@ export default function Orders() {
     return (
         <div className={`w-full min-h-screen ${theme === 'dark' ? 'bg-gray-950' : 'bg-gray-50'} py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-8`}>
             <div className="max-w-4xl mx-auto">
-                <h1 className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-8 flex items-center gap-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    <FaBox className="text-blue-600" /> My Orders
+                <h1 className={`mb-8 text-xl font-bold sm:text-2xl md:mb-12 md:text-3xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    My Orders
                 </h1>
 
                 {loading ? (
-                    <div className="flex justify-center items-center py-20">
+                    <div className="flex justify-center items-center py-14 sm:py-16">
                         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
                     </div>
                 ) : (
@@ -127,9 +127,9 @@ export default function Orders() {
                                 </div>
                             ))
                         ) : (
-                            <div className={`text-center py-12 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                                <FaBox className="text-5xl mx-auto mb-4 opacity-50" />
-                                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <div className={`rounded-lg py-10 text-center sm:py-12 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                                <FaBox className="mx-auto mb-3 text-3xl opacity-50 sm:text-4xl" />
+                                <p className={`text-sm sm:text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                     You have no orders yet
                                 </p>
                             </div>

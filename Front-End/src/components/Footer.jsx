@@ -1,14 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { FaFacebook, FaInstagram, FaWhatsapp } from 'react-icons/fa';
-import { WEMAX_FACEBOOK_PAGE, WEMAX_INSTAGRAM_PAGE, getStoreWhatsAppHref } from '../constants/social.js';
 
 export default function Footer() {
     const { theme } = useSelector((state) => state?.ui || { theme: 'dark' });
 
     return (
         <footer
-            className={`border-t pb-[calc(3.25rem+env(safe-area-inset-bottom,0px))] transition-colors duration-300 ${
+            className={`border-t pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] sm:pb-[calc(3.25rem+env(safe-area-inset-bottom,0px))] transition-colors duration-300 ${
                 theme === 'dark'
                     ? 'bg-gray-950 text-gray-100 border-gray-800'
                     : 'bg-white text-gray-900 border-gray-200'
@@ -16,25 +14,26 @@ export default function Footer() {
         >
             {/* Main Footer Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div className="grid grid-cols-4 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
-                    {/* Company Info */}
-                    <div className="space-y-3">
+                <div className="mb-6 flex flex-col gap-6 lg:grid lg:grid-cols-4 lg:gap-6">
+                    {/* Company Info — centered two rows below lg; left-aligned in grid column from lg */}
+                    <div className="flex flex-col items-center gap-2 text-center sm:gap-2.5 lg:items-start lg:space-y-3 lg:text-left">
                         <h3
-                            className={`text-sm sm:text-base md:text-lg font-semibold tracking-tight ${
+                            className={`text-sm font-semibold tracking-tight sm:text-base md:text-lg ${
                                 theme === 'dark' ? 'text-gray-50' : 'text-gray-900'
                             }`}
                         >
                             WEMAX TECH
                         </h3>
                         <p
-                            className={`${
+                            className={`max-w-md leading-snug sm:leading-relaxed ${
                                 theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                            } leading-relaxed text-[11px] sm:text-xs`}
+                            } text-[11px] sm:text-xs lg:max-w-none`}
                         >
                             Premium electronics and furniture for a smarter life.
                         </p>
                     </div>
 
+                    <div className="grid grid-cols-3 gap-4 sm:gap-6 lg:contents">
                     {/* Quick Links */}
                     <div className="space-y-3">
                         <h4
@@ -163,79 +162,6 @@ export default function Footer() {
                             </Link>
                         </nav>
                     </div>
-                </div>
-
-                {/* Join us on — visible on every page (storefront footer) */}
-                <div
-                    className={`mb-6 rounded-2xl border px-4 py-6 sm:px-6 sm:py-8 ${
-                        theme === 'dark'
-                            ? 'border-gray-800 bg-gray-900/80'
-                            : 'border-gray-200 bg-gray-50'
-                    }`}
-                >
-                    <h2
-                        className={`text-center text-sm font-bold uppercase tracking-[0.14em] sm:text-base ${
-                            theme === 'dark' ? 'text-white' : 'text-gray-900'
-                        }`}
-                    >
-                        Join us on
-                    </h2>
-                    <p
-                        className={`mx-auto mt-1 max-w-md text-center text-[11px] sm:text-xs ${
-                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                        }`}
-                    >
-                        Follow WEMAX on Facebook and Instagram. Message us on WhatsApp.
-                    </p>
-                    <div className="mt-5 flex flex-wrap items-start justify-center gap-8 sm:gap-10">
-                        <a
-                            href={WEMAX_FACEBOOK_PAGE}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group flex flex-col items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1877F2] focus-visible:ring-offset-2 rounded-xl"
-                            aria-label="WEMAX on Facebook"
-                        >
-                            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1877F2] text-white shadow-lg ring-2 ring-[#1877F2]/30 transition group-hover:scale-105 sm:h-14 sm:w-14">
-                                <FaFacebook className="text-2xl sm:text-[1.75rem]" />
-                            </span>
-                            <span
-                                className={`text-xs font-bold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}
-                            >
-                                Facebook
-                            </span>
-                        </a>
-                        <a
-                            href={WEMAX_INSTAGRAM_PAGE}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group flex flex-col items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 rounded-xl"
-                            aria-label="WEMAX on Instagram"
-                        >
-                            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] text-white shadow-lg ring-2 ring-pink-500/25 transition group-hover:scale-105 sm:h-14 sm:w-14">
-                                <FaInstagram className="text-2xl sm:text-[1.75rem]" />
-                            </span>
-                            <span
-                                className={`text-xs font-bold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}
-                            >
-                                Instagram
-                            </span>
-                        </a>
-                        <a
-                            href={getStoreWhatsAppHref()}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group flex flex-col items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 rounded-xl"
-                            aria-label="Chat on WhatsApp"
-                        >
-                            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg ring-2 ring-[#25D366]/30 transition group-hover:scale-105 sm:h-14 sm:w-14">
-                                <FaWhatsapp className="text-2xl sm:text-[1.75rem]" />
-                            </span>
-                            <span
-                                className={`text-xs font-bold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}
-                            >
-                                WhatsApp
-                            </span>
-                        </a>
                     </div>
                 </div>
 

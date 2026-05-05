@@ -90,12 +90,12 @@ function Packages() {
             />
             <div className={`relative z-10 w-full min-h-screen py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-8 ${theme === 'dark' ? 'bg-gray-950/35' : 'bg-white/45'} backdrop-blur-[3px]`}>
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
+                {/* Header — compact; text-only title (matches Products) */}
                 <div className="mb-8 md:mb-12">
-                    <h1 className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-3 md:mb-4 flex items-center gap-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        <FaBox className="text-blue-600" /> Packages & Bundles
+                    <h1 className={`mb-1.5 text-xl font-bold sm:mb-2 sm:text-2xl md:text-3xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        Packages & Bundles
                     </h1>
-                    <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className={`text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                         Curated setups for churches, events, livestreams, and home comfort.
                     </p>
                 </div>
@@ -154,9 +154,9 @@ function Packages() {
                             </Link>
                         ))
                     ) : (
-                        <div className={`col-span-1 sm:col-span-2 lg:col-span-3 text-center py-16 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            <FaBox className="text-5xl mx-auto mb-4 opacity-50" />
-                            <p className="text-lg">No packages available yet. Check back soon.</p>
+                        <div className={`col-span-full text-center py-10 sm:py-12 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <FaBox className="mx-auto mb-3 text-3xl opacity-50 sm:text-4xl" />
+                            <p className="text-sm sm:text-base">No packages available yet. Check back soon.</p>
                         </div>
                     )}
                 </div>

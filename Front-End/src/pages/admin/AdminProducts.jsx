@@ -311,14 +311,31 @@ export default function AdminProducts() {
     const textSecondaryClass = theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
     const hoverBgClass = theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100';
 
+    const formFieldClass = cn(
+        'w-full rounded-lg border px-3 py-1.5 text-sm transition-all sm:px-4 sm:py-2 sm:text-base',
+        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+        bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
+        borderClass,
+        textClass,
+    );
+    const formFlexFieldClass = cn(
+        'min-w-0 flex-1 rounded-lg border px-3 py-1.5 text-sm transition-all sm:px-4 sm:py-2 sm:text-base',
+        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+        bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
+        borderClass,
+        textClass,
+    );
+    const formLabelClass = 'mb-0.5 block text-sm font-semibold sm:mb-1 sm:text-base';
+    const descTextAreaClass = cn(formFieldClass, 'min-h-[72px] resize-y sm:min-h-[100px]');
+
     return (
         <div>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-3 pb-4 border-b-2" style={{ borderColor: 'var(--color-border)' }}>
-                <h1 className={cn("text-2xl md:text-3xl font-bold m-0", textClass)}>Products</h1>
+            <div className="mb-2 flex flex-col items-start justify-between gap-3 border-b-2 pb-3 sm:flex-row sm:items-center sm:gap-4 sm:pb-4" style={{ borderColor: 'var(--color-border)' }}>
+                <h1 className={cn('m-0 text-xl font-bold sm:text-2xl md:text-3xl', textClass)}>Products</h1>
                 <button 
                     type="button"
                     onClick={openAdd}
-                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-800 px-3 py-1.5 text-xs font-semibold !text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:!text-white disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:py-2 sm:text-sm"
                 >
                     Add Product
                 </button>
@@ -326,15 +343,15 @@ export default function AdminProducts() {
             {user?.email && (
                 <div
                     className={cn(
-                        "mb-6 px-4 py-3 rounded-xl border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2",
+                        'mb-4 flex flex-col gap-1.5 rounded-lg border px-3 py-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:rounded-xl sm:px-4 sm:py-3',
                         bgClass,
                         borderClass
                     )}
                 >
-                    <div className={cn("text-sm", textSecondaryClass)}>
+                    <div className={cn('text-xs sm:text-sm', textSecondaryClass)}>
                         Signed in as <span className={cn("font-semibold", textClass)}>{user.email}</span>
                     </div>
-                    <div className={cn("text-sm", textSecondaryClass)}>
+                    <div className={cn('text-xs sm:text-sm', textSecondaryClass)}>
                         Products created by you:{' '}
                         <span className={cn("font-semibold", textClass)}>
                             {myProductCount !== null ? myProductCount : '—'}
@@ -344,8 +361,8 @@ export default function AdminProducts() {
             )}
             {error && (
                 <div className={cn(
-                    "p-4 mb-6 rounded-lg border-l-4 flex items-center gap-2",
-                    "bg-red-500/15 border-red-500 text-red-500"
+                    'mb-4 flex items-center gap-2 rounded-lg border-l-4 p-3 text-sm sm:mb-6 sm:p-4',
+                    'bg-red-500/15 border-red-500 text-red-500',
                 )} role="alert">
                     {error}
                 </div>
@@ -409,7 +426,7 @@ export default function AdminProducts() {
                                     <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="text-sm">
                                 {Array.from({ length: 6 }).map((_, i) => (
                                     <tr key={i} className={cn("border-b", borderClass, "animate-pulse")}>
                                         <td className="px-4 md:px-6 py-3">
@@ -471,13 +488,13 @@ export default function AdminProducts() {
                     {/* Mobile cards */}
                     <div className="md:hidden space-y-3">
                         {products.length === 0 ? (
-                            <div className={cn("rounded-2xl border p-6 text-center shadow-sm", bgClass, borderClass, textSecondaryClass)}>
+                            <div className={cn('rounded-xl border p-4 text-center text-sm shadow-sm sm:rounded-2xl sm:p-6', bgClass, borderClass, textSecondaryClass)}>
                                 No products yet. Add one to get started.
                             </div>
                         ) : products.map((p) => (
-                            <div key={p._id} className={cn("rounded-2xl border p-4 shadow-sm", bgClass, borderClass)}>
-                                <div className="flex items-start gap-3">
-                                    <div className="w-14 h-14 rounded-xl overflow-hidden border border-white/10 shrink-0">
+                            <div key={p._id} className={cn('rounded-xl border p-3 shadow-sm sm:rounded-2xl sm:p-4', bgClass, borderClass)}>
+                                <div className="flex items-start gap-2.5 sm:gap-3">
+                                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-white/10 sm:h-14 sm:w-14 sm:rounded-xl">
                                         {p.images?.[0]?.url ? (
                                             <SmartImage src={p.images[0].url} alt="" className="w-full h-full object-cover" />
                                         ) : (
@@ -487,30 +504,30 @@ export default function AdminProducts() {
                                         )}
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <div className={cn("font-bold text-base truncate", textClass)}>{p.name}</div>
-                                        <div className={cn("mt-1 text-sm", textSecondaryClass)}>{p.category} / {p.subCategory}</div>
+                                        <div className={cn('truncate text-sm font-bold sm:text-base', textClass)}>{p.name}</div>
+                                        <div className={cn('mt-0.5 text-xs sm:text-sm', textSecondaryClass)}>{p.category} / {p.subCategory}</div>
                                         {p.createdByEmail && (
-                                            <div className={cn("mt-1 text-xs", textSecondaryClass)}>
+                                            <div className={cn('mt-1 text-[11px] leading-snug sm:text-xs', textSecondaryClass)}>
                                                 Created by: <span className={cn("font-medium", textClass)}>{p.createdByEmail}</span>
                                             </div>
                                         )}
-                                        <div className="mt-2 flex items-center justify-between gap-3">
-                                            <div className={cn("text-lg font-extrabold", textClass)}>
+                                        <div className="mt-2 flex items-center justify-between gap-2 sm:gap-3">
+                                            <div className={cn('text-base font-bold tabular-nums sm:text-lg', textClass)}>
                                                 KES {p.newPrice?.toLocaleString()}
                                             </div>
-                                            <div className={cn("text-sm", textSecondaryClass)}>
+                                            <div className={cn('text-xs sm:text-sm', textSecondaryClass)}>
                                                 Stock: <span className={cn("font-semibold", textClass)}>{p.stock}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="mt-4 grid grid-cols-2 gap-2">
+                                <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-4">
                                     <button
                                         type="button"
                                         onClick={() => openEdit(p)}
                                         className={cn(
-                                            "px-3 py-2 rounded-xl text-sm font-semibold transition-all border",
+                                            "rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all border sm:rounded-xl sm:px-3 sm:py-2 sm:text-sm",
                                             theme === 'dark'
                                                 ? "bg-gray-900 text-gray-200 border-gray-700 hover:bg-gray-800"
                                                 : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
@@ -522,8 +539,7 @@ export default function AdminProducts() {
                                         type="button"
                                         onClick={() => handleDelete(p._id)}
                                         className={cn(
-                                            "px-3 py-2 rounded-xl text-sm font-semibold transition-all border",
-                                            "bg-red-500/15 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                                            'rounded-lg border border-red-500 bg-red-500/15 px-2.5 py-1.5 text-xs font-semibold text-red-500 transition-all hover:bg-red-500 hover:text-white sm:rounded-xl sm:px-3 sm:py-2 sm:text-sm',
                                         )}
                                     >
                                         Delete
@@ -551,7 +567,7 @@ export default function AdminProducts() {
                                     <th className={cn("px-4 md:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider sticky top-0", textSecondaryClass, bgClass)}>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="text-sm">
                                 {products.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} className={cn("px-4 md:px-6 py-8 text-center", textSecondaryClass)}>
@@ -615,78 +631,59 @@ export default function AdminProducts() {
 
                     {/* Infinite scroll sentinel */}
                     <div ref={sentinelRef} className="h-1" />
-                    <div className="mt-4 flex justify-center">
+                    <div className="mt-3 flex justify-center sm:mt-4">
                         {loadingMore ? (
-                            <div className={cn("text-sm", textSecondaryClass)}>Loading more products...</div>
+                            <div className={cn('text-xs sm:text-sm', textSecondaryClass)}>Loading more products...</div>
                         ) : !hasMore && products.length > 0 ? (
-                            <div className={cn("text-sm", textSecondaryClass)}>You’ve reached the end.</div>
+                            <div className={cn('text-xs sm:text-sm', textSecondaryClass)}>You’ve reached the end.</div>
                         ) : null}
                     </div>
                 </>
             )}
 
             {formOpen && (
-                <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 animate-in fade-in duration-200" role="dialog" aria-modal="true">
+                <div className="fixed inset-0 z-[1000] flex items-end justify-center p-0 animate-in fade-in duration-200 sm:items-center sm:p-4" role="dialog" aria-modal="true">
                     <div className="fixed inset-0 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setFormOpen(false)} />
                     <div className={cn(
-                        "relative bg-gray-800 dark:bg-gray-800 border border-gray-700 dark:border-gray-700 rounded-xl",
-                        "max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8",
-                        "shadow-2xl animate-in slide-in-from-bottom-4 duration-300",
-                        theme === 'dark' ? 'bg-gray-800' : 'bg-white',
-                        theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+                        'relative max-h-[min(92dvh,880px)] w-full max-w-2xl overflow-y-auto rounded-t-2xl border shadow-2xl sm:rounded-xl',
+                        'p-4 sm:p-6 md:p-8',
+                        'animate-in slide-in-from-bottom-4 duration-300 sm:slide-in-from-bottom-0',
+                        theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white',
                     )}>
                         <h2 className={cn(
-                            "text-2xl font-bold mb-6 pb-4 border-b-2",
+                            'border-b-2 pb-3 text-lg font-bold sm:pb-4 sm:text-xl md:text-2xl',
                             textClass,
                             borderClass
                         )}>
                             {editingId ? 'Edit Product' : 'Add Product'}
                         </h2>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-3 pt-3 sm:space-y-4 sm:pt-4">
                             <label className={cn("block", textClass)}>
-                                <span className="font-semibold mb-1 block">Name *</span>
+                                <span className={formLabelClass}>Name *</span>
                                 <input
                                     value={form.name}
                                     onChange={(e) => updateForm('name', e.target.value)}
                                     required
-                                    className={cn(
-                                        "w-full px-4 py-2 rounded-lg border transition-all",
-                                        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                        bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                        borderClass,
-                                        textClass
-                                    )}
+                                    className={formFieldClass}
                                 />
                             </label>
                             <label className={cn("block", textClass)}>
-                                <span className="font-semibold mb-1 block">Description *</span>
+                                <span className={formLabelClass}>Description *</span>
                                 <textarea
                                     value={form.description}
                                     onChange={(e) => updateForm('description', e.target.value)}
                                     rows={3}
                                     required
-                                    className={cn(
-                                        "w-full px-4 py-2 rounded-lg border transition-all resize-y min-h-[100px]",
-                                        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                        bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                        borderClass,
-                                        textClass
-                                    )}
+                                    className={descTextAreaClass}
                                 />
                             </label>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
                                 <label className={cn("block", textClass)}>
-                                    <span className="font-semibold mb-1 block">Category *</span>
+                                    <span className={formLabelClass}>Category *</span>
                                     <select
                                         value={form.category}
                                         onChange={(e) => updateForm('category', e.target.value)}
-                                        className={cn(
-                                            "w-full px-4 py-2 rounded-lg border transition-all",
-                                            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                            bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                            borderClass,
-                                            textClass
-                                        )}
+                                        className={formFieldClass}
                                     >
                                         {Object.keys(CATEGORIES).map((c) => (
                                             <option key={c} value={c}>{c}</option>
@@ -694,17 +691,11 @@ export default function AdminProducts() {
                                     </select>
                                 </label>
                                 <label className={cn("block", textClass)}>
-                                    <span className="font-semibold mb-1 block">Sub-category *</span>
+                                    <span className={formLabelClass}>Sub-category *</span>
                                     <select
                                         value={form.subCategory}
                                         onChange={(e) => updateForm('subCategory', e.target.value)}
-                                        className={cn(
-                                            "w-full px-4 py-2 rounded-lg border transition-all",
-                                            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                            bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                            borderClass,
-                                            textClass
-                                        )}
+                                        className={formFieldClass}
                                     >
                                         {subOptions.map((s) => (
                                             <option key={s} value={s}>{s}</option>
@@ -713,18 +704,12 @@ export default function AdminProducts() {
                                 </label>
                             </div>
                             <label className={cn("block", textClass)}>
-                                <span className="font-semibold mb-1 block">Brand</span>
+                                <span className={formLabelClass}>Brand</span>
                                 {form.category === 'Electronics' && form.subCategory === 'Phones' ? (
                                     <select
                                         value={form.brand}
                                         onChange={(e) => updateForm('brand', e.target.value)}
-                                        className={cn(
-                                            "w-full px-4 py-2 rounded-lg border transition-all",
-                                            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                            bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                            borderClass,
-                                            textClass
-                                        )}
+                                        className={formFieldClass}
                                     >
                                         <option value="">Select brand</option>
                                         {PHONE_BRANDS.map((b) => (
@@ -735,13 +720,7 @@ export default function AdminProducts() {
                                     <select
                                         value={form.brand}
                                         onChange={(e) => updateForm('brand', e.target.value)}
-                                        className={cn(
-                                            "w-full px-4 py-2 rounded-lg border transition-all",
-                                            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                            bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                            borderClass,
-                                            textClass
-                                        )}
+                                        className={formFieldClass}
                                     >
                                         <option value="">Select brand</option>
                                         {LAPTOP_BRANDS.map((b) => (
@@ -753,19 +732,13 @@ export default function AdminProducts() {
                                         value={form.brand}
                                         onChange={(e) => updateForm('brand', e.target.value)}
                                         placeholder="Optional"
-                                        className={cn(
-                                            "w-full px-4 py-2 rounded-lg border transition-all",
-                                            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                            bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                            borderClass,
-                                            textClass
-                                        )}
+                                        className={formFieldClass}
                                     />
                                 )}
                             </label>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
                                 <label className={cn("block", textClass)}>
-                                    <span className="font-semibold mb-1 block">New Price (KES) *</span>
+                                    <span className={formLabelClass}>New Price (KES) *</span>
                                     <input
                                         type="number"
                                         min="0"
@@ -773,117 +746,85 @@ export default function AdminProducts() {
                                         value={form.newPrice}
                                         onChange={(e) => updateForm('newPrice', e.target.value)}
                                         required
-                                        className={cn(
-                                            "w-full px-4 py-2 rounded-lg border transition-all",
-                                            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                            bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                            borderClass,
-                                            textClass
-                                        )}
+                                        className={formFieldClass}
                                     />
                                 </label>
                                 <label className={cn("block", textClass)}>
-                                    <span className="font-semibold mb-1 block">Old Price (KES) — optional</span>
+                                    <span className={formLabelClass}>Old Price (KES) — optional</span>
                                     <input
                                         type="number"
                                         min="0"
                                         step="0.01"
                                         value={form.oldPrice}
                                         onChange={(e) => updateForm('oldPrice', e.target.value)}
-                                        className={cn(
-                                            "w-full px-4 py-2 rounded-lg border transition-all",
-                                            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                            bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                            borderClass,
-                                            textClass
-                                        )}
+                                        className={formFieldClass}
                                     />
                                 </label>
                             </div>
                             <label className={cn("block", textClass)}>
-                                <span className="font-semibold mb-1 block">Stock *</span>
+                                <span className={formLabelClass}>Stock *</span>
                                 <input
                                     type="number"
                                     min="0"
                                     value={form.stock}
                                     onChange={(e) => updateForm('stock', e.target.value)}
                                     required
-                                    className={cn(
-                                        "w-full px-4 py-2 rounded-lg border transition-all",
-                                        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                        bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                        borderClass,
-                                        textClass
-                                    )}
+                                    className={formFieldClass}
                                 />
                             </label>
-                            <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-                                <label className={cn("flex items-center gap-2 cursor-pointer", textClass)}>
+                            <div className="flex flex-col gap-2 md:flex-row md:gap-6">
+                                <label className={cn("flex cursor-pointer items-center gap-2 text-sm sm:text-base", textClass)}>
                                     <input
                                         type="checkbox"
                                         checked={form.freeShipping}
                                         onChange={(e) => updateForm('freeShipping', e.target.checked)}
-                                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className="h-3.5 w-3.5 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500 sm:h-4 sm:w-4"
                                     />
                                     <span>Free Shipping</span>
                                 </label>
-                                <label className={cn("flex items-center gap-2 cursor-pointer", textClass)}>
+                                <label className={cn("flex cursor-pointer items-center gap-2 text-sm sm:text-base", textClass)}>
                                     <input
                                         type="checkbox"
                                         checked={form.isFeatured}
                                         onChange={(e) => updateForm('isFeatured', e.target.checked)}
-                                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className="h-3.5 w-3.5 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500 sm:h-4 sm:w-4"
                                     />
                                     <span>Featured</span>
                                 </label>
-                                <label className={cn("flex items-center gap-2 cursor-pointer", textClass)}>
+                                <label className={cn("flex cursor-pointer items-center gap-2 text-sm sm:text-base", textClass)}>
                                     <input
                                         type="checkbox"
                                         checked={form.isFlashDeal}
                                         onChange={(e) => updateForm('isFlashDeal', e.target.checked)}
-                                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className="h-3.5 w-3.5 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500 sm:h-4 sm:w-4"
                                     />
                                     <span>Flash Deal</span>
                                 </label>
                             </div>
 
-                            <div className={cn("mt-6 pt-4 border-t", borderClass)}>
-                                <span className={cn("block font-semibold mb-3", textClass)}>Specifications</span>
-                                <div className="space-y-3 mb-3">
+                            <div className={cn("mt-4 border-t pt-3 sm:mt-6 sm:pt-4", borderClass)}>
+                                <span className={cn("mb-2 block text-sm font-semibold sm:mb-3 sm:text-base", textClass)}>Specifications</span>
+                                <div className="mb-3 space-y-2 sm:space-y-3">
                                     <div className="space-y-2">
                                         {(form.specifications || []).map((spec, i) => (
-                                            <div key={i} className="flex flex-col md:flex-row gap-2">
+                                            <div key={i} className="flex flex-col gap-2 md:flex-row md:items-center">
                                                 <input
                                                     placeholder="Key"
                                                     value={spec.key}
                                                     onChange={(e) => updateSpec(i, 'key', e.target.value)}
-                                                    className={cn(
-                                                        "flex-1 px-4 py-2 rounded-lg border transition-all",
-                                                        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                                        bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                                        borderClass,
-                                                        textClass
-                                                    )}
+                                                    className={formFlexFieldClass}
                                                 />
                                                 <input
                                                     placeholder="Value"
                                                     value={spec.value}
                                                     onChange={(e) => updateSpec(i, 'value', e.target.value)}
-                                                    className={cn(
-                                                        "flex-1 px-4 py-2 rounded-lg border transition-all",
-                                                        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                                        bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                                        borderClass,
-                                                        textClass
-                                                    )}
+                                                    className={formFlexFieldClass}
                                                 />
                                                 <button 
                                                     type="button" 
                                                     onClick={() => removeSpec(i)}
                                                     className={cn(
-                                                        "px-3 py-2 text-xs rounded font-medium transition-all",
-                                                        "bg-red-500/15 border border-red-500 text-red-500",
-                                                        "hover:bg-red-500 hover:text-white"
+                                                        'rounded-md border border-red-500 bg-red-500/15 px-2.5 py-1.5 text-[11px] font-medium text-red-500 transition-all hover:bg-red-500 hover:text-white sm:px-3 sm:py-2 sm:text-xs',
                                                     )}
                                                 >
                                                     Remove
@@ -894,7 +835,7 @@ export default function AdminProducts() {
                                             type="button" 
                                             onClick={addSpec}
                                             className={cn(
-                                                "px-3 py-2 text-xs rounded font-medium transition-all",
+                                                "px-3 py-1.5 text-[11px] rounded-md font-medium transition-all sm:py-2 sm:text-xs",
                                                 "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300",
                                                 "border border-gray-300 dark:border-gray-600",
                                                 "hover:bg-gray-200 dark:hover:bg-gray-600"
@@ -908,13 +849,10 @@ export default function AdminProducts() {
                                             placeholder={`Paste raw specifications here, e.g.\nFront Camera\t5MP\nBack Camera\t8MP\nDisplay\t5.0″ inch\n...`}
                                             value={specPasteText}
                                             onChange={(e) => setSpecPasteText(e.target.value)}
-                                            rows={6}
+                                            rows={5}
                                             className={cn(
-                                                "w-full px-3 py-2 rounded-lg border text-sm resize-y min-h-[120px]",
-                                                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                                bgClass === 'bg-gray-800' ? 'bg-gray-900' : 'bg-gray-50',
-                                                borderClass,
-                                                textClass
+                                                formFieldClass,
+                                                'min-h-[96px] resize-y text-xs sm:min-h-[120px] sm:text-sm',
                                             )}
                                         />
                                         <button
@@ -922,10 +860,9 @@ export default function AdminProducts() {
                                             disabled={specGenerating || !specPasteText.trim()}
                                             onClick={generateSpecsFromText}
                                             className={cn(
-                                                "inline-flex items-center justify-center px-3 py-2 rounded-lg text-xs font-semibold transition-all",
-                                                "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white",
-                                                "hover:shadow-md hover:-translate-y-0.5",
-                                                "disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                                                'inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-3 py-1.5 text-[11px] font-semibold !text-white transition-all hover:!text-white sm:py-2 sm:text-xs',
+                                                'hover:shadow-md hover:-translate-y-0.5',
+                                                'disabled:cursor-not-allowed disabled:opacity-60 disabled:transform-none',
                                             )}
                                         >
                                             {specGenerating ? 'Generating with AI...' : 'Generate specs from text (AI)'}
@@ -939,20 +876,20 @@ export default function AdminProducts() {
                             </div>
 
                             <div
-                                className={cn("mt-6 pt-4 border-t", borderClass)}
+                                className={cn("mt-4 border-t pt-3 sm:mt-6 sm:pt-4", borderClass)}
                                 onPaste={handlePasteImage}
                             >
-                                <span className={cn("block font-semibold mb-3", textClass)}>Images</span>
-                                <div className="flex flex-wrap gap-3 mb-3">
+                                <span className={cn("mb-2 block text-sm font-semibold sm:mb-3 sm:text-base", textClass)}>Images</span>
+                                <div className="mb-3 flex flex-wrap gap-2 sm:gap-3">
                                     {existingImages.map((img, i) => (
                                         <div key={i} className="relative">
-                                            <SmartImage src={img.url} alt="" className="w-20 h-20 object-cover rounded" />
-                                            <span className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center py-1 rounded-b">Existing</span>
+                                            <SmartImage src={img.url} alt="" className="h-16 w-16 rounded object-cover sm:h-20 sm:w-20" />
+                                            <span className="absolute bottom-0 left-0 right-0 rounded-b bg-black/50 py-0.5 text-center text-[10px] text-white sm:py-1 sm:text-xs">Existing</span>
                                         </div>
                                     ))}
                                     {imageFiles.map((file, i) => (
                                         <div key={`f-${i}`} className="relative">
-                                            <img src={URL.createObjectURL(file)} alt="" className="w-20 h-20 object-cover rounded" />
+                                            <img src={URL.createObjectURL(file)} alt="" className="h-16 w-16 rounded object-cover sm:h-20 sm:w-20" />
                                             <button 
                                                 type="button" 
                                                 onClick={() => removeImageFile(i)}
@@ -966,12 +903,10 @@ export default function AdminProducts() {
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
                                     <label className={cn(
-                                        "inline-block px-4 py-2 rounded-lg cursor-pointer transition-all",
-                                        "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300",
-                                        "border border-gray-300 dark:border-gray-600",
-                                        "hover:bg-gray-200 dark:hover:bg-gray-600"
+                                        'inline-block cursor-pointer rounded-lg border border-gray-300 bg-gray-100 px-3 py-1.5 text-center text-xs transition-all dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 sm:px-4 sm:py-2 sm:text-sm',
+                                        'hover:bg-gray-200 dark:hover:bg-gray-600',
                                     )}>
                                         <input
                                             type="file"
@@ -984,8 +919,7 @@ export default function AdminProducts() {
                                     </label>
                                     <div
                                         className={cn(
-                                            "flex-1 px-4 py-2 rounded-lg border text-xs sm:text-sm",
-                                            "border-dashed",
+                                            'flex-1 rounded-lg border border-dashed px-3 py-2 text-[11px] leading-snug sm:px-4 sm:text-xs md:text-sm',
                                             borderClass,
                                             textSecondaryClass
                                         )}
@@ -996,16 +930,13 @@ export default function AdminProducts() {
                                 </div>
                             </div>
 
-                            <div className={cn("flex flex-col sm:flex-row gap-3 mt-8 pt-4 border-t", borderClass)}>
+                            <div className={cn("mt-5 flex flex-col gap-2 border-t pt-3 sm:mt-8 sm:flex-row sm:gap-3 sm:pt-4", borderClass)}>
                                 <button 
                                     type="button" 
                                     onClick={() => setFormOpen(false)}
                                     className={cn(
-                                        "px-6 py-2 rounded-lg font-medium transition-all",
-                                        "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300",
-                                        "border border-gray-300 dark:border-gray-600",
-                                        "hover:bg-gray-200 dark:hover:bg-gray-600",
-                                        "sm:flex-1"
+                                        'rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium transition-all dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 sm:flex-1 sm:px-6',
+                                        'hover:bg-gray-200 dark:hover:bg-gray-600',
                                     )}
                                 >
                                     Cancel
@@ -1014,11 +945,8 @@ export default function AdminProducts() {
                                     type="submit" 
                                     disabled={saving}
                                     className={cn(
-                                        "px-6 py-2 rounded-lg font-semibold transition-all",
-                                        "bg-gradient-to-r from-blue-600 to-blue-800 text-white",
-                                        "hover:shadow-lg hover:-translate-y-0.5",
-                                        "disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none",
-                                        "sm:flex-1"
+                                        'rounded-lg bg-gradient-to-r from-blue-600 to-blue-800 px-4 py-2 text-sm font-semibold !text-white transition-all hover:!text-white disabled:cursor-not-allowed disabled:opacity-60 disabled:transform-none sm:flex-1 sm:px-6 sm:text-base',
+                                        'hover:shadow-lg hover:-translate-y-0.5',
                                     )}
                                 >
                                     {saving ? 'Saving...' : (editingId ? 'Update Product' : 'Create Product')}

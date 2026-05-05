@@ -40,13 +40,13 @@ export default function Contact() {
         'radial-gradient(ellipse 60% 80% at 50% 100%, rgba(186, 230, 253, 0.2), transparent 55%)',
     ].join(', ');
 
-    const inputClass = `w-full px-4 py-3 rounded-lg border transition-colors ${
+    const inputClass = `w-full rounded-lg border px-3 py-2.5 text-sm transition-colors sm:px-4 sm:py-3 sm:text-base ${
         theme === 'dark'
             ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-600/50'
             : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/50'
     } outline-none`;
 
-    const labelClass = `block text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`;
+    const labelClass = `mb-1.5 block text-xs font-semibold sm:mb-2 sm:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`;
 
     return (
         <div className="relative w-full min-h-screen overflow-hidden">
@@ -61,62 +61,62 @@ export default function Contact() {
             />
             <div className={`relative z-10 w-full min-h-screen py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-8 ${theme === 'dark' ? 'bg-gray-950/35' : 'bg-white/45'} backdrop-blur-[3px]`}>
                 <div className="max-w-4xl mx-auto">
-                    {/* Header */}
-                    <div className="text-center mb-10 md:mb-12">
-                        <div className="flex justify-center mb-4">
-                            <FaHeadset className="text-blue-600 text-4xl sm:text-5xl" />
+                    {/* Header — compact scale (Packages / Products) */}
+                    <div className="mb-8 text-center md:mb-10">
+                        <div className="mb-3 flex justify-center sm:mb-4">
+                            <FaHeadset className="text-2xl text-blue-600 sm:text-3xl" />
                         </div>
-                        <h1 className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-3 md:mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        <h1 className={`mb-2 text-xl font-bold sm:mb-3 sm:text-2xl md:text-3xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                             Contact Us
                         </h1>
-                        <p className={`text-base sm:text-lg max-w-2xl mx-auto ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <p className={`mx-auto max-w-2xl text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                             Have questions? Reach out and we'll get back to you as soon as possible.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
                         {/* Contact Info */}
-                        <div className={`rounded-xl p-6 ${theme === 'dark' ? 'bg-gray-800/60' : 'bg-white/80'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} h-fit`}>
-                            <h2 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        <div className={`h-fit rounded-xl p-5 sm:p-6 ${theme === 'dark' ? 'bg-gray-800/60' : 'bg-white/80'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                            <h2 className={`mb-3 text-base font-bold sm:mb-4 sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                 Get in Touch
                             </h2>
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 <a
                                     href="mailto:support@wemax.co.ke"
-                                    className={`flex items-center gap-3 ${theme === 'dark' ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600 hover:text-blue-600'} transition-colors`}
+                                    className={`flex items-center gap-2.5 text-sm transition-colors sm:gap-3 sm:text-base ${theme === 'dark' ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600 hover:text-blue-600'}`}
                                 >
-                                    <FaEnvelope className="text-blue-500 flex-shrink-0" />
+                                    <FaEnvelope className="h-4 w-4 shrink-0 text-blue-500 sm:h-[1.125rem] sm:w-[1.125rem]" />
                                     <span>support@wemax.co.ke</span>
                                 </a>
                                 <a
                                     href="tel:+254798578998"
-                                    className={`flex items-center gap-3 ${theme === 'dark' ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600 hover:text-blue-600'} transition-colors`}
+                                    className={`flex items-center gap-2.5 text-sm transition-colors sm:gap-3 sm:text-base ${theme === 'dark' ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600 hover:text-blue-600'}`}
                                 >
-                                    <FaPhone className="text-blue-500 flex-shrink-0" />
+                                    <FaPhone className="h-4 w-4 shrink-0 text-blue-500 sm:h-[1.125rem] sm:w-[1.125rem]" />
                                     <span>+254 798578998</span>
                                 </a>
                                 <a
                                     href="tel:+254112634313"
-                                    className={`flex items-center gap-3 ${theme === 'dark' ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600 hover:text-blue-600'} transition-colors`}
+                                    className={`flex items-center gap-2.5 text-sm transition-colors sm:gap-3 sm:text-base ${theme === 'dark' ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600 hover:text-blue-600'}`}
                                 >
-                                    <FaPhone className="text-blue-500 flex-shrink-0" />
+                                    <FaPhone className="h-4 w-4 shrink-0 text-blue-500 sm:h-[1.125rem] sm:w-[1.125rem]" />
                                     <span>+254 112634313</span>
                                 </a>
-                                <div className={`flex items-start gap-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                    <FaMapMarkerAlt className="text-blue-500 flex-shrink-0 mt-0.5" />
+                                <div className={`flex items-start gap-2.5 text-sm sm:gap-3 sm:text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    <FaMapMarkerAlt className="mt-0.5 h-4 w-4 shrink-0 text-blue-500 sm:h-[1.125rem] sm:w-[1.125rem]" />
                                     <span>Nakuru, Kenya</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Contact Form */}
-                        <div className={`lg:col-span-2 rounded-xl p-6 sm:p-8 ${theme === 'dark' ? 'bg-gray-800/60' : 'bg-white/80'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                            <h2 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        <div className={`rounded-xl p-5 sm:p-7 lg:col-span-2 ${theme === 'dark' ? 'bg-gray-800/60' : 'bg-white/80'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                            <h2 className={`mb-3 text-base font-bold sm:mb-4 sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                 Send a Message
                             </h2>
 
                             {submitted ? (
-                                <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-800'}`}>
+                                <div className={`rounded-lg p-3 text-sm sm:p-4 sm:text-base ${theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-800'}`}>
                                     <p className="font-semibold">Thank you! Your message has been sent. We'll get back to you soon.</p>
                                 </div>
                             ) : (
@@ -175,7 +175,7 @@ export default function Contact() {
                                     </div>
                                     <button
                                         type="submit"
-                                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold !text-white transition-colors hover:bg-blue-700 hover:!text-white sm:w-auto sm:px-6 sm:py-3 sm:text-base [&_svg]:!text-white"
                                     >
                                         <FaPaperPlane /> Send Message
                                     </button>

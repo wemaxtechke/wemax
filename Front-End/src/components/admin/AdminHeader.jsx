@@ -26,13 +26,13 @@ export default function AdminHeader({ onMenuToggle }) {
             "sticky top-0 z-50 border-b backdrop-blur-lg",
             bgClass,
             borderClass,
-            "px-4 md:px-8 py-4 flex flex-wrap justify-between items-center gap-4"
+            "flex flex-wrap items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4 md:px-8 md:py-4"
         )}>
-            <div className="flex items-center gap-4 flex-1 min-w-0">
+            <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3 md:gap-4">
                 <button 
                     onClick={handleMenuToggle}
                     className={cn(
-                        "md:hidden p-2 rounded-lg transition-all",
+                        "shrink-0 rounded-lg p-2 transition-all md:hidden",
                         buttonBgClass,
                         borderClass,
                         "border",
@@ -45,13 +45,14 @@ export default function AdminHeader({ onMenuToggle }) {
                     <FaBars className="text-lg" />
                 </button>
                 <h1 className={cn(
-                    "text-xl md:text-2xl font-bold truncate",
+                    "min-w-0 text-base font-bold sm:text-xl md:text-2xl",
                     textClass
                 )}>
-                    Admin Dashboard
+                    <span className="sm:hidden">Admin</span>
+                    <span className="hidden sm:inline">Admin Dashboard</span>
                 </h1>
             </div>
-            <div className="flex items-center gap-2 md:gap-4 flex-wrap">
+            <div className="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2 md:gap-4">
                 <button 
                     onClick={() => dispatch(toggleTheme())}
                     className={cn(
@@ -72,7 +73,7 @@ export default function AdminHeader({ onMenuToggle }) {
                 <button 
                     onClick={() => dispatch(logout())}
                     className={cn(
-                        "px-4 py-2 rounded-lg font-medium transition-all text-sm md:text-base",
+                        "rounded-lg px-3 py-1.5 text-xs font-medium transition-all sm:px-4 sm:py-2 sm:text-sm md:text-base",
                         buttonBgClass,
                         borderClass,
                         "border",

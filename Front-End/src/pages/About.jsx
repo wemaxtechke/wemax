@@ -37,46 +37,52 @@ export default function About() {
             <div className={`relative z-10 w-full min-h-screen py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-8 ${theme === 'dark' ? 'bg-gray-950/35' : 'bg-white/45'} backdrop-blur-[3px]`}>
                 <div className="max-w-4xl mx-auto">
                     {/* Header */}
-                    <div className="text-center mb-12 md:mb-16">
-                        <div className="flex justify-center mb-4">
-                            <img src={wemaxLogo} alt="Wemax" className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl shadow-lg" />
+                    <div className="mb-8 text-center md:mb-12">
+                        <div className="mb-3 flex justify-center sm:mb-4">
+                            <img
+                                src={wemaxLogo}
+                                alt="Wemax"
+                                className="block h-14 w-auto max-w-[11rem] shrink-0 object-contain object-center sm:h-16 sm:max-w-[13rem] md:h-[4.5rem] md:max-w-[15rem]"
+                                decoding="async"
+                                fetchPriority="low"
+                            />
                         </div>
-                        <h1 className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-3 md:mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        <h1 className={`mb-2 text-2xl font-bold sm:text-3xl md:mb-3 md:text-4xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                             About Wemax Tech
                         </h1>
-                        <p className={`text-base sm:text-lg max-w-2xl mx-auto ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <p className={`mx-auto max-w-2xl text-sm sm:text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                             Premium electronics and furniture for a smarter, more connected life.
                         </p>
                     </div>
 
                     {/* Mission & Story */}
-                    <div className={`rounded-xl p-6 sm:p-8 mb-8 ${theme === 'dark' ? 'bg-gray-800/60' : 'bg-white/80'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                        <div className="flex items-center gap-3 mb-4">
-                            <FaInfoCircle className="text-blue-600 text-2xl flex-shrink-0" />
-                            <h2 className={`text-xl sm:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    <div className={`mb-8 rounded-xl p-5 sm:p-7 ${theme === 'dark' ? 'bg-gray-800/60' : 'bg-white/80'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                        <div className="mb-3 flex items-center gap-2 sm:gap-3 sm:mb-4">
+                            <FaInfoCircle className="h-5 w-5 shrink-0 text-blue-600 sm:h-6 sm:w-6" />
+                            <h2 className={`text-lg font-bold sm:text-xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                 Our Story
                             </h2>
                         </div>
-                        <p className={`leading-relaxed mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <p className={`mb-4 text-sm leading-relaxed sm:text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                             Wemax Tech™ is an online electronics and technology solutions brand specializing in retail and product delivery using trusted courier partners including Panda Courier Services and Fargo Wells.
                         </p>
-                        <p className={`leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <p className={`text-sm leading-relaxed sm:text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                             We bring together premium electronics and designer furniture in one place. From church setups and event livestreams to home offices and living rooms, we curate packages and products that fit your needs. We operate a hybrid drop-shipping model, acting as an intermediary between suppliers and customers while maintaining full quality responsibility.
                         </p>
                     </div>
 
                     {/* Mission & Vision */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div className={`rounded-xl p-6 sm:p-8 ${theme === 'dark' ? 'bg-gray-800/60' : 'bg-white/80'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                            <FaBullseye className="text-blue-600 text-2xl mb-4" />
-                            <h3 className={`text-lg font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Our Mission</h3>
+                    <div className="mb-8 grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
+                        <div className={`rounded-xl p-5 sm:p-7 ${theme === 'dark' ? 'bg-gray-800/60' : 'bg-white/80'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                            <FaBullseye className="mb-3 h-5 w-5 text-blue-600 sm:h-6 sm:w-6" />
+                            <h3 className={`mb-1.5 text-base font-bold sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Our Mission</h3>
                             <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                 To deliver quality electronics and furniture that enhance your spaces—whether for worship, work, or home.
                             </p>
                         </div>
-                        <div className={`rounded-xl p-6 sm:p-8 ${theme === 'dark' ? 'bg-gray-800/60' : 'bg-white/80'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                            <FaAward className="text-blue-600 text-2xl mb-4" />
-                            <h3 className={`text-lg font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Our Vision</h3>
+                        <div className={`rounded-xl p-5 sm:p-7 ${theme === 'dark' ? 'bg-gray-800/60' : 'bg-white/80'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                            <FaAward className="mb-3 h-5 w-5 text-blue-600 sm:h-6 sm:w-6" />
+                            <h3 className={`mb-1.5 text-base font-bold sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Our Vision</h3>
                             <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                 To be Kenya's trusted destination for electronics and furniture packages that combine value with quality.
                             </p>
@@ -84,27 +90,27 @@ export default function About() {
                     </div>
 
                     {/* What We Offer */}
-                    <div className={`rounded-xl p-6 sm:p-8 mb-8 ${theme === 'dark' ? 'bg-gray-800/60' : 'bg-white/80'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                        <div className="flex items-center gap-3 mb-4">
-                            <FaHeart className="text-blue-600 text-2xl flex-shrink-0" />
-                            <h2 className={`text-xl sm:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    <div className={`mb-8 rounded-xl p-5 sm:p-7 ${theme === 'dark' ? 'bg-gray-800/60' : 'bg-white/80'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                        <div className="mb-3 flex items-center gap-2 sm:gap-3 sm:mb-4">
+                            <FaHeart className="h-5 w-5 shrink-0 text-blue-600 sm:h-6 sm:w-6" />
+                            <h2 className={`text-lg font-bold sm:text-xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                 What We Offer
                             </h2>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div className="flex items-start gap-3">
-                                <FaBox className="text-blue-500 mt-1 flex-shrink-0" />
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
+                            <div className="flex items-start gap-2.5 sm:gap-3">
+                                <FaBox className="mt-0.5 h-4 w-4 shrink-0 text-blue-500 sm:h-[1.125rem] sm:w-[1.125rem]" />
                                 <div>
-                                    <h4 className={`font-semibold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Electronics</h4>
+                                    <h4 className={`mb-0.5 text-sm font-semibold sm:text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Electronics</h4>
                                     <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                         Cameras, livestream gear, speakers, and tech for churches, events, and home.
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex items-start gap-3">
-                                <FaCouch className="text-blue-500 mt-1 flex-shrink-0" />
+                            <div className="flex items-start gap-2.5 sm:gap-3">
+                                <FaCouch className="mt-0.5 h-4 w-4 shrink-0 text-blue-500 sm:h-[1.125rem] sm:w-[1.125rem]" />
                                 <div>
-                                    <h4 className={`font-semibold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Furniture</h4>
+                                    <h4 className={`mb-0.5 text-sm font-semibold sm:text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Furniture</h4>
                                     <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                         Designer furniture and bundles to create comfortable, functional spaces.
                                     </p>
@@ -117,11 +123,7 @@ export default function About() {
                     <div className="text-center">
                         <Link
                             to="/packages"
-                            className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${
-                                theme === 'dark'
-                                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                            }`}
+                            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold !text-white transition-colors hover:bg-blue-700 hover:!text-white sm:px-6 sm:py-3 sm:text-base [&_svg]:!text-white"
                         >
                             <FaBox /> Explore Our Packages
                         </Link>

@@ -58,7 +58,7 @@ export default function Cart() {
     ].join(', ');
 
     return (
-        <div className="relative w-full min-h-screen overflow-hidden">
+        <div className="relative w-full overflow-x-hidden">
             <div
                 className="absolute inset-0 z-0"
                 style={{
@@ -68,11 +68,11 @@ export default function Cart() {
                     backgroundSize: 'cover',
                 }}
             />
-            <div className={`relative z-10 w-full min-h-screen py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-8 ${theme === 'dark' ? 'bg-gray-950/35' : 'bg-white/45'} backdrop-blur-[3px]`}>
+            <div className={`relative z-10 w-full py-3 sm:py-12 md:py-16 px-2.5 sm:px-6 md:px-8 ${theme === 'dark' ? 'bg-gray-950/35' : 'bg-white/45'} backdrop-blur-[3px]`}>
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
-                <h1 className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-8 flex items-center gap-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    <FaShoppingCart className="text-blue-600" /> Shopping Cart
+                <h1 className={`mb-3 flex items-center gap-1.5 text-lg font-bold sm:mb-8 sm:gap-3 sm:text-3xl md:text-4xl lg:text-5xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    <FaShoppingCart className="shrink-0 text-base text-blue-600 sm:text-3xl md:text-4xl" /> Shopping Cart
                 </h1>
 
                 {loading ? (
@@ -80,32 +80,32 @@ export default function Cart() {
                         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+                    <div className="grid grid-cols-1 gap-3 md:gap-8 lg:grid-cols-3">
                         {/* Cart Items */}
                         <div className="lg:col-span-2">
                             {(items.length > 0 || packages.length > 0) ? (
-                                <div className="space-y-4">
+                                <div className="space-y-1.5 sm:space-y-4">
                                     {/* Product Items */}
                                     {items.map((item) => (
                                         <div 
                                             key={item._id} 
-                                            className={`p-4 md:p-6 rounded-lg flex items-center gap-4 justify-between ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}
+                                            className={`flex items-start gap-1.5 rounded-md border p-2 sm:items-center sm:gap-4 sm:rounded-lg sm:p-4 md:p-6 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
                                         >
                                             <SmartImage
                                                 src={item.product?.images?.[0]?.url || wemaxLogo}
                                                 alt={item.product?.name || 'Product'}
-                                                className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg flex-shrink-0"
+                                                className="h-10 w-10 shrink-0 rounded-md object-cover sm:h-16 sm:w-16 sm:rounded-lg md:h-20 md:w-20"
                                             />
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                                                    {item.product?.name}
-                                                </h3>
-                                                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                                    Qty: {item.quantity}
-                                                </p>
-                                            </div>
-                                            <div className="text-right mr-4">
-                                                <p className="text-lg md:text-xl font-bold text-grey-600">
+                                            <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:gap-2 sm:items-center sm:justify-between">
+                                                <div className="min-w-0">
+                                                    <h3 className={`line-clamp-2 text-[11px] font-semibold sm:text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                                        {item.product?.name}
+                                                    </h3>
+                                                    <p className={`mt-px text-[9px] sm:mt-1 sm:text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                        Qty: {item.quantity}
+                                                    </p>
+                                                </div>
+                                                <p className={`shrink-0 text-xs font-bold sm:text-right sm:text-lg md:text-xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                                     KES {item.price?.toLocaleString()}
                                                 </p>
                                             </div>
@@ -113,13 +113,13 @@ export default function Cart() {
                                                 type="button"
                                                 onClick={() => handleRemoveProduct(item._id)}
                                                 disabled={removingId === item._id}
-                                                className={`p-2 rounded-lg transition-colors ${theme === 'dark' ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-100'} disabled:opacity-50 disabled:cursor-not-allowed`}
+                                                className={`shrink-0 rounded-md p-1 transition-colors sm:rounded-lg sm:p-2 ${theme === 'dark' ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-100'} disabled:cursor-not-allowed disabled:opacity-50`}
                                                 aria-label="Remove from cart"
                                             >
                                                 {removingId === item._id ? (
-                                                    <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                                    <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent sm:h-4 sm:w-4" />
                                                 ) : (
-                                                    <FaTrash />
+                                                    <FaTrash className="text-[10px] sm:text-sm" />
                                                 )}
                                             </button>
                                         </div>
@@ -129,23 +129,23 @@ export default function Cart() {
                                     {packages.map((pkg) => (
                                         <div 
                                             key={pkg._id} 
-                                            className={`p-4 md:p-6 rounded-lg flex items-center gap-4 justify-between ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}
+                                            className={`flex items-start gap-1.5 rounded-md border p-2 sm:items-center sm:gap-4 sm:rounded-lg sm:p-4 md:p-6 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
                                         >
                                             <SmartImage
                                                 src={pkg.package?.images?.[0]?.url || wemaxLogo}
                                                 alt={pkg.package?.name || 'Package'}
-                                                className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg flex-shrink-0"
+                                                className="h-10 w-10 shrink-0 rounded-md object-cover sm:h-16 sm:w-16 sm:rounded-lg md:h-20 md:w-20"
                                             />
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                                                    📦 {pkg.package?.name}
-                                                </h3>
-                                                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                                    Qty: {pkg.quantity}
-                                                </p>
-                                            </div>
-                                            <div className="text-right mr-4">
-                                                <p className="text-lg md:text-xl font-bold text-blue-600">
+                                            <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:gap-2 sm:items-center sm:justify-between">
+                                                <div className="min-w-0">
+                                                    <h3 className={`line-clamp-2 text-[11px] font-semibold sm:text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                                        📦 {pkg.package?.name}
+                                                    </h3>
+                                                    <p className={`mt-px text-[9px] sm:mt-1 sm:text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                        Qty: {pkg.quantity}
+                                                    </p>
+                                                </div>
+                                                <p className="shrink-0 text-xs font-bold text-blue-600 sm:text-right sm:text-lg md:text-xl">
                                                     KES {pkg.price?.toLocaleString()}
                                                 </p>
                                             </div>
@@ -153,13 +153,13 @@ export default function Cart() {
                                                 type="button"
                                                 onClick={() => handleRemovePackage(pkg._id)}
                                                 disabled={removingId === pkg._id}
-                                                className={`p-2 rounded-lg transition-colors ${theme === 'dark' ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-100'} disabled:opacity-50 disabled:cursor-not-allowed`}
+                                                className={`shrink-0 rounded-md p-1 transition-colors sm:rounded-lg sm:p-2 ${theme === 'dark' ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-100'} disabled:cursor-not-allowed disabled:opacity-50`}
                                                 aria-label="Remove package from cart"
                                             >
                                                 {removingId === pkg._id ? (
-                                                    <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                                    <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent sm:h-4 sm:w-4" />
                                                 ) : (
-                                                    <FaTrash />
+                                                    <FaTrash className="text-[10px] sm:text-sm" />
                                                 )}
                                             </button>
                                         </div>
@@ -182,13 +182,13 @@ export default function Cart() {
                         </div>
 
                         {/* Order Summary */}
-                        <div className={`rounded-lg p-6 h-fit ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                            <h2 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        <div className={`h-fit rounded-lg border p-3 sm:p-6 ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+                            <h2 className={`mb-3 text-sm font-bold sm:mb-6 sm:text-xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                 Order Summary
                             </h2>
                             
-                            <div className="space-y-4 mb-6 pb-6 border-b border-gray-300">
-                                <div className="flex justify-between">
+                            <div className="mb-3 space-y-2 border-b border-gray-300 pb-3 sm:mb-6 sm:space-y-4 sm:pb-6">
+                                <div className="flex justify-between text-xs sm:text-base">
                                     <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
                                         Subtotal
                                     </span>
@@ -196,7 +196,7 @@ export default function Cart() {
                                         KES {subtotal?.toLocaleString() || '0'}
                                     </span>
                                 </div>
-                                <div className="flex justify-between">
+                                <div className="flex justify-between text-xs sm:text-base">
                                     <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
                                         Shipping
                                     </span>
@@ -204,7 +204,7 @@ export default function Cart() {
                                         TBD
                                     </span>
                                 </div>
-                                <div className="flex justify-between">
+                                <div className="flex justify-between text-xs sm:text-base">
                                     <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
                                         Tax
                                     </span>
@@ -214,23 +214,23 @@ export default function Cart() {
                                 </div>
                             </div>
 
-                            <div className="flex justify-between mb-6">
-                                <span className="text-lg font-bold">Total</span>
-                                <span className="text-2xl font-bold text-grey-600">
+                            <div className="mb-3 flex justify-between sm:mb-6">
+                                <span className={`text-sm font-bold sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Total</span>
+                                <span className={`text-base font-bold sm:text-2xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                     KES {subtotal?.toLocaleString() || '0'}
                                 </span>
                             </div>
 
                             <Link 
                                 to="/checkout" 
-                                className="w-full block text-center bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition-colors duration-300 mb-3"
+                                className="mb-2 block w-full rounded-lg bg-blue-600 py-2 text-center text-xs font-bold text-white transition-colors duration-300 hover:bg-blue-700 sm:mb-3 sm:py-3 sm:text-base"
                             >
                                 Proceed to Checkout
                             </Link>
 
                             <Link 
                                 to="/products" 
-                                className={`w-full block text-center py-3 rounded-lg font-semibold transition-colors duration-300 border ${theme === 'dark' ? 'border-gray-600 text-gray-400 hover:bg-gray-700' : 'border-gray-300 text-gray-600 hover:bg-gray-100'}`}
+                                className={`block w-full rounded-lg border py-2 text-center text-xs font-semibold transition-colors duration-300 sm:py-3 sm:text-base ${theme === 'dark' ? 'border-gray-600 text-gray-400 hover:bg-gray-700' : 'border-gray-300 text-gray-600 hover:bg-gray-100'}`}
                             >
                                 Continue Shopping
                             </Link>

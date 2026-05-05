@@ -209,25 +209,25 @@ export default function Home() {
             {/* Main Container */}
             <div className="max-w-7xl mx-auto">
                 {/* Categories Section - Mobile Dropdown */}
-                <div className="md:hidden px-3 py-3">
+                <div className="md:hidden px-[0.5625rem] py-[0.5625rem]">
                     <button
                         onClick={() => setCategoriesOpen(!categoriesOpen)}
-                        className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl border text-sm font-medium tracking-wide ${
+                        className={`flex w-full items-center justify-between rounded-xl border px-3 py-[0.5625rem] text-[0.65625rem] font-medium tracking-wide ${
                             theme === 'dark'
                                 ? 'bg-gray-950/80 border-gray-800 text-gray-100'
                                 : 'bg-white/80 border-gray-200 text-gray-900'
-                        } shadow-[0_12px_30px_rgba(15,23,42,0.35)] backdrop-blur`}
+                        } shadow-[0_9px_22.5px_rgba(15,23,42,0.35)] backdrop-blur`}
                         aria-expanded={categoriesOpen}
                         aria-controls="mobile-categories"
                     >
-                        <span className="flex flex-col items-start">
-                            <span className="uppercase text-[10px] tracking-[0.18em] opacity-70">
+                        <span className="flex flex-col items-start gap-0.5 leading-tight">
+                            <span className="text-[0.46875rem] uppercase tracking-[0.14em] opacity-70">
                                 Browse
                             </span>
-                            <span>All Categories</span>
+                            <span className="font-semibold">All Categories</span>
                         </span>
                         <FaChevronDown
-                            className={`transition-transform duration-300 ${
+                            className={`text-[0.5625rem] transition-transform duration-300 ${
                                 categoriesOpen ? 'rotate-180' : ''
                             }`}
                         />
@@ -240,11 +240,11 @@ export default function Home() {
                         }`}
                     >
                         <div
-                            className={`rounded-2xl overflow-hidden border ${
+                            className={`rounded-xl overflow-hidden border ${
                                 theme === 'dark'
                                     ? 'bg-gray-950/95 border-gray-800 divide-gray-800'
                                     : 'bg-white border-gray-200 divide-gray-100'
-                            } shadow-[0_18px_45px_rgba(15,23,42,0.45)] backdrop-blur divide-y max-h-[320px] overflow-y-auto`}
+                            } shadow-[0_18px_45px_rgba(15,23,42,0.45)] backdrop-blur divide-y max-h-[320px] overflow-y-auto text-xs`}
                         >
                             {categories.map((category) =>
                                 category.name === 'Phones' ? (
@@ -252,27 +252,27 @@ export default function Home() {
                                         <button
                                             type="button"
                                             onClick={() => setPhonesExpanded(!phonesExpanded)}
-                                            className={`w-full flex items-center justify-between px-4 py-3 transition-colors ${
+                                            className={`flex w-full items-center justify-between px-3 py-2 transition-colors ${
                                                 theme === 'dark'
                                                     ? 'hover:bg-gray-900/80 text-gray-100'
                                                     : 'hover:bg-gray-50 text-gray-900'
                                             }`}
                                         >
-                                            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                                            <span className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
                                                 Phones
                                             </span>
                                             <FaChevronDown
-                                                className={`text-[11px] transition-transform ${phonesExpanded ? 'rotate-180' : ''} ${
+                                                className={`text-[9px] transition-transform ${phonesExpanded ? 'rotate-180' : ''} ${
                                                     theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
                                                 }`}
                                             />
                                         </button>
                                         {phonesExpanded && (
-                                            <div className={`border-l-2 ml-4 pl-2 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                                            <div className={`ml-3 border-l pl-1.5 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
                                                 <Link
                                                     to="/products?subCategory=Phones"
                                                     onClick={() => { setCategoriesOpen(false); setPhonesExpanded(false); }}
-                                                    className={`block px-4 py-2 text-sm font-medium ${
+                                                    className={`block px-3 py-1.5 text-[11px] font-medium leading-snug ${
                                                         theme === 'dark' ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-700 hover:bg-gray-50'
                                                     }`}
                                                 >
@@ -283,7 +283,7 @@ export default function Home() {
                                                         key={brand}
                                                         to={`/products?subCategory=Phones&brand=${encodeURIComponent(brand)}`}
                                                         onClick={() => { setCategoriesOpen(false); setPhonesExpanded(false); }}
-                                                        className={`block px-4 py-2 text-sm ${
+                                                        className={`block px-3 py-1.5 text-[11px] leading-snug ${
                                                             theme === 'dark' ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-700 hover:bg-gray-50'
                                                         }`}
                                                     >
@@ -298,27 +298,27 @@ export default function Home() {
                                         <button
                                             type="button"
                                             onClick={() => setLaptopsExpanded(!laptopsExpanded)}
-                                            className={`w-full flex items-center justify-between px-4 py-3 transition-colors ${
+                                            className={`flex w-full items-center justify-between px-3 py-2 transition-colors ${
                                                 theme === 'dark'
                                                     ? 'hover:bg-gray-900/80 text-gray-100'
                                                     : 'hover:bg-gray-50 text-gray-900'
                                             }`}
                                         >
-                                            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                                            <span className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
                                                 Laptops
                                             </span>
                                             <FaChevronDown
-                                                className={`text-[11px] transition-transform ${laptopsExpanded ? 'rotate-180' : ''} ${
+                                                className={`text-[9px] transition-transform ${laptopsExpanded ? 'rotate-180' : ''} ${
                                                     theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
                                                 }`}
                                             />
                                         </button>
                                         {laptopsExpanded && (
-                                            <div className={`border-l-2 ml-4 pl-2 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                                            <div className={`ml-3 border-l pl-1.5 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
                                                 <Link
                                                     to="/products?subCategory=Laptops"
                                                     onClick={() => { setCategoriesOpen(false); setLaptopsExpanded(false); }}
-                                                    className={`block px-4 py-2 text-sm font-medium ${
+                                                    className={`block px-3 py-1.5 text-[11px] font-medium leading-snug ${
                                                         theme === 'dark' ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-700 hover:bg-gray-50'
                                                     }`}
                                                 >
@@ -329,7 +329,7 @@ export default function Home() {
                                                         key={brand}
                                                         to={`/products?subCategory=Laptops&brand=${encodeURIComponent(brand)}`}
                                                         onClick={() => { setCategoriesOpen(false); setLaptopsExpanded(false); }}
-                                                        className={`block px-4 py-2 text-sm ${
+                                                        className={`block px-3 py-1.5 text-[11px] leading-snug ${
                                                             theme === 'dark' ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-700 hover:bg-gray-50'
                                                         }`}
                                                     >
@@ -344,21 +344,21 @@ export default function Home() {
                                         key={category.name}
                                         to={`/products?subCategory=${encodeURIComponent(category.name)}`}
                                         onClick={() => setCategoriesOpen(false)}
-                                        className={`flex items-center justify-between px-4 py-3 transition-colors ${
+                                        className={`flex items-center justify-between px-3 py-2 transition-colors ${
                                             theme === 'dark'
                                                 ? 'hover:bg-gray-900/80 text-gray-100'
                                                 : 'hover:bg-gray-50 text-gray-900'
                                         }`}
                                     >
                                         <span
-                                            className={`text-sm font-medium ${
+                                            className={`font-medium ${
                                                 theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
                                             }`}
                                         >
                                             {category.name}
                                         </span>
                                         <FaChevronRight
-                                            className={`text-[11px] ${
+                                            className={`text-[9px] ${
                                                 theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
                                             }`}
                                         />
@@ -521,7 +521,7 @@ export default function Home() {
                         <div className="md:pl-[calc((100%_-_4.5rem)_/_4_+_1.5rem)] space-y-6 md:space-y-8">
                         {/* Hot Deals Section (replaces previous hero) */}
                         <div
-                            className={`rounded-3xl overflow-hidden shadow-[0_26px_70px_rgba(15,23,42,0.65)] border ${theme === 'dark' ? 'bg-gray-950/90 border-orange-900/70' : 'bg-white/90 border-orange-200'}`}
+                            className={`relative z-0 rounded-3xl overflow-hidden border shadow-[0_4px_24px_-6px_rgba(15,23,42,0.14),0_10px_36px_-12px_rgba(15,23,42,0.22)] md:shadow-[0_8px_32px_-8px_rgba(15,23,42,0.18),0_18px_48px_-14px_rgba(15,23,42,0.28)] ${theme === 'dark' ? 'bg-gray-950/90 border-orange-900/70' : 'bg-white/90 border-orange-200'}`}
                         >
                             {/* Hot Deals Header — slim bar */}
                             <div
@@ -531,15 +531,15 @@ export default function Home() {
                                         : 'bg-gradient-to-r from-orange-400 via-red-400 to-rose-400'
                                 }`}
                             >
-                                <div className="flex items-center gap-1.5 text-white min-w-0">
-                                    <div className="text-left min-w-0">
-                                        <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.18em] opacity-90 leading-none">
-                                            Big Savings
-                                        </p>
-                                        <h1 className="text-lg sm:text-xl md:text-2xl font-extrabold leading-[1.1] tracking-tight">
+                                <div className="flex w-full min-w-0 items-center gap-1.5 text-white">
+                                    <div className="mx-auto flex w-4/5 min-w-0 max-w-full flex-row items-baseline justify-between gap-2 text-left sm:w-full sm:max-w-none sm:flex-col sm:items-start sm:justify-start sm:gap-0">
+                                        <h1 className="min-w-0 max-w-[55%] truncate text-base font-extrabold leading-none tracking-tight sm:max-w-none sm:truncate-none sm:text-xl sm:leading-[1.1] md:text-2xl">
                                             HOT DEALS
                                         </h1>
-                                        <p className="hidden sm:block mt-0.5 text-[10px] md:text-[11px] opacity-90 line-clamp-1">
+                                        <p className="shrink-0 pl-1.5 text-right text-[9px] font-semibold uppercase leading-none tracking-[0.18em] opacity-90 sm:pl-0 sm:text-left sm:text-[10px]">
+                                            Big Savings
+                                        </p>
+                                        <p className="mt-0.5 hidden w-full text-[10px] opacity-90 line-clamp-1 sm:block md:text-[11px]">
                                             Limited-time offers on top tech & home essentials.
                                         </p>
                                     </div>
@@ -562,42 +562,42 @@ export default function Home() {
 
                             {/* Hot Deals Products (Featured) */}
                             {featuredLoading ? (
-                                <div className={`p-4 md:p-5 ${theme === 'dark' ? 'bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-b from-white via-orange-50 to-white'}`}>
-                                    <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
+                                <div className={`p-3 md:p-4 ${theme === 'dark' ? 'bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-b from-white via-orange-50 to-white'}`}>
+                                    <div className="flex flex-nowrap gap-[0.421875rem] sm:gap-[0.5625rem] md:gap-[0.84375rem] overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
                                         {Array.from({ length: 5 }).map((_, i) => (
                                             <div
                                                 key={i}
-                                                className={`group flex-none w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)] lg:w-[calc((100%-3rem)/5)] shrink-0 snap-start rounded-2xl overflow-hidden border animate-pulse ${
+                                                className={`group flex-none w-[calc((100%-0.421875rem)/2)] sm:w-[calc((100%-1.125rem)/3)] md:w-[calc((100%-2.53125rem)/4)] lg:w-[calc((100%-3.375rem)/5)] shrink-0 snap-start rounded-md overflow-hidden border animate-pulse ${
                                                     theme === 'dark'
                                                         ? 'bg-gray-900/90 border-gray-800'
                                                         : 'bg-white border-orange-100'
                                                 }`}
                                             >
                                                 <div
-                                                    className={`relative overflow-hidden h-32 sm:h-40 md:h-44 ${
+                                                    className={`relative overflow-hidden h-[5.625rem] sm:h-[6.75rem] md:h-[7.875rem] ${
                                                         theme === 'dark'
                                                             ? 'bg-gradient-to-b from-gray-800 to-gray-950'
                                                             : 'bg-gradient-to-b from-orange-50 to-orange-100'
                                                     }`}
                                                 />
-                                                <div className="p-3 md:p-3.5">
+                                                <div className="p-[0.421875rem] sm:p-[0.5625rem]">
                                                     <div
-                                                        className={`h-3 sm:h-4 rounded mb-2 ${
+                                                        className={`mb-1 h-2 rounded sm:h-2.5 ${
                                                             theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
                                                         }`}
                                                     />
                                                     <div
-                                                        className={`h-3 rounded w-2/3 mb-3 ${
+                                                        className={`mb-2 h-2 w-2/3 rounded ${
                                                             theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
                                                         }`}
                                                     />
                                                     <div
-                                                        className={`h-4 rounded w-1/2 mb-2 ${
-                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                        className={`mb-[0.421875rem] h-3 w-1/2 rounded sm:h-[0.84375rem] ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
                                                         }`}
                                                     />
                                                     <div
-                                                        className={`h-6 rounded ${
+                                                        className={`h-[1.125rem] rounded ${
                                                             theme === 'dark' ? 'bg-gray-800' : 'bg-orange-200'
                                                         }`}
                                                     />
@@ -613,20 +613,20 @@ export default function Home() {
                                     </p>
                                 </div>
                             ) : (
-                                <div className={`p-4 md:p-5 ${theme === 'dark' ? 'bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-b from-white via-orange-50 to-white'}`}>
-                                    <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
+                                <div className={`p-3 md:p-4 ${theme === 'dark' ? 'bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-b from-white via-orange-50 to-white'}`}>
+                                    <div className="flex flex-nowrap gap-[0.421875rem] sm:gap-[0.5625rem] md:gap-[0.84375rem] overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
                                         {featuredProducts.map((product) => (
                                             <Link
                                                 key={product._id}
                                                 to={`/products/${product._id}`}
-                                                className={`group flex-none w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)] lg:w-[calc((100%-3rem)/5)] shrink-0 snap-start rounded-2xl overflow-hidden border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.5)] ${
+                                                className={`group flex-none w-[calc((100%-0.421875rem)/2)] sm:w-[calc((100%-1.125rem)/3)] md:w-[calc((100%-2.53125rem)/4)] lg:w-[calc((100%-3.375rem)/5)] shrink-0 snap-start rounded-md overflow-hidden border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.5)] ${
                                                     theme === 'dark'
                                                         ? 'bg-gray-900/90 border-gray-800'
                                                         : 'bg-white border-orange-100'
                                                 }`}
                                             >
                                                 <div
-                                                    className={`relative overflow-hidden h-32 sm:h-40 md:h-44 ${
+                                                    className={`relative overflow-hidden h-[5.625rem] sm:h-[6.75rem] md:h-[7.875rem] ${
                                                         theme === 'dark'
                                                             ? 'bg-gradient-to-b from-gray-800 to-gray-950'
                                                             : 'bg-gradient-to-b from-orange-50 to-orange-100'
@@ -638,15 +638,15 @@ export default function Home() {
                                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                                     />
                                                     {product.discountPercent > 0 && (
-                                                        <div className="absolute top-2 right-2 rounded-full bg-black/75 px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-amber-300 border border-amber-400/40 backdrop-blur">
+                                                        <div className="absolute right-1 top-1 rounded-full border border-amber-400/40 bg-black/75 px-1 py-px text-[8px] font-semibold text-amber-300 backdrop-blur sm:text-[10px]">
                                                             Save {product.discountPercent}%
                                                         </div>
                                                     )}
                                                 </div>
 
-                                                <div className="p-3 md:p-3.5">
+                                                <div className="p-[0.421875rem] sm:p-[0.5625rem]">
                                                     <h3
-                                                        className={`text-[10px] sm:text-sm font-medium line-clamp-2 mb-1 ${
+                                                        className={`mb-1 line-clamp-2 text-[8px] font-medium sm:text-[10px] md:text-xs ${
                                                             theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
                                                         }`}
                                                     >
@@ -654,8 +654,8 @@ export default function Home() {
                                                     </h3>
 
                                                     {product.averageRating > 0 && (
-                                                        <div className="flex items-center gap-1.5 mb-1.5">
-                                                            <div className="flex text-yellow-400 text-[9px] sm:text-[10px]">
+                                                        <div className="mb-1 flex items-center gap-1">
+                                                            <div className="flex text-[8px] text-yellow-400 sm:text-[10px]">
                                                                 {[...Array(5)].map((_, i) => (
                                                                     <FaStar
                                                                         key={i}
@@ -668,7 +668,7 @@ export default function Home() {
                                                                 ))}
                                                             </div>
                                                             <span
-                                                                className={`text-[9px] sm:text-[10px] ${
+                                                                className={`text-[8px] sm:text-[10px] ${
                                                                     theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                                                                 }`}
                                                             >
@@ -678,13 +678,13 @@ export default function Home() {
                                                         </div>
                                                     )}
 
-                                                    <div className="mb-1.5">
-                                                        <p className="text-[12px] sm:text-sm md:text-base font-semibold text-amber-400">
+                                                    <div className="mb-1">
+                                                        <p className="text-[10.5px] font-semibold text-amber-400 sm:text-sm md:text-base">
                                                             KES {product.newPrice?.toLocaleString() || '0'}
                                                         </p>
                                                         {product.oldPrice && product.oldPrice > product.newPrice && (
                                                             <p
-                                                                className={`text-[10px] sm:text-[11px] line-through ${
+                                                                className={`text-[8px] line-through sm:text-[10px] ${
                                                                     theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
                                                                 }`}
                                                             >
@@ -695,12 +695,12 @@ export default function Home() {
 
                                                     {product.stock !== undefined && (
                                                         <div
-                                                            className={`text-[10px] sm:text-[11px] mb-1.5 ${
+                                                            className={`mb-1 text-[8px] sm:text-[10px] ${
                                                                 theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                                                             }`}
                                                         >
                                                             <div
-                                                                className={`w-full h-1.5 rounded-full overflow-hidden ${
+                                                                className={`h-1 w-full overflow-hidden rounded-full ${
                                                                     theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'
                                                                 }`}
                                                             >
@@ -715,10 +715,10 @@ export default function Home() {
                                                                         }}
                                                                     />
                                                                 ) : (
-                                                                    <div className="w-full h-full bg-red-500" />
+                                                                    <div className="h-full w-full bg-red-500" />
                                                                 )}
                                                             </div>
-                                                            <p className="text-[10px] sm:text-[11px] mt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                                                            <p className="mt-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                                                                 <span>
                                                                     {product.stock === 0
                                                                         ? 'Out of stock'
@@ -728,7 +728,7 @@ export default function Home() {
                                                                 </span>
                                                                 {product.stock > 0 && product.stock < 20 && (
                                                                     <span className="inline-flex items-center gap-1">
-                                                                        <FaShoppingCart className="text-[9px] sm:text-[10px]" />
+                                                                        <FaShoppingCart className="text-[8px] sm:text-[10px]" />
                                                                         Fast moving
                                                                     </span>
                                                                 )}
@@ -746,34 +746,34 @@ export default function Home() {
                     </div>
 
                     {/* Flash Sales Section - full width so it starts where category starts */}
-                    <div className="col-span-1 md:col-span-4">
+                    <div className="relative z-[1] col-span-1 md:col-span-4">
                         <div className={`rounded-3xl overflow-hidden shadow-[0_18px_60px_rgba(190,24,93,0.45)] border ${theme === 'dark' ? 'bg-gray-950/80 border-rose-900/70' : 'bg-white/80 border-rose-100'}`}>
                             {/* Flash Sales Header */}
-                            <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 md:px-6 py-3 md:py-4 ${theme === 'dark' ? 'bg-gradient-to-r from-rose-700 via-red-600 to-orange-500' : 'bg-gradient-to-r from-rose-500 via-red-500 to-orange-400'}`}>
+                            <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 px-3 py-2 sm:gap-2 md:gap-3 md:px-5 md:py-3 ${theme === 'dark' ? 'bg-gradient-to-r from-rose-700 via-red-600 to-orange-500' : 'bg-gradient-to-r from-rose-500 via-red-500 to-orange-400'}`}>
                                 {/* First Row: Title and Description */}
-                                <div className="flex items-center gap-3 text-white">
-                                    <div>
-                                        <p className="text-xs md:text-sm font-semibold tracking-wide uppercase">
+                                <div className="flex items-center gap-2 text-white">
+                                    <div className="leading-none">
+                                        <p className="text-[10px] font-semibold uppercase tracking-wide sm:text-xs md:text-sm">
                                             Flash Sale
                                         </p>
-                                        <p className="text-xs opacity-85">
+                                        <p className="mt-0.5 hidden text-[10px] leading-snug opacity-85 sm:mt-1 sm:block md:text-xs">
                                             Limited premium drops for today only
                                         </p>
                                     </div>
                                 </div>
                                 {/* Second Row: Clock Icon, Timer, and View All Link */}
-                                <div className="flex items-center gap-2 sm:gap-3 md:gap-4 text-white">
-                                    <div className="relative flex items-center justify-center h-9 w-9 rounded-full bg-black/20 shrink-0">
+                                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 text-white">
+                                    <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black/20 sm:h-8 sm:w-8 md:h-9 md:w-9">
                                         <div className="absolute inset-0 rounded-full border border-white/30 animate-ping opacity-50" />
-                                        <FaClock className="relative text-base" />
+                                        <FaClock className="relative text-sm sm:text-base" />
                                     </div>
-                                    <span className="hidden sm:inline text-[11px] uppercase tracking-[0.18em]">
+                                    <span className="hidden text-[10px] uppercase tracking-[0.18em] sm:inline md:text-[11px]">
                                         Time left
                                     </span>
-                                    <span className={`text-sm md:text-base font-semibold px-3 py-1 rounded-full ${theme === 'dark' ? 'bg-black/40 text-white' : 'bg-white/90 text-red-600'} shadow-sm`}>
+                                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold shadow-sm sm:px-2.5 md:px-3 md:py-1 md:text-sm ${theme === 'dark' ? 'bg-black/40 text-white' : 'bg-white/90 text-red-600'}`}>
                                         {String(timeLeft.hours).padStart(2, '0')}h:{String(timeLeft.minutes).padStart(2, '0')}m:{String(timeLeft.seconds).padStart(2, '0')}s
                                     </span>
-                                    <Link to="/products" className="text-[11px] md:text-xs font-semibold underline-offset-4 hover:underline whitespace-nowrap">
+                                    <Link to="/products" className="text-[10px] font-semibold underline-offset-2 hover:underline sm:text-[11px] md:text-xs md:underline-offset-4 whitespace-nowrap">
                                         View all deals →
                                     </Link>
                                 </div>
@@ -781,42 +781,42 @@ export default function Home() {
 
                             {/* Flash Sales Products */}
                             {flashSaleLoading ? (
-                                <div className="p-4 md:p-5">
-                                    <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
+                                <div className="p-3 md:p-4">
+                                    <div className="flex flex-nowrap gap-[0.421875rem] sm:gap-[0.5625rem] md:gap-[0.84375rem] overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
                                         {Array.from({ length: 5 }).map((_, i) => (
                                             <div
                                                 key={i}
-                                                className={`group flex-none w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)] lg:w-[calc((100%-3rem)/5)] shrink-0 snap-start rounded-2xl overflow-hidden transition-all duration-300 animate-pulse ${
+                                                className={`group flex-none w-[calc((100%-0.421875rem)/2)] sm:w-[calc((100%-1.125rem)/3)] md:w-[calc((100%-2.53125rem)/4)] lg:w-[calc((100%-3.375rem)/5)] shrink-0 snap-start rounded-md overflow-hidden transition-all duration-300 animate-pulse ${
                                                     theme === 'dark'
                                                         ? 'bg-gray-900/80 border border-gray-800'
                                                         : 'bg-blue-50 border border-blue-100'
                                                 }`}
                                             >
                                                 <div
-                                                    className={`relative overflow-hidden h-32 sm:h-40 md:h-44 ${
+                                                    className={`relative overflow-hidden h-[5.625rem] sm:h-[6.75rem] md:h-[7.875rem] ${
                                                         theme === 'dark'
                                                             ? 'bg-gradient-to-b from-gray-800 to-gray-900'
                                                             : 'bg-gradient-to-b from-blue-50 to-blue-100'
                                                     }`}
                                                 />
-                                                <div className="p-3 md:p-3.5">
+                                                <div className="p-[0.421875rem] sm:p-[0.5625rem]">
                                                     <div
-                                                        className={`h-3 sm:h-4 rounded mb-2 ${
+                                                        className={`mb-1 h-2 rounded sm:h-2.5 ${
                                                             theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
                                                         }`}
                                                     />
                                                     <div
-                                                        className={`h-3 rounded w-2/3 mb-3 ${
+                                                        className={`mb-2 h-2 w-2/3 rounded ${
                                                             theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
                                                         }`}
                                                     />
                                                     <div
-                                                        className={`h-4 rounded w-1/2 mb-2 ${
-                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                        className={`mb-[0.421875rem] h-3 w-1/2 rounded sm:h-[0.84375rem] ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
                                                         }`}
                                                     />
                                                     <div
-                                                        className={`h-6 rounded ${
+                                                        className={`h-[1.125rem] rounded ${
                                                             theme === 'dark' ? 'bg-gray-800' : 'bg-orange-200'
                                                         }`}
                                                     />
@@ -832,38 +832,38 @@ export default function Home() {
                                     </p>
                                 </div>
                             ) : (
-                                <div className="p-4 md:p-5">
-                                    <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
+                                <div className="p-3 md:p-4">
+                                    <div className="flex flex-nowrap gap-[0.421875rem] sm:gap-[0.5625rem] md:gap-[0.84375rem] overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
                                         {flashSaleProducts.map((product) => (
                                             <Link 
                                                 key={product._id} 
                                                 to={`/products/${product._id}`}
-                                                className={`group flex-none w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)] lg:w-[calc((100%-3rem)/5)] shrink-0 snap-start rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.45)] ${theme === 'dark' ? 'bg-gray-900/80 border border-gray-800' : 'bg-blue-50 border border-blue-100'}`}
+                                                className={`group flex-none w-[calc((100%-0.421875rem)/2)] sm:w-[calc((100%-1.125rem)/3)] md:w-[calc((100%-2.53125rem)/4)] lg:w-[calc((100%-3.375rem)/5)] shrink-0 snap-start rounded-md overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.45)] ${theme === 'dark' ? 'bg-gray-900/80 border border-gray-800' : 'bg-blue-50 border border-blue-100'}`}
                                             >
                                                 {/* Product Image */}
-                                                <div className={`relative overflow-hidden h-32 sm:h-40 md:h-44 ${theme === 'dark' ? 'bg-gradient-to-b from-gray-800 to-gray-900' : 'bg-gradient-to-b from-blue-50 to-blue-100'}`}>
+                                                <div className={`relative overflow-hidden h-[5.625rem] sm:h-[6.75rem] md:h-[7.875rem] ${theme === 'dark' ? 'bg-gradient-to-b from-gray-800 to-gray-900' : 'bg-gradient-to-b from-blue-50 to-blue-100'}`}>
                                                     <img 
                                                         src={product.images?.[0]?.url || wemaxLogo} 
                                                         alt={product.name}
                                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                                     />
                                                     {product.discountPercent > 0 && (
-                                                        <div className="absolute top-2 right-2 rounded-full bg-black/70 px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-amber-300 border border-amber-400/40 backdrop-blur">
+                                                        <div className="absolute right-1 top-1 rounded-full border border-amber-400/40 bg-black/70 px-1 py-px text-[8px] font-semibold text-amber-300 backdrop-blur sm:text-[10px]">
                                                             Save {product.discountPercent}%
                                                         </div>
                                                     )}
                                                 </div>
 
                                                 {/* Product Info */}
-                                                <div className="p-3 md:p-3.5">
-                                                    <h3 className={`text-[10px] sm:text-sm font-medium line-clamp-2 mb-1 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
+                                                <div className="p-[0.421875rem] sm:p-[0.5625rem]">
+                                                    <h3 className={`mb-1 line-clamp-2 text-[8px] font-medium sm:text-[10px] md:text-xs ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
                                                         {product.name}
                                                     </h3>
 
                                                     {/* Rating */}
                                                     {product.averageRating > 0 && (
-                                                        <div className="flex items-center gap-1.5 mb-1.5">
-                                                            <div className="flex text-yellow-400 text-[9px] sm:text-[10px]">
+                                                        <div className="mb-1 flex items-center gap-1">
+                                                            <div className="flex text-[8px] text-yellow-400 sm:text-[10px]">
                                                                 {[...Array(5)].map((_, i) => (
                                                                     <FaStar
                                                                         key={i}
@@ -871,19 +871,19 @@ export default function Home() {
                                                                     />
                                                                 ))}
                                                             </div>
-                                                            <span className={`text-[9px] sm:text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                            <span className={`text-[8px] sm:text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                                                 {product.averageRating.toFixed(1)} {product.reviewsCount > 0 && `(${product.reviewsCount})`}
                                                             </span>
                                                         </div>
                                                     )}
 
                                                     {/* Price */}
-                                                    <div className="mb-1.5">
-                                                        <p className="text-[12px] sm:text-sm md:text-base font-semibold text-amber-400">
+                                                    <div className="mb-1">
+                                                        <p className="text-[10.5px] font-semibold text-amber-400 sm:text-sm md:text-base">
                                                             KES {product.newPrice?.toLocaleString() || '0'}
                                                         </p>
                                                         {product.oldPrice && product.oldPrice > product.newPrice && (
-                                                            <p className={`text-[10px] sm:text-[11px] line-through ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                                                            <p className={`text-[8px] line-through sm:text-[10px] ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
                                                                 KES {product.oldPrice?.toLocaleString()}
                                                             </p>
                                                         )}
@@ -891,8 +891,8 @@ export default function Home() {
 
                                                     {/* Stock Info */}
                                                     {product.stock !== undefined && (
-                                                        <div className={`text-[10px] sm:text-[11px] mb-1.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                                            <div className={`w-full h-1.5 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'}`}>
+                                                        <div className={`mb-1 text-[8px] sm:text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                            <div className={`h-1 w-full overflow-hidden rounded-full ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'}`}>
                                                                 {product.stock > 0 ? (
                                                                     <div
                                                                         className={`h-full bg-gradient-to-r from-amber-400 via-orange-500 to-red-500`}
@@ -901,10 +901,10 @@ export default function Home() {
                                                                         }}
                                                                     />
                                                                 ) : (
-                                                                    <div className="w-full h-full bg-red-500" />
+                                                                    <div className="h-full w-full bg-red-500" />
                                                                 )}
                                                             </div>
-                                                            <p className="text-[10px] sm:text-[11px] mt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                                                            <p className="mt-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                                                                 <span>
                                                                     {product.stock === 0
                                                                         ? 'Out of stock'
@@ -914,7 +914,7 @@ export default function Home() {
                                                                 </span>
                                                                 {product.stock > 0 && product.stock < 20 && (
                                                                     <span className="inline-flex items-center gap-1">
-                                                                        <FaShoppingCart className="text-[9px] sm:text-[10px]" />
+                                                                        <FaShoppingCart className="text-[8px] sm:text-[10px]" />
                                                                         Fast moving
                                                                     </span>
                                                                 )}
@@ -957,12 +957,8 @@ export default function Home() {
                                 <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.08), transparent 60%)' }} />
 
                                 <div className="relative z-10">
-                                    <p className={`text-xs md:text-sm font-semibold flex items-center gap-2 ${theme === 'dark' ? 'text-cyan-100' : 'text-slate-900'}`}>
-                                        <span className="text-lg"></span>
+                                    <p className={`text-xs font-semibold md:text-sm ${theme === 'dark' ? 'text-cyan-100' : 'text-slate-900'}`}>
                                         Electronics Bundle Packages
-                                    </p>
-                                    <p className={`text-[11px] md:text-xs ${theme === 'dark' ? 'text-cyan-100/80' : 'text-slate-700'}`}>
-                                        Smart TV, audio, and premium tech bundles in one click.
                                     </p>
                                 </div>
                                 <Link
@@ -977,42 +973,42 @@ export default function Home() {
                             </div>
 
                             {electronicsBundlesLoading ? (
-                                <div className="p-4 md:p-5">
-                                    <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
+                                <div className="p-3 md:p-4">
+                                    <div className="flex flex-nowrap gap-[0.421875rem] sm:gap-[0.5625rem] md:gap-[0.84375rem] overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
                                         {Array.from({ length: 5 }).map((_, i) => (
                                             <div
                                                 key={i}
-                                                className={`group flex-none w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)] lg:w-[calc((100%-3rem)/5)] shrink-0 snap-start rounded-2xl overflow-hidden transition-all duration-300 animate-pulse ${
+                                                className={`group flex-none w-[calc((100%-0.421875rem)/2)] sm:w-[calc((100%-1.125rem)/3)] md:w-[calc((100%-2.53125rem)/4)] lg:w-[calc((100%-3.375rem)/5)] shrink-0 snap-start rounded-md overflow-hidden transition-all duration-300 animate-pulse ${
                                                     theme === 'dark'
                                                         ? 'bg-gray-900/80 border border-gray-800'
                                                         : 'bg-blue-50 border border-blue-100'
                                                 }`}
                                             >
                                                 <div
-                                                    className={`relative overflow-hidden h-32 sm:h-40 md:h-44 ${
+                                                    className={`relative overflow-hidden h-[5.625rem] sm:h-[6.75rem] md:h-[7.875rem] ${
                                                         theme === 'dark'
                                                             ? 'bg-gradient-to-b from-gray-800 to-gray-900'
                                                             : 'bg-gradient-to-b from-blue-50 to-blue-100'
                                                     }`}
                                                 />
-                                                <div className="p-3 md:p-3.5">
+                                                <div className="p-[0.421875rem] sm:p-[0.5625rem]">
                                                     <div
-                                                        className={`h-3 sm:h-4 rounded mb-2 ${
+                                                        className={`mb-1 h-2 rounded sm:h-2.5 ${
                                                             theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
                                                         }`}
                                                     />
                                                     <div
-                                                        className={`h-3 rounded w-2/3 mb-3 ${
+                                                        className={`mb-2 h-2 w-2/3 rounded ${
                                                             theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
                                                         }`}
                                                     />
                                                     <div
-                                                        className={`h-4 rounded w-1/2 mb-2 ${
-                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                        className={`mb-[0.421875rem] h-3 w-1/2 rounded sm:h-[0.84375rem] ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
                                                         }`}
                                                     />
                                                     <div
-                                                        className={`h-6 rounded ${
+                                                        className={`h-[1.125rem] rounded ${
                                                             theme === 'dark' ? 'bg-gray-800' : 'bg-orange-200'
                                                         }`}
                                                     />
@@ -1028,46 +1024,46 @@ export default function Home() {
                                     </p>
                                 </div>
                             ) : (
-                                <div className="p-4 md:p-5">
-                                    <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
+                                <div className="p-3 md:p-4">
+                                    <div className="flex flex-nowrap gap-[0.421875rem] sm:gap-[0.5625rem] md:gap-[0.84375rem] overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
                                         {electronicsBundles.map((pkg) => (
                                             <Link
                                                 key={pkg._id}
                                                 to={`/packages/${pkg._id}`}
-                                                className={`group flex-none w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)] lg:w-[calc((100%-3rem)/5)] shrink-0 snap-start rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.45)] ${theme === 'dark' ? 'bg-gray-900/80 border border-gray-800' : 'bg-blue-50 border border-blue-100'}`}
+                                                className={`group flex-none w-[calc((100%-0.421875rem)/2)] sm:w-[calc((100%-1.125rem)/3)] md:w-[calc((100%-2.53125rem)/4)] lg:w-[calc((100%-3.375rem)/5)] shrink-0 snap-start rounded-md overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.45)] ${theme === 'dark' ? 'bg-gray-900/80 border border-gray-800' : 'bg-blue-50 border border-blue-100'}`}
                                             >
                                                 {/* Package Image */}
-                                                <div className={`relative overflow-hidden h-32 sm:h-40 md:h-44 ${theme === 'dark' ? 'bg-gradient-to-b from-gray-800 to-gray-900' : 'bg-gradient-to-b from-blue-50 to-blue-100'}`}>
+                                                <div className={`relative overflow-hidden h-[5.625rem] sm:h-[6.75rem] md:h-[7.875rem] ${theme === 'dark' ? 'bg-gradient-to-b from-gray-800 to-gray-900' : 'bg-gradient-to-b from-blue-50 to-blue-100'}`}>
                                                     <img
                                                         src={pkg.images?.[0]?.url || wemaxLogo}
                                                         alt={pkg.name}
                                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                                     />
                                                     {pkg.discountPercent > 0 && (
-                                                        <div className="absolute top-2 right-2 rounded-full bg-black/70 px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-amber-300 border border-amber-400/40 backdrop-blur">
+                                                        <div className="absolute right-1 top-1 rounded-full border border-amber-400/40 bg-black/70 px-1 py-px text-[8px] font-semibold text-amber-300 backdrop-blur sm:text-[10px]">
                                                             Save {pkg.discountPercent}%
                                                         </div>
                                                     )}
                                                 </div>
 
                                                 {/* Package Info */}
-                                                <div className="p-3 md:p-3.5">
-                                                    <h3 className={`text-[11px] sm:text-sm font-medium line-clamp-2 mb-1.5 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
+                                                <div className="p-[0.421875rem] sm:p-[0.5625rem]">
+                                                    <h3 className={`mb-1 line-clamp-2 text-[8px] font-medium sm:text-[10px] md:text-xs ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
                                                         {pkg.name}
                                                     </h3>
 
-                                                    <div className="mb-2">
-                                                        <p className="text-sm md:text-base font-semibold text-amber-400">
+                                                    <div className="mb-[0.421875rem]">
+                                                        <p className="text-[10.5px] font-semibold text-amber-400 sm:text-sm md:text-base">
                                                             KES {Number(pkg.totalPrice || 0).toLocaleString()}
                                                         </p>
                                                         {pkg.oldTotalPrice != null && pkg.oldTotalPrice > pkg.totalPrice && (
-                                                            <p className={`text-[11px] line-through ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                                                            <p className={`text-[8px] line-through sm:text-[10px] ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
                                                                 KES {Number(pkg.oldTotalPrice).toLocaleString()}
                                                             </p>
                                                         )}
                                                     </div>
 
-                                                    <p className={`text-[11px] line-clamp-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                    <p className={`line-clamp-2 text-[8px] sm:text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                                         {pkg.description || 'View details'}
                                                     </p>
                                                 </div>
@@ -1092,11 +1088,10 @@ export default function Home() {
                                 }}
                             >
                                 <div className="relative z-10">
-                                    <p className={`text-xs md:text-sm font-semibold flex items-center gap-2 ${theme === 'dark' ? 'text-amber-200' : 'text-amber-900'}`}>
-                                        <span className="text-lg"></span>
+                                    <p className={`text-xs font-semibold md:text-sm ${theme === 'dark' ? 'text-amber-200' : 'text-amber-900'}`}>
                                         Furniture Bundle Packages
                                     </p>
-                                    <p className={`text-[11px] md:text-xs ${theme === 'dark' ? 'text-amber-100/80' : 'text-amber-900/70'}`}>
+                                    <p className={`mt-0.5 hidden text-[11px] sm:block md:text-xs ${theme === 'dark' ? 'text-amber-100/80' : 'text-amber-900/70'}`}>
                                         Curated furniture bundles to elevate your space.
                                     </p>
                                 </div>
@@ -1110,42 +1105,42 @@ export default function Home() {
                             </div>
 
                             {furnitureBundlesLoading ? (
-                                <div className="p-4 md:p-5">
-                                    <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
+                                <div className="p-3 md:p-4">
+                                    <div className="flex flex-nowrap gap-[0.421875rem] sm:gap-[0.5625rem] md:gap-[0.84375rem] overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
                                         {Array.from({ length: 5 }).map((_, i) => (
                                             <div
                                                 key={i}
-                                                className={`group flex-none w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)] lg:w-[calc((100%-3rem)/5)] shrink-0 snap-start rounded-2xl overflow-hidden transition-all duration-300 animate-pulse ${
+                                                className={`group flex-none w-[calc((100%-0.421875rem)/2)] sm:w-[calc((100%-1.125rem)/3)] md:w-[calc((100%-2.53125rem)/4)] lg:w-[calc((100%-3.375rem)/5)] shrink-0 snap-start rounded-md overflow-hidden transition-all duration-300 animate-pulse ${
                                                     theme === 'dark'
                                                         ? 'bg-gray-900/80 border border-gray-800'
                                                         : 'bg-blue-50 border border-blue-100'
                                                 }`}
                                             >
                                                 <div
-                                                    className={`relative overflow-hidden h-32 sm:h-40 md:h-44 ${
+                                                    className={`relative overflow-hidden h-[5.625rem] sm:h-[6.75rem] md:h-[7.875rem] ${
                                                         theme === 'dark'
                                                             ? 'bg-gradient-to-b from-gray-800 to-gray-900'
                                                             : 'bg-gradient-to-b from-blue-50 to-blue-100'
                                                     }`}
                                                 />
-                                                <div className="p-3 md:p-3.5">
+                                                <div className="p-[0.421875rem] sm:p-[0.5625rem]">
                                                     <div
-                                                        className={`h-3 sm:h-4 rounded mb-2 ${
+                                                        className={`mb-1 h-2 rounded sm:h-2.5 ${
                                                             theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
                                                         }`}
                                                     />
                                                     <div
-                                                        className={`h-3 rounded w-2/3 mb-3 ${
+                                                        className={`mb-2 h-2 w-2/3 rounded ${
                                                             theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
                                                         }`}
                                                     />
                                                     <div
-                                                        className={`h-4 rounded w-1/2 mb-2 ${
-                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                                        className={`mb-[0.421875rem] h-3 w-1/2 rounded sm:h-[0.84375rem] ${
+                                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
                                                         }`}
                                                     />
                                                     <div
-                                                        className={`h-6 rounded ${
+                                                        className={`h-[1.125rem] rounded ${
                                                             theme === 'dark' ? 'bg-gray-800' : 'bg-orange-200'
                                                         }`}
                                                     />
@@ -1161,46 +1156,46 @@ export default function Home() {
                                     </p>
                                 </div>
                             ) : (
-                                <div className="p-4 md:p-5">
-                                    <div className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
+                                <div className="p-3 md:p-4">
+                                    <div className="flex flex-nowrap gap-[0.421875rem] sm:gap-[0.5625rem] md:gap-[0.84375rem] overflow-x-auto overflow-y-hidden pb-2 snap-x snap-mandatory">
                                         {furnitureBundles.map((pkg) => (
                                             <Link
                                                 key={pkg._id}
                                                 to={`/packages/${pkg._id}`}
-                                                className={`group flex-none w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.5rem)/3)] md:w-[calc((100%-2.25rem)/4)] lg:w-[calc((100%-3rem)/5)] shrink-0 snap-start rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.45)] ${theme === 'dark' ? 'bg-gray-900/80 border border-gray-800' : 'bg-blue-50 border border-blue-100'}`}
+                                                className={`group flex-none w-[calc((100%-0.421875rem)/2)] sm:w-[calc((100%-1.125rem)/3)] md:w-[calc((100%-2.53125rem)/4)] lg:w-[calc((100%-3.375rem)/5)] shrink-0 snap-start rounded-md overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.45)] ${theme === 'dark' ? 'bg-gray-900/80 border border-gray-800' : 'bg-blue-50 border border-blue-100'}`}
                                             >
                                                 {/* Package Image */}
-                                                <div className={`relative overflow-hidden h-32 sm:h-40 md:h-44 ${theme === 'dark' ? 'bg-gradient-to-b from-gray-800 to-gray-900' : 'bg-gradient-to-b from-blue-50 to-blue-100'}`}>
+                                                <div className={`relative overflow-hidden h-[5.625rem] sm:h-[6.75rem] md:h-[7.875rem] ${theme === 'dark' ? 'bg-gradient-to-b from-gray-800 to-gray-900' : 'bg-gradient-to-b from-blue-50 to-blue-100'}`}>
                                                     <img
                                                         src={pkg.images?.[0]?.url || wemaxLogo}
                                                         alt={pkg.name}
                                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                                     />
                                                     {pkg.discountPercent > 0 && (
-                                                        <div className="absolute top-2 right-2 rounded-full bg-black/70 px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-amber-300 border border-amber-400/40 backdrop-blur">
+                                                        <div className="absolute right-1 top-1 rounded-full border border-amber-400/40 bg-black/70 px-1 py-px text-[8px] font-semibold text-amber-300 backdrop-blur sm:text-[10px]">
                                                             Save {pkg.discountPercent}%
                                                         </div>
                                                     )}
                                                 </div>
 
                                                 {/* Package Info */}
-                                                <div className="p-3 md:p-3.5">
-                                                    <h3 className={`text-[11px] sm:text-sm font-medium line-clamp-2 mb-1.5 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
+                                                <div className="p-[0.421875rem] sm:p-[0.5625rem]">
+                                                    <h3 className={`mb-1 line-clamp-2 text-[8px] font-medium sm:text-[10px] md:text-xs ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
                                                         {pkg.name}
                                                     </h3>
 
-                                                    <div className="mb-2">
-                                                        <p className="text-sm md:text-base font-semibold text-amber-400">
+                                                    <div className="mb-[0.421875rem]">
+                                                        <p className="text-[10.5px] font-semibold text-amber-400 sm:text-sm md:text-base">
                                                             KES {Number(pkg.totalPrice || 0).toLocaleString()}
                                                         </p>
                                                         {pkg.oldTotalPrice != null && pkg.oldTotalPrice > pkg.totalPrice && (
-                                                            <p className={`text-[11px] line-through ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                                                            <p className={`text-[8px] line-through sm:text-[10px] ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
                                                                 KES {Number(pkg.oldTotalPrice).toLocaleString()}
                                                             </p>
                                                         )}
                                                     </div>
 
-                                                    <p className={`text-[11px] line-clamp-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                    <p className={`line-clamp-2 text-[8px] sm:text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                                         {pkg.description || 'View details'}
                                                     </p>
                                                 </div>

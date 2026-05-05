@@ -150,39 +150,39 @@ export default function AdminChats() {
 
     return (
         <div>
-            <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b-2", borderClass)}>
-                <div>
-                    <h1 className={cn("text-2xl md:text-3xl font-bold", textClass)}>Customer Chats</h1>
-                    <p className={cn("mt-1 text-sm", textSecondaryClass)}>Respond quickly and keep support premium.</p>
+            <div className={cn('mb-2 border-b-2 pb-3 sm:mb-4 sm:pb-4', borderClass)}>
+                <div className="min-w-0">
+                    <h1 className={cn('text-xl font-bold sm:text-2xl md:text-3xl', textClass)}>Customer Chats</h1>
+                    <p className={cn('mt-0.5 text-xs sm:mt-1 sm:text-sm', textSecondaryClass)}>Respond quickly and keep support premium.</p>
                 </div>
             </div>
 
             {error && (
-                <div className="p-4 mb-6 rounded-lg border-l-4 flex items-center gap-2 bg-rose-500/15 border-rose-500 text-rose-400" role="alert">
+                <div className="mb-4 flex items-center gap-2 rounded-lg border-l-4 border-rose-500 bg-rose-500/15 p-3 text-sm text-rose-400 sm:mb-6 sm:p-4" role="alert">
                     {error}
                 </div>
             )}
 
             {loading ? (
-                <div className="flex justify-center items-center min-h-[320px]">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+                <div className="flex min-h-[240px] items-center justify-center sm:min-h-[300px]">
+                    <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600 sm:h-12 sm:w-12" />
                 </div>
             ) : (
-                <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex flex-col gap-3 md:flex-row md:gap-4">
                     {/* Chats list */}
                     <div className={cn(
-                        "w-full md:w-80 rounded-2xl border shadow-sm overflow-hidden",
+                        'w-full overflow-hidden rounded-xl border shadow-sm md:w-80 md:rounded-2xl',
                         bgClass,
                         borderClass,
                         selectedChat ? "hidden md:block" : "block"
                     )}>
-                        <div className={cn("px-4 py-3 border-b", borderClass, theme === 'dark' ? 'bg-gray-900/60' : 'bg-gray-50')}>
-                            <div className={cn("text-sm font-semibold", textClass)}>Chats</div>
-                            <div className={cn("text-xs", textSecondaryClass)}>{chats.length} conversation(s)</div>
+                        <div className={cn('border-b px-3 py-2 sm:px-4 sm:py-3', borderClass, theme === 'dark' ? 'bg-gray-900/60' : 'bg-gray-50')}>
+                            <div className={cn('text-xs font-semibold sm:text-sm', textClass)}>Chats</div>
+                            <div className={cn('text-[11px] sm:text-xs', textSecondaryClass)}>{chats.length} conversation(s)</div>
                         </div>
-                        <div className="max-h-[70vh] overflow-y-auto">
+                        <div className="max-h-[55vh] overflow-y-auto md:max-h-[70vh]">
                             {chats.length === 0 ? (
-                                <div className={cn("px-4 py-10 text-center", textSecondaryClass)}>No customer chats yet.</div>
+                                <div className={cn('px-3 py-8 text-center text-sm sm:px-4 sm:py-10', textSecondaryClass)}>No customer chats yet.</div>
                             ) : (
                                 chats.map((chat) => {
                                     const isActive = selectedChat?._id === chat._id;
@@ -191,7 +191,7 @@ export default function AdminChats() {
                                             type="button"
                                             key={chat._id}
                                             className={cn(
-                                                "w-full text-left px-4 py-3 border-b last:border-b-0 transition-all",
+                                                'w-full border-b px-3 py-2.5 text-left transition-all last:border-b-0 sm:px-4 sm:py-3',
                                                 borderClass,
                                                 isActive
                                                     ? "bg-gradient-to-r from-blue-600 to-blue-800 text-white"
@@ -201,10 +201,10 @@ export default function AdminChats() {
                                         >
                                             <div className="flex items-center justify-between gap-3">
                                                 <div className="min-w-0">
-                                                    <div className={cn("font-semibold truncate", isActive ? "text-white" : textClass)}>
+                                                    <div className={cn('truncate text-sm font-semibold sm:text-base', isActive ? "text-white" : textClass)}>
                                                         {chat.user?.name || chat.user?.email || 'Customer'}
                                                     </div>
-                                                    <div className={cn("text-xs truncate", isActive ? "text-white/80" : textSecondaryClass)}>
+                                                    <div className={cn('truncate text-[11px] sm:text-xs', isActive ? "text-white/80" : textSecondaryClass)}>
                                                         {chat.user?.email || '—'}
                                                     </div>
                                                 </div>
@@ -226,26 +226,26 @@ export default function AdminChats() {
 
                     {/* Messages panel */}
                     <div className={cn(
-                        "flex-1 rounded-2xl border shadow-sm overflow-hidden",
+                        'flex-1 overflow-hidden rounded-xl border shadow-sm md:rounded-2xl',
                         bgClass,
                         borderClass,
                         selectedChat ? "block" : "hidden md:block"
                     )}>
                         {!selectedChat ? (
-                            <div className="flex items-center justify-center min-h-[420px] p-8">
-                                <div className={cn("text-center", textSecondaryClass)}>
-                                    <div className={cn("text-lg font-semibold", textClass)}>Select a chat</div>
-                                    <div className="mt-1 text-sm">Choose a conversation to view messages.</div>
+                            <div className="flex min-h-[min(50vh,420px)] items-center justify-center p-6 sm:min-h-[420px] sm:p-8">
+                                <div className={cn('text-center', textSecondaryClass)}>
+                                    <div className={cn('text-base font-semibold sm:text-lg', textClass)}>Select a chat</div>
+                                    <div className="mt-1 text-xs sm:text-sm">Choose a conversation to view messages.</div>
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-col h-[75vh] md:h-[70vh]">
-                                <div className={cn("px-4 py-3 border-b flex items-center justify-between gap-3", borderClass, theme === 'dark' ? 'bg-gray-900/60' : 'bg-gray-50')}>
+                            <div className="flex h-[min(72dvh,620px)] flex-col md:h-[70vh]">
+                                <div className={cn('flex items-center justify-between gap-2 border-b px-3 py-2 sm:gap-3 sm:px-4 sm:py-3', borderClass, theme === 'dark' ? 'bg-gray-900/60' : 'bg-gray-50')}>
                                     <div className="min-w-0">
-                                        <div className={cn("text-sm font-semibold truncate", textClass)}>
+                                        <div className={cn('truncate text-sm font-semibold sm:text-base', textClass)}>
                                             {selectedChat.user?.name || selectedChat.user?.email}
                                         </div>
-                                        <div className={cn("text-xs truncate", textSecondaryClass)}>
+                                        <div className={cn('truncate text-[11px] sm:text-xs', textSecondaryClass)}>
                                             {selectedChat.user?.email || '—'}
                                         </div>
                                     </div>
@@ -253,7 +253,7 @@ export default function AdminChats() {
                                         type="button"
                                         onClick={() => setSelectedChat(null)}
                                         className={cn(
-                                            "md:hidden px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border",
+                                            'rounded-lg border px-2.5 py-1 text-[11px] font-semibold transition-all md:hidden sm:px-3 sm:py-1.5 sm:text-xs',
                                             theme === 'dark'
                                                 ? "bg-gray-900 text-gray-200 border-gray-700 hover:bg-gray-800"
                                                 : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
@@ -263,24 +263,24 @@ export default function AdminChats() {
                                     </button>
                                 </div>
 
-                                <div className={cn("flex-1 overflow-y-auto px-4 py-4 space-y-3", theme === 'dark' ? 'bg-gray-900/30' : 'bg-gray-50')}>
+                                <div className={cn('flex-1 space-y-2 overflow-y-auto px-3 py-3 sm:space-y-3 sm:px-4 sm:py-4', theme === 'dark' ? 'bg-gray-900/30' : 'bg-gray-50')}>
                                     {loadingMessages ? (
-                                        <div className={cn("text-sm", textSecondaryClass)}>Loading messages...</div>
+                                        <div className={cn('text-xs sm:text-sm', textSecondaryClass)}>Loading messages...</div>
                                     ) : (
                                         messages.map((msg) => {
                                             const isAdmin = msg.senderRole === 'admin';
                                             return (
                                                 <div key={msg._id} className={cn("flex", isAdmin ? "justify-end" : "justify-start")}>
                                                     <div className={cn(
-                                                        "max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-3 border shadow-sm",
+                                                        'max-w-[90%] rounded-xl border px-3 py-2 shadow-sm sm:max-w-[70%] sm:rounded-2xl sm:px-4 sm:py-3',
                                                         isAdmin
                                                             ? "bg-gradient-to-r from-blue-600 to-blue-800 text-white border-blue-500/30"
                                                             : cn(inputBgClass, textClass, borderClass)
                                                     )}>
-                                                        <div className={cn("text-sm whitespace-pre-wrap break-words", isAdmin ? "text-white" : textClass)}>
+                                                        <div className={cn('whitespace-pre-wrap break-words text-xs sm:text-sm', isAdmin ? "text-white" : textClass)}>
                                                             {msg.content}
                                                         </div>
-                                                        <div className={cn("mt-2 text-[11px] opacity-90", isAdmin ? "text-white/80" : textSecondaryClass)}>
+                                                        <div className={cn('mt-1.5 text-[10px] opacity-90 sm:mt-2 sm:text-[11px]', isAdmin ? "text-white/80" : textSecondaryClass)}>
                                                             {msg.sender?.name || '—'} · {formatTime(msg.createdAt)}
                                                         </div>
                                                     </div>
@@ -291,14 +291,14 @@ export default function AdminChats() {
                                     <div ref={messagesEndRef} />
                                 </div>
 
-                                <form onSubmit={sendMessage} className={cn("p-4 border-t flex gap-3", borderClass, bgClass)}>
+                                <form onSubmit={sendMessage} className={cn('flex gap-2 border-t p-3 sm:gap-3 sm:p-4', borderClass, bgClass)}>
                                     <input
                                         value={reply}
                                         onChange={(e) => setReply(e.target.value)}
                                         placeholder="Type a reply..."
                                         disabled={sending}
                                         className={cn(
-                                            "flex-1 px-4 py-2 rounded-xl border transition-all",
+                                            'flex-1 rounded-lg border px-3 py-2 text-sm transition-all sm:rounded-xl sm:px-4 sm:text-base',
                                             "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                                             inputBgClass,
                                             borderClass,
@@ -309,10 +309,9 @@ export default function AdminChats() {
                                     <button
                                         type="submit"
                                         className={cn(
-                                            "px-5 py-2 rounded-xl font-semibold transition-all",
-                                            "bg-gradient-to-r from-blue-600 to-blue-800 text-white",
-                                            "hover:shadow-lg hover:-translate-y-0.5",
-                                            "disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                                            'shrink-0 rounded-lg bg-gradient-to-r from-blue-600 to-blue-800 px-3 py-2 text-xs font-semibold !text-white transition-all hover:!text-white sm:rounded-xl sm:px-5 sm:text-sm',
+                                            'hover:shadow-md hover:-translate-y-0.5 sm:hover:shadow-lg',
+                                            'disabled:cursor-not-allowed disabled:opacity-60 disabled:transform-none',
                                         )}
                                         disabled={sending || !reply.trim()}
                                     >

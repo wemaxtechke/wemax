@@ -142,7 +142,7 @@ export default function Products() {
             />
             <div className={`relative z-10 w-full min-h-screen py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-8 ${theme === 'dark' ? 'bg-gray-950/35' : 'bg-white/45'} backdrop-blur-[3px]`}>
             <div className="max-w-7xl mx-auto">
-                <h1 className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-8 md:mb-12 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                <h1 className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-8 md:mb-12 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                     All Products
                 </h1>
 
@@ -158,37 +158,37 @@ export default function Products() {
 
                 {loading ? (
                     <>
-                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[0.421875rem] sm:gap-[0.5625rem] md:gap-[0.84375rem]">
                             {Array.from({ length: 12 }).map((_, i) => (
                                 <div
                                     key={i}
-                                    className={`rounded-lg overflow-hidden shadow-sm ${
+                                    className={`overflow-hidden rounded-md shadow-sm ${
                                         theme === 'dark' ? 'bg-gray-800' : 'bg-white'
                                     } animate-pulse`}
                                 >
                                     <div
-                                        className={`h-40 sm:h-48 md:h-56 ${
+                                        className={`h-[5.625rem] sm:h-[6.75rem] md:h-[7.875rem] ${
                                             theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
                                         }`}
                                     />
-                                    <div className={`p-3 sm:p-4 ${theme === 'dark' ? 'bg-gray-900/40' : 'bg-blue-50'}`}>
+                                    <div className={`p-[0.421875rem] sm:p-[0.5625rem] ${theme === 'dark' ? 'bg-gray-900/40' : 'bg-blue-50'}`}>
                                         <div
-                                            className={`h-3 sm:h-4 rounded mb-2 ${
+                                            className={`mb-1 h-2 rounded sm:h-2.5 ${
                                                 theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
                                             }`}
                                         />
                                         <div
-                                            className={`h-3 rounded w-2/3 mb-4 ${
+                                            className={`mb-2 h-2 w-2/3 rounded ${
                                                 theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
                                             }`}
                                         />
                                         <div
-                                            className={`h-5 sm:h-6 rounded w-1/2 mb-3 ${
+                                            className={`mb-[0.421875rem] h-3 w-1/2 rounded sm:h-[0.84375rem] ${
                                                 theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
                                             }`}
                                         />
                                         <div
-                                            className={`h-8 rounded ${
+                                            className={`h-[1.125rem] rounded ${
                                                 theme === 'dark' ? 'bg-gray-800' : 'bg-orange-200'
                                             }`}
                                         />
@@ -199,53 +199,53 @@ export default function Products() {
                     </>
                 ) : (
                     <>
-                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[0.421875rem] sm:gap-[0.5625rem] md:gap-[0.84375rem]">
                             {products.length > 0 ? (
                                 products.map((product) => (
                                     <Link 
                                         key={product._id} 
                                         to={`/products/${product._id}`}
-                                        className={`group rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:shadow-lg'}`}
+                                        className={`group overflow-hidden rounded-md transition-all duration-300 hover:shadow-xl ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:shadow-lg'}`}
                                     >
-                                        {/* Product Image Container */}
-                                        <div className="relative overflow-hidden h-40 sm:h-48 md:h-56 bg-white">
+                                        {/* Product Image — scaled again ×0.75 */}
+                                        <div className="relative h-[5.625rem] overflow-hidden bg-white sm:h-[6.75rem] md:h-[7.875rem]">
                                             <SmartImage
                                                 src={product.images?.[0]?.url || wemaxLogo}
                                                 alt={product.name}
-                                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                                                className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
                                             />
                                             {product.discount > 0 && (
-                                                <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs sm:text-sm font-bold">
+                                                <div className="absolute right-1 top-1 rounded bg-red-500 px-1 py-px text-[8px] font-bold text-white sm:text-[10px]">
                                                     -{product.discount}%
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Product Info */}
-                                        <div className={`p-3 sm:p-4 ${theme === 'dark' ? 'bg-blue-950/40' : 'bg-blue-50'}`}>
-                                            <h3 className={`text-xs sm:text-sm md:text-base font-semibold line-clamp-2 mb-2 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
+                                        <div className={`p-[0.421875rem] sm:p-[0.5625rem] ${theme === 'dark' ? 'bg-blue-950/40' : 'bg-blue-50'}`}>
+                                            <h3 className={`mb-1 line-clamp-2 text-[8px] font-semibold sm:text-[10px] md:text-xs ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>
                                                 {product.name}
                                             </h3>
 
                                             {/* Rating */}
-                                            <div className="flex items-center gap-1 mb-2">
+                                            <div className="mb-1 flex items-center gap-px">
                                                 <div className="flex text-yellow-500">
                                                     {[...Array(5)].map((_, i) => (
-                                                        <FaStar key={i} className="text-xs sm:text-sm" />
+                                                        <FaStar key={i} className="text-[8px] sm:text-[10px]" />
                                                     ))}
                                                 </div>
-                                                <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                <span className={`text-[8px] sm:text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                                     (234)
                                                 </span>
                                             </div>
 
                                             {/* Price */}
-                                            <div className="mb-3">
-                                                <p className={`text-lg sm:text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
+                                            <div className="mb-[0.421875rem]">
+                                                <p className={`text-[10.5px] font-bold sm:text-sm md:text-base ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
                                                     KES {product.newPrice?.toLocaleString() || '0'}
                                                 </p>
                                                 {product.oldPrice && product.oldPrice > product.newPrice && (
-                                                    <p className="text-xs sm:text-sm line-through text-gray-500">
+                                                    <p className="text-[8px] text-gray-500 line-through sm:text-[10px]">
                                                         KES {product.oldPrice?.toLocaleString()}
                                                     </p>
                                                 )}
@@ -255,9 +255,9 @@ export default function Products() {
                                             <button
                                                 type="button"
                                                 onClick={(e) => handleAddToCart(e, product)}
-                                                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded text-xs sm:text-sm font-semibold transition-colors duration-300 flex items-center justify-center gap-2"
+                                                className="flex w-full items-center justify-center gap-1 rounded bg-orange-500 py-1 text-[8px] font-semibold text-white transition-colors duration-300 hover:bg-orange-600 sm:text-[10px]"
                                             >
-                                                <FaShoppingCart className="text-xs sm:text-sm" /> Add
+                                                <FaShoppingCart className="text-[8px] sm:text-[10px]" /> Add
                                             </button>
                                         </div>
                                     </Link>

@@ -21,7 +21,7 @@ export default function AdminLayout() {
             <AdminSidebar isOpen={sidebarOpen} onClose={handleCloseSidebar} />
             <div className="flex-1 ml-0 md:ml-[260px] flex flex-col min-h-screen transition-all duration-300">
                 <AdminHeader onMenuToggle={handleToggleSidebar} />
-                <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+                <main className="flex-1 overflow-y-auto px-3 py-4 sm:px-4 md:p-8">
                     <Outlet />
                 </main>
             </div>
