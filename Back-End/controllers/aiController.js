@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
-import { prisma } from '../lib/prisma.js';
-import { formatProduct, productDetailInclude } from '../lib/apiFormatters.js';
+import { executeQuery } from '../lib/mysql.js';
+import { formatProduct } from '../lib/apiFormatters.js';
 
 /** Prisma Client enum names for ProductCategory */
 const PRODUCT_CATEGORIES = [
@@ -40,30 +40,105 @@ function extractJsonObject(content) {
     if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
         text = text.slice(startIdx, endIdx + 1).trim();
     }
-    return JSON.parse(text);
+    try {
+        return JSON.parse(text);
+    } catch (e) {
+        // If JSON parsing fails, the AI returned plain text
+        // Return a fallback structure
+        return {
+            assistantText: text,
+            quickReplies: [],
+            readyToSearch: false,
+            filters: {
+                search: null,
+                category: null,
+                subCategory: null,
+                brand: null,
+                minPrice: null,
+                maxPrice: null
+            }
+        };
+    }
 }
 
-function buildProductWhere(filters) {
-    const where = { AND: [] };
-    const search = filters.search && String(filters.search).trim();
+// Common typo autocorrections
+const TYPO_FIXES = {
+    mornitor: 'monitor',
+    mornitors: 'monitors',
+    studiio: 'studio',
+    speeker: 'speaker',
+    speekers: 'speakers',
+    headfone: 'headphone',
+    headfones: 'headphones',
+    laptoop: 'laptop',
+    laptoops: 'laptops',
+    desktopp: 'desktop',
+    desktops: 'desktops',
+    mobille: 'mobile',
+    mobilles: 'mobiles',
+    cammera: 'camera',
+    cammeras: 'cameras',
+    printter: 'printer',
+    printters: 'printers',
+    keybord: 'keyboard',
+    keybords: 'keyboards',
+    mouuse: 'mouse',
+    mouce: 'mouse',
+    tabblet: 'tablet',
+    tabblets: 'tablets',
+    televiision: 'television',
+    tvv: 'tv',
+    woofeer: 'woofer',
+    woofers: 'woofers',
+    subwoofeer: 'subwoofer',
+    amplifiier: 'amplifier',
+    amplifi: 'amp',
+    ampli: 'amp',
+    mikrophone: 'microphone',
+    mic: 'microphone',
+    mixer: 'mixer',
+    controlller: 'controller',
+    dj: 'dj',
+    consolle: 'console',
+    djcontroller: 'dj controller',
+};
+
+function autocorrectSearchTerm(search) {
+    if (!search) return search;
+    const words = search.toLowerCase().split(/\s+/);
+    const corrected = words.map(word => TYPO_FIXES[word] || word);
+    return corrected.join(' ');
+}
+
+function buildProductWhereSQL(filters) {
+    const conditions = [];
+    const params = [];
+
+    let search = filters.search && String(filters.search).trim();
     if (search) {
-        where.AND.push({
-            OR: [
-                { name: { contains: search } },
-                { description: { contains: search } },
-                { brand: { contains: search } },
-            ],
-        });
+        // Apply typo autocorrection
+        search = autocorrectSearchTerm(search);
+        const q = `%${search}%`;
+        conditions.push('(p.name LIKE ? OR p.description LIKE ? OR p.brand LIKE ?)');
+        params.push(q, q, q);
     }
+
     const category = normalizeCategory(filters.category);
-    if (category) where.AND.push({ category });
+    if (category) {
+        conditions.push('p.category = ?');
+        params.push(category);
+    }
 
     if (filters.subCategory && String(filters.subCategory).trim()) {
-        where.AND.push({ subCategory: String(filters.subCategory).trim() });
+        conditions.push('p.subCategory = ?');
+        params.push(String(filters.subCategory).trim());
     }
+
     if (filters.brand && String(filters.brand).trim()) {
-        where.AND.push({ brand: String(filters.brand).trim() });
+        conditions.push('p.brand = ?');
+        params.push(String(filters.brand).trim());
     }
+
     const minPrice =
         filters.minPrice != null && filters.minPrice !== ''
             ? Number(filters.minPrice)
@@ -72,31 +147,18 @@ function buildProductWhere(filters) {
         filters.maxPrice != null && filters.maxPrice !== ''
             ? Number(filters.maxPrice)
             : null;
+
     if (minPrice != null && !Number.isNaN(minPrice)) {
-        where.AND.push({ newPrice: { gte: minPrice } });
+        conditions.push('p.newPrice >= ?');
+        params.push(minPrice);
     }
     if (maxPrice != null && !Number.isNaN(maxPrice)) {
-        where.AND.push({ newPrice: { lte: maxPrice } });
-    }
-    // If both min and max, merge into one object — Prisma AND two constraints on same field can merge
-    const priceMin = minPrice != null && !Number.isNaN(minPrice) ? minPrice : undefined;
-    const priceMax = maxPrice != null && !Number.isNaN(maxPrice) ? maxPrice : undefined;
-    if (priceMin !== undefined || priceMax !== undefined) {
-        const np = {};
-        if (priceMin !== undefined) np.gte = priceMin;
-        if (priceMax !== undefined) np.lte = priceMax;
-        where.AND = where.AND.filter(
-            (clause) =>
-                !(
-                    clause.newPrice &&
-                    typeof clause.newPrice === 'object' &&
-                    ('gte' in clause.newPrice || 'lte' in clause.newPrice)
-                )
-        );
-        where.AND.push({ newPrice: np });
+        conditions.push('p.newPrice <= ?');
+        params.push(maxPrice);
     }
 
-    return where.AND.length ? where : {};
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    return { whereClause, params };
 }
 
 function hasConcreteFilters(filters) {
@@ -152,6 +214,7 @@ export const shopAssistant = async (req, res) => {
 
 RULES:
 - assistantText: max 2–3 short sentences. Friendly, no fluff.
+- CRITICAL: NEVER say "Searching...", "Looking for...", "Finding..." or similar. Just return JSON. The system searches automatically.
 - If product type OR budget is unclear, set readyToSearch to false and ask ONE focused question in assistantText.
 - quickReplies: 2–4 very short chip labels (e.g. "Under 10k", "Sound systems", "Phones") to guide the user; empty array if none.
 - filters: extract search keywords (e.g. woofer, TV), optional category, subCategory, brand, minPrice, maxPrice (numbers in KES).
@@ -206,13 +269,7 @@ OUTPUT: a single JSON object ONLY:
             return res.status(502).json({ message: 'Empty response from AI' });
         }
 
-        let parsed;
-        try {
-            parsed = extractJsonObject(rawContent);
-        } catch (e) {
-            console.error('shopAssistant JSON parse:', rawContent, e);
-            return res.status(502).json({ message: 'Assistant returned invalid data' });
-        }
+        const parsed = extractJsonObject(rawContent);
 
         let assistantText =
             typeof parsed.assistantText === 'string' ? parsed.assistantText.trim() : 'How can I help you find something?';
@@ -236,16 +293,59 @@ OUTPUT: a single JSON object ONLY:
         const canQuery = hasConcreteFilters(normalizedFilters);
 
         if (canQuery) {
-            const whereFinal = buildProductWhere(normalizedFilters);
-            const rows = await prisma.product.findMany({
-                where: Object.keys(whereFinal).length ? whereFinal : undefined,
-                orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
-                take: 8,
-                include: productDetailInclude,
-            });
-            products = rows.map(formatProduct);
+            const { whereClause, params } = buildProductWhereSQL(normalizedFilters);
 
-            if (products.length === 0) {
+            // Get products with images and specs
+            const productsQuery = `
+                SELECT
+                    p.*,
+                    pi.id as imageId,
+                    pi.url as imageUrl,
+                    pi.publicId as imagePublicId,
+                    pi.sortOrder as imageSortOrder,
+                    ps.id as specId,
+                    ps.specKey,
+                    ps.value as specValue
+                FROM Product p
+                LEFT JOIN ProductImage pi ON p.id = pi.productId
+                LEFT JOIN ProductSpec ps ON p.id = ps.productId
+                ${whereClause}
+                ORDER BY p.isFeatured DESC, p.createdAt DESC
+                LIMIT 8
+            `;
+            const rows = await executeQuery(productsQuery, params);
+
+            // Group product data
+            const productsMap = new Map();
+            rows.forEach(row => {
+                if (!productsMap.has(row.id)) {
+                    productsMap.set(row.id, {
+                        ...row,
+                        images: [],
+                        specifications: []
+                    });
+                }
+                const product = productsMap.get(row.id);
+                if (row.imageId && !product.images.find(img => img.id === row.imageId)) {
+                    product.images.push({
+                        id: row.imageId,
+                        url: row.imageUrl,
+                        publicId: row.imagePublicId,
+                        sortOrder: row.imageSortOrder
+                    });
+                }
+                if (row.specId && !product.specifications.find(s => s.id === row.specId)) {
+                    product.specifications.push({
+                        id: row.specId,
+                        specKey: row.specKey,
+                        value: row.specValue
+                    });
+                }
+            });
+
+            products = Array.from(productsMap.values()).map(formatProduct);
+
+            if (products.length === 0 && parsed.readyToSearch) {
                 assistantText =
                     assistantText +
                     (assistantText.endsWith('.') ? ' ' : '. ') +
