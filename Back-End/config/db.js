@@ -1,11 +1,13 @@
-import { prisma } from '../lib/prisma.js';
+import { mysqlPool } from '../lib/mysql.js';
 
 export const connectDB = async () => {
     try {
-        await prisma.$connect();
-        console.log('✅ MySQL connected successfully (Prisma)');
+        const connection = await mysqlPool.getConnection();
+        await connection.ping();
+        connection.release();
+        console.log('MySQL connected successfully (Ultra-Optimized with node-mysql2)');
     } catch (error) {
-        console.error('❌ Database connection error:', error.message);
+        console.error('Database connection error:', error.message);
         process.exit(1);
     }
 };

@@ -1,10 +1,10 @@
-import { prisma } from '../lib/prisma.js';
+import { executeQuery } from '../lib/mysql.js';
 import { parseIntId } from '../lib/parseId.js';
 import { formatShippingRate } from '../lib/apiFormatters.js';
 
 export const getShippingRates = async (req, res) => {
     try {
-        const rates = await prisma.shippingRate.findMany({ orderBy: { locationName: 'asc' } });
+        const rates = await executeQuery('SELECT * FROM ShippingRate ORDER BY locationName ASC');
         res.json(rates.map(formatShippingRate));
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -13,20 +13,11 @@ export const getShippingRates = async (req, res) => {
 
 export const getPublicShippingRates = async (req, res) => {
     try {
-        const rates = await prisma.shippingRate.findMany({
-            select: {
-                id: true,
-                carrier: true,
-                locationName: true,
-                regionCode: true,
-                price: true,
-                isDefault: true,
-                allowCashOnDelivery: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-            orderBy: { locationName: 'asc' },
-        });
+        const rates = await executeQuery(`
+            SELECT id, carrier, locationName, regionCode, price, isDefault, allowCashOnDelivery, createdAt, updatedAt
+            FROM ShippingRate
+            ORDER BY locationName ASC
+        `);
         res.json(rates.map(formatShippingRate));
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -36,11 +27,18 @@ export const getPublicShippingRates = async (req, res) => {
 export const createShippingRate = async (req, res) => {
     try {
         if (req.body.isDefault) {
-            await prisma.shippingRate.updateMany({ data: { isDefault: false } });
+            await executeQuery('UPDATE ShippingRate SET isDefault = false');
         }
 
-        const rate = await prisma.shippingRate.create({ data: req.body });
-        res.status(201).json(formatShippingRate(rate));
+        const { carrier, locationName, regionCode, price, isDefault, allowCashOnDelivery } = req.body;
+        const result = await executeQuery(
+            `INSERT INTO ShippingRate (carrier, locationName, regionCode, price, isDefault, allowCashOnDelivery, createdAt, updatedAt)
+             VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+            [carrier, locationName, regionCode || null, price, isDefault || false, allowCashOnDelivery !== false]
+        );
+
+        const rates = await executeQuery('SELECT * FROM ShippingRate WHERE id = ?', [result.insertId]);
+        res.status(201).json(formatShippingRate(rates[0]));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -53,24 +51,26 @@ export const updateShippingRate = async (req, res) => {
             return res.status(404).json({ message: 'Shipping rate not found' });
         }
 
-        const rate = await prisma.shippingRate.findUnique({ where: { id } });
-        if (!rate) {
+        const rates = await executeQuery('SELECT * FROM ShippingRate WHERE id = ?', [id]);
+        if (rates.length === 0) {
             return res.status(404).json({ message: 'Shipping rate not found' });
         }
 
         if (req.body.isDefault) {
-            await prisma.shippingRate.updateMany({
-                where: { id: { not: id } },
-                data: { isDefault: false },
-            });
+            await executeQuery('UPDATE ShippingRate SET isDefault = false WHERE id != ?', [id]);
         }
 
-        const updatedRate = await prisma.shippingRate.update({
-            where: { id },
-            data: req.body,
-        });
+        const { carrier, locationName, regionCode, price, isDefault, allowCashOnDelivery } = req.body;
+        await executeQuery(
+            `UPDATE ShippingRate SET
+                carrier = ?, locationName = ?, regionCode = ?, price = ?,
+                isDefault = ?, allowCashOnDelivery = ?, updatedAt = NOW()
+            WHERE id = ?`,
+            [carrier, locationName, regionCode || null, price, isDefault || false, allowCashOnDelivery !== false, id]
+        );
 
-        res.json(formatShippingRate(updatedRate));
+        const updatedRates = await executeQuery('SELECT * FROM ShippingRate WHERE id = ?', [id]);
+        res.json(formatShippingRate(updatedRates[0]));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -83,12 +83,12 @@ export const deleteShippingRate = async (req, res) => {
             return res.status(404).json({ message: 'Shipping rate not found' });
         }
 
-        const rate = await prisma.shippingRate.findUnique({ where: { id } });
-        if (!rate) {
+        const rates = await executeQuery('SELECT * FROM ShippingRate WHERE id = ?', [id]);
+        if (rates.length === 0) {
             return res.status(404).json({ message: 'Shipping rate not found' });
         }
 
-        await prisma.shippingRate.delete({ where: { id } });
+        await executeQuery('DELETE FROM ShippingRate WHERE id = ?', [id]);
         res.json({ message: 'Shipping rate deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });

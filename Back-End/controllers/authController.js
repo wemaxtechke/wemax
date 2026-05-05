@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { prisma } from '../lib/prisma.js';
+import { executeQuery } from '../lib/mysql.js';
 import { generateToken } from '../utils/generateToken.js';
 import { formatUserPublic } from '../lib/apiFormatters.js';
 
@@ -11,24 +11,26 @@ export const register = async (req, res) => {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
-        const existingUser = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
-        if (existingUser) {
+        const existingUsers = await executeQuery(
+            'SELECT * FROM User WHERE email = ?',
+            [email.toLowerCase().trim()]
+        );
+        if (existingUsers.length > 0) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
         const passwordHash = await bcrypt.hash(password, 10);
 
-        const user = await prisma.user.create({
-            data: {
-                name: name.trim(),
-                email: email.toLowerCase().trim(),
-                passwordHash,
-                phone: phone.trim(),
-                role: 'customer',
-            },
-        });
+        const result = await executeQuery(
+            `INSERT INTO User (name, email, passwordHash, phone, role, isActive, createdAt, updatedAt) 
+             VALUES (?, ?, ?, ?, 'customer', true, NOW(), NOW())`,
+            [name.trim(), email.toLowerCase().trim(), passwordHash, phone.trim()]
+        );
 
-        const token = generateToken(user.id);
+        const users = await executeQuery('SELECT * FROM User WHERE id = ?', [result.insertId]);
+        const user = users[0];
+
+        const token = generateToken(user.id, user.role);
 
         res.cookie('token', token, {
             httpOnly: true,
@@ -39,7 +41,6 @@ export const register = async (req, res) => {
 
         res.status(201).json({
             message: 'Registration successful',
-            user: formatUserPublic(user),
             token,
         });
     } catch (error) {
@@ -55,7 +56,12 @@ export const login = async (req, res) => {
             return res.status(400).json({ message: 'Email and password are required' });
         }
 
-        const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
+        const users = await executeQuery(
+            'SELECT * FROM User WHERE email = ?',
+            [email.toLowerCase().trim()]
+        );
+        const user = users.length > 0 ? users[0] : null;
+
         if (!user || !user.passwordHash) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
@@ -98,7 +104,8 @@ export const logout = (req, res) => {
 
 export const getMe = async (req, res) => {
     try {
-        const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+        const users = await executeQuery('SELECT * FROM User WHERE id = ?', [req.user.id]);
+        const user = users.length > 0 ? users[0] : null;
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }

@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
-import { prisma } from '../lib/prisma.js';
+import { executeQuery } from '../lib/mysql.js';
 
 export const initializeSocket = (httpServer) => {
     const io = new Server(httpServer, {
@@ -24,7 +24,8 @@ export const initializeSocket = (httpServer) => {
                 return next(new Error('Authentication error'));
             }
 
-            const user = await prisma.user.findUnique({ where: { id: userId } });
+            const users = await executeQuery('SELECT * FROM User WHERE id = ?', [userId]);
+            const user = users.length > 0 ? users[0] : null;
 
             if (!user) {
                 return next(new Error('User not found'));

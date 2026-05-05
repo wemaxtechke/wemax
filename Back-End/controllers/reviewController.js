@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma.js';
+import { executeQuery } from '../lib/mysql.js';
 import { parseIntId } from '../lib/parseId.js';
 import { formatReview } from '../lib/apiFormatters.js';
 import { refreshProductReviewStats } from '../services/productReviewStats.js';
@@ -14,11 +14,14 @@ export const getReviews = async (req, res) => {
             return res.status(400).json({ message: 'Invalid product ID' });
         }
 
-        const reviews = await prisma.review.findMany({
-            where: { productId },
-            include: reviewInclude,
-            orderBy: { createdAt: 'desc' },
-        });
+        const reviews = await executeQuery(`
+            SELECT r.*, 
+                   u.id as userId, u.name as userName, u.email as userEmail
+            FROM Review r
+            LEFT JOIN User u ON r.userId = u.id
+            WHERE r.productId = ?
+            ORDER BY r.createdAt DESC
+        `, [productId]);
 
         res.json(reviews.map((r) => formatReview(r)));
     } catch (error) {
@@ -35,33 +38,41 @@ export const createReview = async (req, res) => {
 
         const { rating, title, comment } = req.body;
 
-        const product = await prisma.product.findUnique({ where: { id: productId } });
-        if (!product) {
+        // Check if product exists
+        const products = await executeQuery('SELECT * FROM Product WHERE id = ?', [productId]);
+        if (products.length === 0) {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        const existingReview = await prisma.review.findUnique({
-            where: { productId_userId: { productId, userId: req.user.id } },
-        });
+        // Check if user already reviewed this product
+        const existingReviews = await executeQuery(
+            'SELECT * FROM Review WHERE productId = ? AND userId = ?',
+            [productId, req.user.id]
+        );
 
-        if (existingReview) {
+        if (existingReviews.length > 0) {
             return res.status(400).json({ message: 'You have already reviewed this product' });
         }
 
-        const review = await prisma.review.create({
-            data: {
-                productId,
-                userId: req.user.id,
-                rating,
-                title,
-                comment,
-            },
-            include: reviewInclude,
-        });
+        // Create review
+        const reviewResult = await executeQuery(
+            'INSERT INTO Review (productId, userId, rating, title, comment, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, NOW(), NOW())',
+            [productId, req.user.id, rating, title, comment]
+        );
 
+        // Refresh product review stats
         await refreshProductReviewStats(productId);
 
-        res.status(201).json(formatReview(review));
+        // Get the created review with user details
+        const createdReviews = await executeQuery(`
+            SELECT r.*, 
+                   u.id as userId, u.name as userName, u.email as userEmail
+            FROM Review r
+            LEFT JOIN User u ON r.userId = u.id
+            WHERE r.id = ?
+        `, [reviewResult.insertId]);
+
+        res.status(201).json(formatReview(createdReviews[0]));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -74,10 +85,20 @@ export const updateReview = async (req, res) => {
             return res.status(404).json({ message: 'Review not found' });
         }
 
-        const review = await prisma.review.findUnique({ where: { id } });
-        if (!review) {
+        // Get review with user details
+        const reviews = await executeQuery(`
+            SELECT r.*, 
+                   u.id as userId, u.name as userName, u.email as userEmail
+            FROM Review r
+            LEFT JOIN User u ON r.userId = u.id
+            WHERE r.id = ?
+        `, [id]);
+
+        if (reviews.length === 0) {
             return res.status(404).json({ message: 'Review not found' });
         }
+
+        const review = reviews[0];
 
         if (review.userId !== req.user.id) {
             return res.status(403).json({ message: 'Access denied' });
@@ -89,15 +110,25 @@ export const updateReview = async (req, res) => {
         if (title !== undefined) data.title = title;
         if (comment !== undefined) data.comment = comment;
 
-        const updatedReview = await prisma.review.update({
-            where: { id },
-            data,
-            include: reviewInclude,
-        });
+        // Update review
+        await executeQuery(
+            'UPDATE Review SET rating = ?, title = ?, comment = ?, updatedAt = NOW() WHERE id = ?',
+            [rating, title, comment, id]
+        );
 
+        // Refresh product review stats
         await refreshProductReviewStats(review.productId);
 
-        res.json(formatReview(updatedReview));
+        // Get updated review with user details
+        const updatedReviews = await executeQuery(`
+            SELECT r.*, 
+                   u.id as userId, u.name as userName, u.email as userEmail
+            FROM Review r
+            LEFT JOIN User u ON r.userId = u.id
+            WHERE r.id = ?
+        `, [id]);
+
+        res.json(formatReview(updatedReviews[0]));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -110,17 +141,31 @@ export const deleteReview = async (req, res) => {
             return res.status(404).json({ message: 'Review not found' });
         }
 
-        const review = await prisma.review.findUnique({ where: { id } });
-        if (!review) {
+        // Get review with product ID for stats refresh
+        const reviews = await executeQuery(`
+            SELECT r.*, 
+                   u.id as userId, u.name as userName, u.email as userEmail
+            FROM Review r
+            LEFT JOIN User u ON r.userId = u.id
+            WHERE r.id = ?
+        `, [id]);
+
+        if (reviews.length === 0) {
             return res.status(404).json({ message: 'Review not found' });
         }
+
+        const review = reviews[0];
 
         if (review.userId !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Access denied' });
         }
 
         const productId = review.productId;
-        await prisma.review.delete({ where: { id } });
+        
+        // Delete review
+        await executeQuery('DELETE FROM Review WHERE id = ?', [id]);
+        
+        // Refresh product review stats
         await refreshProductReviewStats(productId);
 
         res.json({ message: 'Review deleted successfully' });

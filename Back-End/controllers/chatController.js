@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma.js';
+import { executeQuery } from '../lib/mysql.js';
 import { parseIntId } from '../lib/parseId.js';
 import { formatChat, formatMessage } from '../lib/apiFormatters.js';
 import { bumpChatAfterMessage } from '../services/chatThread.js';
@@ -15,17 +15,30 @@ const messageInclude = {
 export const getChats = async (req, res) => {
     try {
         if (req.user.role === 'admin') {
-            const chats = await prisma.chat.findMany({
-                include: chatInclude,
-                orderBy: { lastMessageAt: 'desc' },
-            });
+            const chats = await executeQuery(`
+                SELECT c.*, 
+                       u.id as userId, u.name as userName, u.email as userEmail,
+                       (SELECT COUNT(*) FROM Message WHERE chatId = c.id) as messageCount,
+                       (SELECT MAX(createdAt) FROM Message WHERE chatId = c.id) as lastMessageAt
+                FROM Chat c
+                LEFT JOIN User u ON c.userId = u.id
+                ORDER BY c.lastMessageAt DESC
+            `);
             res.json(chats.map((c) => formatChat(c)));
         } else {
-            const chat = await prisma.chat.findUnique({
-                where: { userId: req.user.id },
-                include: chatInclude,
-            });
-            res.json(chat ? [formatChat(chat)] : []);
+            const chats = await executeQuery(`
+                SELECT c.*, 
+                       u.id as userId, u.name as userName, u.email as userEmail,
+                       (SELECT COUNT(*) FROM Message WHERE chatId = c.id) as messageCount,
+                       (SELECT MAX(createdAt) FROM Message WHERE chatId = c.id) as lastMessageAt
+                FROM Chat c
+                LEFT JOIN User u ON c.userId = u.id
+                WHERE c.userId = ?
+                ORDER BY c.lastMessageAt DESC
+                LIMIT 1
+            `, [req.user.id]);
+            
+            res.json(chats.length > 0 ? [formatChat(chats[0])] : []);
         }
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -34,21 +47,32 @@ export const getChats = async (req, res) => {
 
 export const getMyChat = async (req, res) => {
     try {
-        let chat = await prisma.chat.findUnique({
-            where: { userId: req.user.id },
-        });
+        let chat = await executeQuery('SELECT * FROM Chat WHERE userId = ?', [req.user.id]);
 
-        if (!chat) {
-            chat = await prisma.chat.create({
-                data: { userId: req.user.id },
-            });
+        if (chat.length === 0) {
+            // Create new chat if none exists
+            const result = await executeQuery(
+                'INSERT INTO Chat (userId, createdAt, updatedAt) VALUES (?, NOW(), NOW())',
+                [req.user.id]
+            );
+            const newChats = await executeQuery('SELECT * FROM Chat WHERE id = ?', [result.insertId]);
+            chat = newChats[0];
+        } else {
+            chat = chat[0];
         }
 
-        const populatedChat = await prisma.chat.findUnique({
-            where: { id: chat.id },
-            include: chatInclude,
-        });
-        res.json(formatChat(populatedChat));
+        // Get populated chat with user details
+        const populatedChats = await executeQuery(`
+            SELECT c.*, 
+                   u.id as userId, u.name as userName, u.email as userEmail,
+                   (SELECT COUNT(*) FROM Message WHERE chatId = c.id) as messageCount,
+                   (SELECT MAX(createdAt) FROM Message WHERE chatId = c.id) as lastMessageAt
+            FROM Chat c
+            LEFT JOIN User u ON c.userId = u.id
+            WHERE c.id = ?
+        `, [chat.id]);
+
+        res.json(formatChat(populatedChats[0]));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -61,31 +85,45 @@ export const getMessages = async (req, res) => {
             return res.status(404).json({ message: 'Chat not found' });
         }
 
-        const chat = await prisma.chat.findUnique({ where: { id: chatId } });
-        if (!chat) {
+        // Check if chat exists and get user access
+        const chats = await executeQuery(`
+            SELECT c.*, u.id as userId, u.name as userName, u.email as userEmail
+            FROM Chat c
+            LEFT JOIN User u ON c.userId = u.id
+            WHERE c.id = ?
+        `, [chatId]);
+
+        if (chats.length === 0) {
             return res.status(404).json({ message: 'Chat not found' });
         }
+
+        const chat = chats[0];
 
         if (req.user.role === 'customer' && chat.userId !== req.user.id) {
             return res.status(403).json({ message: 'Access denied' });
         }
 
-        const messages = await prisma.message.findMany({
-            where: { chatId },
-            include: messageInclude,
-            orderBy: { createdAt: 'asc' },
-        });
+        // Get messages with sender details
+        const messages = await executeQuery(`
+            SELECT m.*, 
+                   s.id as senderId, s.name as senderName, s.email as senderEmail
+            FROM Message m
+            LEFT JOIN User s ON m.senderId = s.id
+            WHERE m.chatId = ?
+            ORDER BY m.createdAt ASC
+        `, [chatId]);
 
+        // Mark chat as read
         if (req.user.role === 'admin') {
-            await prisma.chat.update({
-                where: { id: chatId },
-                data: { unreadForAdmin: 0 },
-            });
+            await executeQuery(
+                'UPDATE Chat SET unreadForAdmin = 0 WHERE id = ?',
+                [chatId]
+            );
         } else {
-            await prisma.chat.update({
-                where: { id: chatId },
-                data: { unreadForUser: 0 },
-            });
+            await executeQuery(
+                'UPDATE Chat SET unreadForUser = 0 WHERE id = ?',
+                [chatId]
+            );
         }
 
         res.json(messages.map((m) => formatMessage(m)));
@@ -99,13 +137,24 @@ export const sendMessage = async (req, res) => {
         let { chatId, content } = req.body;
         chatId = chatId != null ? parseIntId(String(chatId)) : null;
 
-        let chat = chatId ? await prisma.chat.findUnique({ where: { id: chatId } }) : null;
+        let chat = null;
+        if (chatId) {
+            const chats = await executeQuery('SELECT * FROM Chat WHERE id = ?', [chatId]);
+            if (chats.length === 0) {
+                return res.status(404).json({ message: 'Chat not found' });
+            }
+            chat = chats[0];
+        }
 
         if (!chat) {
             if (req.user.role === 'customer') {
-                chat = await prisma.chat.create({
-                    data: { userId: req.user.id },
-                });
+                // Create new chat for customer
+                const result = await executeQuery(
+                    'INSERT INTO Chat (userId, createdAt, updatedAt) VALUES (?, NOW(), NOW())',
+                    [req.user.id]
+                );
+                const newChats = await executeQuery('SELECT * FROM Chat WHERE id = ?', [result.insertId]);
+                chat = newChats[0];
             } else {
                 return res.status(404).json({ message: 'Chat not found' });
             }
@@ -115,24 +164,25 @@ export const sendMessage = async (req, res) => {
             return res.status(403).json({ message: 'Access denied' });
         }
 
-        const message = await prisma.message.create({
-            data: {
-                chatId: chat.id,
-                senderRole: req.user.role,
-                senderId: req.user.id,
-                content,
-            },
-            include: messageInclude,
-        });
+        // Insert message
+        const messageResult = await executeQuery(
+            'INSERT INTO Message (chatId, senderRole, senderId, content, createdAt, updatedAt) VALUES (?, ?, ?, ?, NOW(), NOW())',
+            [chat.id, req.user.role, req.user.id, content]
+        );
 
-        await bumpChatAfterMessage(chat.id, req.user.role, message.createdAt);
+        // Update chat last message timestamp
+        await bumpChatAfterMessage(chat.id, req.user.role, new Date());
 
-        const populatedMessage = await prisma.message.findUnique({
-            where: { id: message.id },
-            include: messageInclude,
-        });
+        // Get populated message
+        const populatedMessages = await executeQuery(`
+            SELECT m.*, 
+                   s.id as senderId, s.name as senderName, s.email as senderEmail
+            FROM Message m
+            LEFT JOIN User s ON m.senderId = s.id
+            WHERE m.id = ?
+        `, [MessageResult.insertId]);
 
-        res.status(201).json(formatMessage(populatedMessage));
+        res.status(201).json(formatMessage(populatedMessages[0]));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

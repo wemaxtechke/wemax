@@ -1,29 +1,5 @@
 import { discountPercentPackage, discountPercentProduct } from './apiShape.js';
 
-export const productDetailInclude = {
-    images: { orderBy: { sortOrder: 'asc' } },
-    specifications: true,
-};
-
-export const packageDetailInclude = {
-    items: { include: { product: { include: productDetailInclude } } },
-    images: { orderBy: { sortOrder: 'asc' } },
-};
-
-export const prismaOrderInclude = {
-    customer: { select: { id: true, name: true, email: true, phone: true } },
-    items: {
-        include: {
-            product: { include: productDetailInclude },
-        },
-    },
-    packages: {
-        include: {
-            package: { include: packageDetailInclude },
-        },
-    },
-};
-
 export function formatProduct(p) {
     if (!p) return null;
     const loc = p.locationShipping;
@@ -160,44 +136,114 @@ export function formatOrder(order) {
     };
 }
 
-export async function formatCart(prisma, userId) {
-    const [lines, pkgLines] = await Promise.all([
-        prisma.cartProductLine.findMany({
-            where: { userId },
-            include: { product: { include: productDetailInclude } },
-        }),
-        prisma.cartPackageLine.findMany({
-            where: { userId },
-            include: {
-                package: {
-                    include: {
-                        items: { include: { product: { include: productDetailInclude } } },
-                        images: { orderBy: { sortOrder: 'asc' } },
-                    },
-                },
-            },
-        }),
-    ]);
+export async function formatCart(userId) {
+    // Import executeQuery dynamically to avoid circular dependency
+    const { executeQuery } = await import('./mysql.js');
+
+    // Get cart product lines with product details
+    const lines = await executeQuery(`
+        SELECT cpl.*, p.*, pi.url as imageUrl, ps.specKey, ps.value as specValue
+        FROM CartProductLine cpl
+        JOIN Product p ON cpl.productId = p.id
+        LEFT JOIN ProductImage pi ON p.id = pi.productId AND pi.sortOrder = 0
+        LEFT JOIN ProductSpec ps ON p.id = ps.productId
+        WHERE cpl.userId = ?
+    `, [userId]);
+
+    // Get cart package lines with package details
+    const pkgLines = await executeQuery(`
+        SELECT ckl.*, pkg.*, pi.url as imageUrl, pii.productId, pii.quantity as itemQty,
+               p.name as itemProductName, p.newPrice as itemProductPrice
+        FROM CartPackageLine ckl
+        JOIN Package pkg ON ckl.packageId = pkg.id
+        LEFT JOIN PackageImage pi ON pkg.id = pi.packageId AND pi.sortOrder = 0
+        LEFT JOIN PackageItem pii ON pkg.id = pii.packageId
+        LEFT JOIN Product p ON pii.productId = p.id
+        WHERE ckl.userId = ?
+    `, [userId]);
+
+    // Group product lines by cart line id
+    const productMap = new Map();
+    lines.forEach(row => {
+        if (!productMap.has(row.id)) {
+            const product = {
+                id: row.productId,
+                name: row.name,
+                description: row.description,
+                category: row.category,
+                subCategory: row.subCategory,
+                brand: row.brand,
+                newPrice: row.newPrice,
+                oldPrice: row.oldPrice,
+                freeShipping: row.freeShipping,
+                stock: row.stock,
+                averageRating: row.averageRating,
+                reviewsCount: row.reviewsCount,
+                isFeatured: row.isFeatured,
+                isFlashDeal: row.isFlashDeal,
+                images: row.imageUrl ? [{ url: row.imageUrl, sortOrder: 0 }] : [],
+                specifications: []
+            };
+            productMap.set(row.id, { product, quantity: row.quantity, price: row.price, cartLineId: row.id });
+        }
+        if (row.specKey && row.specValue) {
+            const entry = productMap.get(row.id);
+            entry.product.specifications.push({ specKey: row.specKey, value: row.specValue });
+        }
+    });
+
+    // Group package lines by cart line id
+    const packageMap = new Map();
+    pkgLines.forEach(row => {
+        if (!packageMap.has(row.id)) {
+            const pkg = {
+                id: row.packageId,
+                name: row.name,
+                description: row.description,
+                totalPrice: row.totalPrice,
+                oldTotalPrice: row.oldTotalPrice,
+                freeShipping: row.freeShipping,
+                category: row.category,
+                tag: row.tag,
+                images: row.imageUrl ? [{ url: row.imageUrl, sortOrder: 0 }] : [],
+                items: []
+            };
+            packageMap.set(row.id, { package: pkg, quantity: row.quantity, price: row.price, cartLineId: row.id });
+        }
+        if (row.productId) {
+            const entry = packageMap.get(row.id);
+            entry.package.items.push({
+                productId: row.productId,
+                productName: row.itemProductName,
+                quantity: row.itemQty,
+                price: row.itemProductPrice
+            });
+        }
+    });
 
     let subtotal = 0;
-    const items = lines.map((l) => {
-        subtotal += l.price * l.quantity;
-        return {
-            _id: String(l.id),
-            product: formatProduct(l.product),
-            quantity: l.quantity,
-            price: l.price,
-        };
-    });
-    const packages = pkgLines.map((l) => {
-        subtotal += l.price * l.quantity;
-        return {
-            _id: String(l.id),
-            package: formatPackage(l.package),
-            quantity: l.quantity,
-            price: l.price,
-        };
-    });
+    const items = [];
+    const packages = [];
+
+    for (const [, value] of productMap) {
+        subtotal += value.price * value.quantity;
+        items.push({
+            _id: String(value.cartLineId),
+            product: formatProduct(value.product),
+            quantity: value.quantity,
+            price: value.price,
+        });
+    }
+
+    for (const [, value] of packageMap) {
+        subtotal += value.price * value.quantity;
+        packages.push({
+            _id: String(value.cartLineId),
+            package: formatPackage(value.package),
+            quantity: value.quantity,
+            price: value.price,
+        });
+    }
 
     return { items, packages, subtotal };
 }
@@ -285,4 +331,11 @@ export function parseSort(sortParam, defaultField = 'createdAt') {
     const desc = s.startsWith('-');
     const field = desc ? s.slice(1) : s;
     return { [field]: desc ? 'desc' : 'asc' };
+}
+
+export function parseSortForSQL(sortParam, defaultField = 'createdAt') {
+    const s = sortParam || `-${defaultField}`;
+    const desc = s.startsWith('-');
+    const field = desc ? s.slice(1) : s;
+    return `${field} ${desc ? 'DESC' : 'ASC'}`;
 }

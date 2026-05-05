@@ -1,6 +1,6 @@
-import { prisma } from '../lib/prisma.js';
+import { executeQuery, executeTransaction } from '../lib/mysql.js';
 import { parseIntId } from '../lib/parseId.js';
-import { formatOrder, prismaOrderInclude } from '../lib/apiFormatters.js';
+import { formatOrder } from '../lib/apiFormatters.js';
 import { saveRemoteOrDataUrl } from '../config/storage.js';
 import {
     sendOrderConfirmationSMS,
@@ -12,20 +12,38 @@ import { sendQuotationEmail } from '../services/emailService.js';
 
 async function resolveShippingCost(shippingLocation, shippingCarrier) {
     const loc = String(shippingLocation || '').trim();
-    const carrierFilter = shippingCarrier ? { carrier: shippingCarrier } : {};
+    const locPattern = `%${loc}%`;
 
-    const match = await prisma.shippingRate.findFirst({
-        where: {
-            ...carrierFilter,
-            OR: [{ locationName: { contains: loc } }, { regionCode: { contains: loc } }],
-        },
-    });
-    if (match) return match.price;
+    // Try to find matching shipping rate
+    let match;
+    if (shippingCarrier) {
+        match = await executeQuery(
+            `SELECT * FROM ShippingRate WHERE carrier = ? AND (locationName LIKE ? OR regionCode LIKE ?) LIMIT 1`,
+            [shippingCarrier, locPattern, locPattern]
+        );
+    } else {
+        match = await executeQuery(
+            `SELECT * FROM ShippingRate WHERE locationName LIKE ? OR regionCode LIKE ? LIMIT 1`,
+            [locPattern, locPattern]
+        );
+    }
 
-    const defaultRate = await prisma.shippingRate.findFirst({
-        where: shippingCarrier ? { carrier: shippingCarrier, isDefault: true } : { isDefault: true },
-    });
-    return defaultRate ? defaultRate.price : 0;
+    if (match && match.length > 0) return match[0].price;
+
+    // Find default rate
+    let defaultRate;
+    if (shippingCarrier) {
+        defaultRate = await executeQuery(
+            `SELECT * FROM ShippingRate WHERE carrier = ? AND isDefault = true LIMIT 1`,
+            [shippingCarrier]
+        );
+    } else {
+        defaultRate = await executeQuery(
+            `SELECT * FROM ShippingRate WHERE isDefault = true LIMIT 1`,
+            []
+        );
+    }
+    return (defaultRate && defaultRate.length > 0) ? defaultRate[0].price : 0;
 }
 
 export const createOrder = async (req, res) => {
@@ -45,10 +63,16 @@ export const createOrder = async (req, res) => {
         let orderPackages = packages;
 
         if ((!orderItems || orderItems.length === 0) && (!orderPackages || orderPackages.length === 0)) {
-            const [cpl, ckl] = await Promise.all([
-                prisma.cartProductLine.findMany({ where: { userId }, include: { product: true } }),
-                prisma.cartPackageLine.findMany({ where: { userId }, include: { package: true } }),
-            ]);
+            const cpl = await executeQuery(
+                `SELECT cpl.*, p.newPrice as productPrice FROM CartProductLine cpl
+                 JOIN Product p ON cpl.productId = p.id WHERE cpl.userId = ?`,
+                [userId]
+            );
+            const ckl = await executeQuery(
+                `SELECT ckl.*, pkg.totalPrice as packagePrice FROM CartPackageLine ckl
+                 JOIN Package pkg ON ckl.packageId = pkg.id WHERE ckl.userId = ?`,
+                [userId]
+            );
             orderItems = cpl.map((l) => ({
                 productId: l.productId,
                 quantity: l.quantity,
@@ -72,8 +96,9 @@ export const createOrder = async (req, res) => {
         for (const item of orderItems) {
             const pid = parseIntId(item.product ?? item.productId);
             if (!pid) continue;
-            const product = await prisma.product.findUnique({ where: { id: pid } });
-            if (!product) continue;
+            const products = await executeQuery('SELECT * FROM Product WHERE id = ?', [pid]);
+            if (products.length === 0) continue;
+            const product = products[0];
             const price = product.newPrice;
             const quantity = item.quantity || 1;
             subtotal += price * quantity;
@@ -83,8 +108,9 @@ export const createOrder = async (req, res) => {
         for (const pkg of orderPackages) {
             const pkgId = parseIntId(pkg.package ?? pkg.packageId);
             if (!pkgId) continue;
-            const packageDoc = await prisma.package.findUnique({ where: { id: pkgId } });
-            if (!packageDoc) continue;
+            const packages = await executeQuery('SELECT * FROM Package WHERE id = ?', [pkgId]);
+            if (packages.length === 0) continue;
+            const packageDoc = packages[0];
             const price = pkg.price != null ? pkg.price : packageDoc.totalPrice;
             const quantity = pkg.quantity || 1;
             subtotal += price * quantity;
@@ -99,16 +125,16 @@ export const createOrder = async (req, res) => {
 
         let hasFreeShipping = false;
         for (const item of processedItems) {
-            const product = await prisma.product.findUnique({ where: { id: item.productId } });
-            if (product?.freeShipping) {
+            const products = await executeQuery('SELECT freeShipping FROM Product WHERE id = ?', [item.productId]);
+            if (products.length > 0 && products[0].freeShipping) {
                 hasFreeShipping = true;
                 break;
             }
         }
         if (!hasFreeShipping) {
             for (const pkg of processedPackages) {
-                const packageDoc = await prisma.package.findUnique({ where: { id: pkg.packageId } });
-                if (packageDoc?.freeShipping) {
+                const packages = await executeQuery('SELECT freeShipping FROM Package WHERE id = ?', [pkg.packageId]);
+                if (packages.length > 0 && packages[0].freeShipping) {
                     hasFreeShipping = true;
                     break;
                 }
@@ -129,59 +155,71 @@ export const createOrder = async (req, res) => {
             }
         }
 
-        const order = await prisma.$transaction(async (tx) => {
-            const o = await tx.order.create({
-                data: {
-                    customerId: userId,
-                    shipName: shippingAddress.name,
-                    shipPhone: shippingAddress.phone,
-                    shipCity: shippingAddress.city,
-                    shipRegion: shippingAddress.region,
-                    shipAddressLine: shippingAddress.addressLine,
-                    shippingLocation,
-                    shippingCarrier: shippingCarrier || null,
-                    shippingCost,
-                    subtotal,
-                    total: subtotal + shippingCost,
-                    paymentMethod: paymentMethod || 'bank',
-                    paymentPaybill: process.env.BANK_PAYBILL_NUMBER || '123456',
-                    paymentAccount: process.env.BANK_ACCOUNT_NUMBER || 'WEMAX001',
-                    paymentProofUrl,
-                    paymentProofPublicId,
-                    paymentStatus: 'Pending',
-                    status: 'Pending',
-                    items: {
-                        create: processedItems.map((i) => ({
-                            productId: i.productId,
-                            quantity: i.quantity,
-                            price: i.price,
-                        })),
-                    },
-                    packages: {
-                        create: processedPackages.map((p) => ({
-                            packageId: p.packageId,
-                            quantity: p.quantity,
-                            price: p.price,
-                        })),
-                    },
-                },
-            });
+        // Create order and related data using transaction
+        const queries = [];
 
-            await tx.cartProductLine.deleteMany({ where: { userId } });
-            await tx.cartPackageLine.deleteMany({ where: { userId } });
-
-            return o;
+        // Insert order
+        queries.push({
+            query: `INSERT INTO \`Order\` (
+                customerId, shipName, shipPhone, shipCity, shipRegion, shipAddressLine,
+                shippingLocation, shippingCarrier, shippingCost, subtotal, total,
+                paymentMethod, paymentPaybill, paymentAccount, paymentProofUrl, paymentProofPublicId,
+                paymentStatus, status, createdAt, updatedAt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', 'Pending', NOW(), NOW())`,
+            params: [
+                userId, shippingAddress.name, shippingAddress.phone, shippingAddress.city,
+                shippingAddress.region, shippingAddress.addressLine, shippingLocation,
+                shippingCarrier || null, shippingCost, subtotal, subtotal + shippingCost,
+                paymentMethod || 'bank', process.env.BANK_PAYBILL_NUMBER || '123456',
+                process.env.BANK_ACCOUNT_NUMBER || 'WEMAX001', paymentProofUrl, paymentProofPublicId
+            ]
         });
 
-        const populatedOrder = await prisma.order.findUnique({
-            where: { id: order.id },
-            include: prismaOrderInclude,
-        });
+        // Get the order ID first
+        const orderResult = await executeQuery(
+            `INSERT INTO \`Order\` (
+                customerId, shipName, shipPhone, shipCity, shipRegion, shipAddressLine,
+                shippingLocation, shippingCarrier, shippingCost, subtotal, total,
+                paymentMethod, paymentPaybill, paymentAccount, paymentProofUrl, paymentProofPublicId,
+                paymentStatus, status, createdAt, updatedAt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', 'Pending', NOW(), NOW())`,
+            [
+                userId, shippingAddress.name, shippingAddress.phone, shippingAddress.city,
+                shippingAddress.region, shippingAddress.addressLine, shippingLocation,
+                shippingCarrier || null, shippingCost, subtotal, subtotal + shippingCost,
+                paymentMethod || 'bank', process.env.BANK_PAYBILL_NUMBER || '123456',
+                process.env.BANK_ACCOUNT_NUMBER || 'WEMAX001', paymentProofUrl, paymentProofPublicId
+            ]
+        );
+        const orderId = orderResult.insertId;
+
+        // Insert order items
+        for (const item of processedItems) {
+            await executeQuery(
+                'INSERT INTO OrderItem (orderId, productId, quantity, price) VALUES (?, ?, ?, ?)',
+                [orderId, item.productId, item.quantity, item.price]
+            );
+        }
+
+        // Insert order packages
+        for (const pkg of processedPackages) {
+            await executeQuery(
+                'INSERT INTO OrderPackageLine (orderId, packageId, quantity, price) VALUES (?, ?, ?, ?)',
+                [orderId, pkg.packageId, pkg.quantity, pkg.price]
+            );
+        }
+
+        // Clear cart
+        await executeQuery('DELETE FROM CartProductLine WHERE userId = ?', [userId]);
+        await executeQuery('DELETE FROM CartPackageLine WHERE userId = ?', [userId]);
+
+        // Fetch populated order
+        const populatedOrder = await getOrderWithRelations(orderId);
 
         const orderApi = formatOrder(populatedOrder);
 
         const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-        const quotationLink = `${clientUrl}/orders/${order.id}/quotation`;
+        const quotationLink = `${clientUrl}/orders/${orderId}/quotation`;
 
         (async () => {
             try {
@@ -190,7 +228,7 @@ export const createOrder = async (req, res) => {
                 const customerName = populatedOrder.customer?.name || shippingAddress?.name || 'Customer';
 
                 if (customerEmail) {
-                    await sendQuotationEmail(customerEmail, customerName, pdfBuffer, order.id);
+                    await sendQuotationEmail(customerEmail, customerName, pdfBuffer, orderId);
                     console.log('[Order] Quotation email sent to', customerEmail);
                 } else {
                     console.warn('[Order] No customer email found for quotation');
@@ -221,31 +259,61 @@ export const createOrder = async (req, res) => {
 export const getOrders = async (req, res) => {
     try {
         const { status, page = 1, limit = 20 } = req.query;
-        const where = {};
+        const conditions = [];
+        const params = [];
 
         if (req.user.role === 'customer') {
-            where.customerId = req.user.id;
+            conditions.push('o.customerId = ?');
+            params.push(req.user.id);
         }
 
         if (status) {
-            where.status = status;
+            conditions.push('o.status = ?');
+            params.push(status);
         }
 
+        const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
         const skip = (Number(page) - 1) * Number(limit);
 
-        const [orders, total] = await Promise.all([
-            prisma.order.findMany({
-                where,
-                include: prismaOrderInclude,
-                orderBy: { createdAt: 'desc' },
-                skip,
-                take: Number(limit),
-            }),
-            prisma.order.count({ where }),
-        ]);
+        // Count total
+        const countResult = await executeQuery(
+            `SELECT COUNT(*) as total FROM \`Order\` o ${whereClause}`,
+            params
+        );
+        const total = countResult[0].total;
+
+        // Get orders with basic info
+        const orders = await executeQuery(
+            `SELECT o.*, u.name as customerName, u.email as customerEmail
+             FROM \`Order\` o
+             LEFT JOIN User u ON o.customerId = u.id
+             ${whereClause}
+             ORDER BY o.createdAt DESC
+             LIMIT ? OFFSET ?`,
+            [...params, Number(limit), skip]
+        );
+
+        // Get order items and packages for each order
+        const ordersWithDetails = await Promise.all(
+            orders.map(async (order) => {
+                const items = await executeQuery(
+                    `SELECT oi.*, p.name as productName FROM OrderItem oi
+                     JOIN Product p ON oi.productId = p.id
+                     WHERE oi.orderId = ?`,
+                    [order.id]
+                );
+                const packages = await executeQuery(
+                    `SELECT opl.*, pkg.name as packageName FROM OrderPackageLine opl
+                     JOIN Package pkg ON opl.packageId = pkg.id
+                     WHERE opl.orderId = ?`,
+                    [order.id]
+                );
+                return { ...order, items, packages };
+            })
+        );
 
         res.json({
-            orders: orders.map(formatOrder),
+            orders: ordersWithDetails.map(formatOrder),
             totalPages: Math.ceil(total / Number(limit)),
             currentPage: Number(page),
             total,
@@ -262,10 +330,7 @@ export const getOrderById = async (req, res) => {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        const order = await prisma.order.findUnique({
-            where: { id },
-            include: prismaOrderInclude,
-        });
+        const order = await getOrderWithRelations(id);
 
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
@@ -289,23 +354,20 @@ export const updateOrderStatus = async (req, res) => {
         }
 
         const { status } = req.body;
-        const existing = await prisma.order.findUnique({ where: { id } });
+        const existing = await executeQuery('SELECT * FROM `Order` WHERE id = ?', [id]);
 
-        if (!existing) {
+        if (existing.length === 0) {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        const previousStatus = existing.status;
+        const previousStatus = existing[0].status;
 
-        await prisma.order.update({
-            where: { id },
-            data: { status },
-        });
+        await executeQuery(
+            'UPDATE `Order` SET status = ?, updatedAt = NOW() WHERE id = ?',
+            [status, id]
+        );
 
-        const populatedOrder = await prisma.order.findUnique({
-            where: { id },
-            include: prismaOrderInclude,
-        });
+        const populatedOrder = await getOrderWithRelations(id);
         const orderApi = formatOrder(populatedOrder);
 
         const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
@@ -318,7 +380,7 @@ export const updateOrderStatus = async (req, res) => {
         }
 
         if (status === 'Delivered' && previousStatus !== 'Delivered') {
-            const courierLocation = existing.shippingLocation || existing.shipCity || 'the courier location';
+            const courierLocation = existing[0].shippingLocation || existing[0].shipCity || 'the courier location';
             sendDeliverySMS(orderApi, courierLocation).catch((err) => {
                 console.error('[Order] Delivery SMS failed:', err?.message || err);
             });
@@ -337,23 +399,17 @@ export const confirmPayment = async (req, res) => {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        const order = await prisma.order.findUnique({ where: { id } });
-        if (!order) {
+        const order = await executeQuery('SELECT * FROM `Order` WHERE id = ?', [id]);
+        if (order.length === 0) {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        await prisma.order.update({
-            where: { id },
-            data: {
-                paymentPaidAt: new Date(),
-                paymentStatus: 'Paid',
-            },
-        });
+        await executeQuery(
+            'UPDATE `Order` SET paymentPaidAt = NOW(), paymentStatus = ?, updatedAt = NOW() WHERE id = ?',
+            ['Paid', id]
+        );
 
-        const populatedOrder = await prisma.order.findUnique({
-            where: { id },
-            include: prismaOrderInclude,
-        });
+        const populatedOrder = await getOrderWithRelations(id);
 
         res.json(formatOrder(populatedOrder));
     } catch (error) {
@@ -368,10 +424,7 @@ export const getQuotationPDF = async (req, res) => {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        const order = await prisma.order.findUnique({
-            where: { id },
-            include: prismaOrderInclude,
-        });
+        const order = await getOrderWithRelations(id);
 
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
@@ -393,3 +446,45 @@ export const getQuotationPDF = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// Helper function to get order with all relations
+async function getOrderWithRelations(orderId) {
+    const orders = await executeQuery(`
+        SELECT o.*, u.name as customerName, u.email as customerEmail, u.phone as customerPhone
+        FROM \`Order\` o
+        LEFT JOIN User u ON o.customerId = u.id
+        WHERE o.id = ?
+    `, [orderId]);
+
+    if (orders.length === 0) return null;
+
+    const order = orders[0];
+
+    // Get order items
+    const items = await executeQuery(`
+        SELECT oi.*, p.name as productName, p.newPrice as productPrice
+        FROM OrderItem oi
+        JOIN Product p ON oi.productId = p.id
+        WHERE oi.orderId = ?
+    `, [orderId]);
+
+    // Get order packages
+    const packages = await executeQuery(`
+        SELECT opl.*, pkg.name as packageName, pkg.totalPrice as packagePrice
+        FROM OrderPackageLine opl
+        JOIN Package pkg ON opl.packageId = pkg.id
+        WHERE opl.orderId = ?
+    `, [orderId]);
+
+    return {
+        ...order,
+        items,
+        packages,
+        customer: order.customerId ? {
+            id: order.customerId,
+            name: order.customerName,
+            email: order.customerEmail,
+            phone: order.customerPhone
+        } : null
+    };
+}

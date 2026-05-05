@@ -1,9 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+// Temporary placeholder - Prisma has been migrated to raw SQL
+// This file exists to prevent import errors during migration
 
-const globalForPrisma = globalThis;
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.prisma = prisma;
-}
+export const prisma = {
+  // Placeholder - will be removed after full migration
+};

@@ -1,6 +1,6 @@
-import { prisma } from '../lib/prisma.js';
+import { executeQuery, executeTransaction } from '../lib/mysql.js';
 import { parseIntId } from '../lib/parseId.js';
-import { formatProduct, parseSort, productDetailInclude } from '../lib/apiFormatters.js';
+import { formatProduct, parseSortForSQL } from '../lib/apiFormatters.js';
 import { saveUploadBuffer, deleteStoredFile } from '../config/storage.js';
 
 export const getProducts = async (req, res) => {
@@ -20,57 +20,106 @@ export const getProducts = async (req, res) => {
             createdByEmail,
         } = req.query;
 
-        const where = { AND: [] };
+        // Build WHERE conditions
+        const conditions = [];
+        const params = [];
 
         if (search) {
-            const q = String(search);
-            where.AND.push({
-                OR: [
-                    { name: { contains: q } },
-                    { description: { contains: q } },
-                    { brand: { contains: q } },
-                ],
-            });
+            const q = `%${String(search)}%`;
+            conditions.push('(p.name LIKE ? OR p.description LIKE ? OR p.brand LIKE ?)');
+            params.push(q, q, q);
         }
 
-        if (category) where.AND.push({ category });
-        if (subCategory) where.AND.push({ subCategory });
+        if (category) {
+            conditions.push('p.category = ?');
+            params.push(category);
+        }
+        if (subCategory) {
+            conditions.push('p.subCategory = ?');
+            params.push(subCategory);
+        }
         if (brand) {
-            where.AND.push({ brand: String(brand) });
+            conditions.push('p.brand = ?');
+            params.push(String(brand));
         }
-        if (minPrice || maxPrice) {
-            const np = {};
-            if (minPrice) np.gte = Number(minPrice);
-            if (maxPrice) np.lte = Number(maxPrice);
-            where.AND.push({ newPrice: np });
+        if (minPrice) {
+            conditions.push('p.newPrice >= ?');
+            params.push(Number(minPrice));
         }
-        if (flashDeal === 'true') where.AND.push({ isFlashDeal: true });
-        if (freeShipping === 'true') where.AND.push({ freeShipping: true });
-        if (createdByEmail) where.AND.push({ createdByEmail });
+        if (maxPrice) {
+            conditions.push('p.newPrice <= ?');
+            params.push(Number(maxPrice));
+        }
+        if (flashDeal === 'true') {
+            conditions.push('p.isFlashDeal = true');
+        }
+        if (freeShipping === 'true') {
+            conditions.push('p.freeShipping = true');
+        }
+        if (createdByEmail) {
+            conditions.push('p.createdByEmail = ?');
+            params.push(createdByEmail);
+        }
 
-        const whereFinal = where.AND.length ? where : {};
+        const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
+        // Pagination
         const skip = (Number(page) - 1) * Number(limit);
-        const orderBy = parseSort(sort);
+        const take = Number(limit);
 
-        const [rows, total] = await Promise.all([
-            prisma.product.findMany({
-                where: whereFinal,
-                orderBy,
-                skip,
-                take: Number(limit),
-                include: productDetailInclude,
-            }),
-            prisma.product.count({ where: whereFinal }),
-        ]);
+        // Sorting
+        const orderBy = parseSortForSQL(sort) || 'createdAt DESC';
+
+        // Count total
+        const countQuery = `SELECT COUNT(*) as total FROM Product p ${whereClause}`;
+        const countResult = await executeQuery(countQuery, params);
+        const total = countResult[0].total;
+
+        // Get products with related data
+        const productsQuery = `
+            SELECT 
+                p.*,
+                pi.url as imageUrl,
+                ps.specKey,
+                ps.value as specValue
+            FROM Product p
+            LEFT JOIN ProductImage pi ON p.id = pi.productId AND pi.sortOrder = 0
+            LEFT JOIN ProductSpec ps ON p.id = ps.productId
+            ${whereClause}
+            ORDER BY ${orderBy}
+            LIMIT ? OFFSET ?
+        `;
+        const rows = await executeQuery(productsQuery, [...params, take, skip]);
+
+        // Group product specs and format
+        const productsMap = new Map();
+        rows.forEach(row => {
+            if (!productsMap.has(row.id)) {
+                productsMap.set(row.id, {
+                    ...row,
+                    images: row.imageUrl ? [{ url: row.imageUrl, sortOrder: 0 }] : [],
+                    specifications: []
+                });
+            }
+            if (row.specKey && row.specValue) {
+                const product = productsMap.get(row.id);
+                product.specifications.push({
+                    specKey: row.specKey,
+                    value: row.specValue
+                });
+            }
+        });
+
+        const products = Array.from(productsMap.values()).map(formatProduct);
 
         res.json({
-            products: rows.map(formatProduct),
-            totalPages: Math.ceil(total / Number(limit)),
+            products,
+            totalPages: Math.ceil(total / take),
             currentPage: Number(page),
             total,
         });
     } catch (error) {
+        console.error('getProducts error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -82,13 +131,58 @@ export const getProductById = async (req, res) => {
             return res.status(400).json({ message: 'Invalid product ID' });
         }
 
-        const product = await prisma.product.findUnique({
-            where: { id },
-            include: productDetailInclude,
-        });
-        if (!product) {
+        // Get product with images and specs
+        const products = await executeQuery(`
+            SELECT 
+                p.*,
+                pi.id as imageId,
+                pi.url as imageUrl,
+                pi.publicId as imagePublicId,
+                pi.sortOrder as imageSortOrder,
+                ps.id as specId,
+                ps.specKey,
+                ps.value as specValue
+            FROM Product p
+            LEFT JOIN ProductImage pi ON p.id = pi.productId
+            LEFT JOIN ProductSpec ps ON p.id = ps.productId
+            WHERE p.id = ?
+        `, [id]);
+
+        if (products.length === 0) {
             return res.status(404).json({ message: 'Product not found' });
         }
+
+        // Group product data
+        const product = {
+            ...products[0],
+            images: [],
+            specifications: []
+        };
+
+        const imageMap = new Map();
+        products.forEach(row => {
+            if (row.imageId && !imageMap.has(row.imageId)) {
+                imageMap.set(row.imageId, {
+                    id: row.imageId,
+                    url: row.imageUrl,
+                    publicId: row.imagePublicId,
+                    sortOrder: row.imageSortOrder
+                });
+            }
+            if (row.specId && row.specKey) {
+                const exists = product.specifications.find(s => s.id === row.specId);
+                if (!exists) {
+                    product.specifications.push({
+                        id: row.specId,
+                        specKey: row.specKey,
+                        value: row.specValue
+                    });
+                }
+            }
+        });
+
+        product.images = Array.from(imageMap.values()).sort((a, b) => a.sortOrder - b.sortOrder);
+
         res.json(formatProduct(product));
     } catch (error) {
         console.error('Error fetching product by ID:', error);
@@ -153,37 +247,54 @@ export const createProduct = async (req, res) => {
         const data = parseProductBody(req.body);
         const creator = req.user || null;
 
-        const product = await prisma.product.create({
-            data: {
-                name: data.name,
-                description: data.description,
-                category: data.category,
-                subCategory: data.subCategory,
-                brand: data.brand,
-                newPrice: data.newPrice,
-                oldPrice: data.oldPrice,
-                freeShipping: data.freeShipping,
-                stock: data.stock,
-                isFeatured: data.isFeatured,
-                isFlashDeal: data.isFlashDeal,
-                locationShipping: data.locationShipping ?? undefined,
-                createdById: creator?.id,
-                createdByEmail: creator?.email || undefined,
-                images: {
-                    create: images.map((im, i) => ({
-                        url: im.url,
-                        publicId: im.publicId,
-                        sortOrder: i,
-                    })),
-                },
-                specifications: {
-                    create: data.specifications
-                        .filter((s) => s && s.key)
-                        .map((s) => ({ key: s.key, value: s.value || '' })),
-                },
-            },
-            include: productDetailInclude,
-        });
+        // Insert product
+        const productResult = await executeQuery(
+            `INSERT INTO Product (
+                name, description, category, subCategory, brand,
+                newPrice, oldPrice, freeShipping, stock, isFeatured, isFlashDeal,
+                locationShipping, createdById, createdByEmail, createdAt, updatedAt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+            [
+                data.name,
+                data.description,
+                data.category,
+                data.subCategory,
+                data.brand,
+                data.newPrice,
+                data.oldPrice || null,
+                data.freeShipping,
+                data.stock,
+                data.isFeatured,
+                data.isFlashDeal,
+                data.locationShipping ? JSON.stringify(data.locationShipping) : null,
+                creator?.id || null,
+                creator?.email || null
+            ]
+        );
+
+        const productId = productResult.insertId;
+
+        // Insert images
+        if (images.length > 0) {
+            const imageQueries = images.map((im, i) => ({
+                query: `INSERT INTO ProductImage (productId, url, publicId, sortOrder) VALUES (?, ?, ?, ?)`,
+                params: [productId, im.url, im.publicId, i]
+            }));
+            await executeTransaction(imageQueries);
+        }
+
+        // Insert specifications
+        const validSpecs = data.specifications.filter(s => s && s.key);
+        if (validSpecs.length > 0) {
+            const specQueries = validSpecs.map(s => ({
+                query: `INSERT INTO ProductSpec (productId, specKey, value) VALUES (?, ?, ?)`,
+                params: [productId, s.key, s.value || '']
+            }));
+            await executeTransaction(specQueries);
+        }
+
+        // Fetch complete product with relations
+        const product = await getProductWithRelations(productId);
 
         res.status(201).json(formatProduct(product));
     } catch (error) {
@@ -199,13 +310,12 @@ export const updateProduct = async (req, res) => {
             return res.status(400).json({ message: 'Invalid product ID' });
         }
 
-        const existing = await prisma.product.findUnique({
-            where: { id },
-            include: { images: true },
-        });
-        if (!existing) {
+        // Check if product exists
+        const existingProducts = await executeQuery('SELECT * FROM Product WHERE id = ?', [id]);
+        if (existingProducts.length === 0) {
             return res.status(404).json({ message: 'Product not found' });
         }
+        const existing = existingProducts[0];
 
         const newUploads = [];
         if (req.files && req.files.length > 0) {
@@ -220,43 +330,55 @@ export const updateProduct = async (req, res) => {
         }
 
         const data = parseProductBody(req.body);
-        const mergedImages = [...(existing.images || []).map((i) => ({ url: i.url, publicId: i.publicId })), ...newUploads];
 
-        await prisma.$transaction([
-            prisma.productImage.deleteMany({ where: { productId: id } }),
-            prisma.productSpec.deleteMany({ where: { productId: id } }),
-        ]);
+        // Get existing images
+        const existingImages = await executeQuery(
+            'SELECT * FROM ProductImage WHERE productId = ?',
+            [id]
+        );
+        const mergedImages = [...existingImages.map(i => ({ url: i.url, publicId: i.publicId })), ...newUploads];
 
-        const product = await prisma.product.update({
-            where: { id },
-            data: {
-                name: data.name,
-                description: data.description,
-                category: data.category,
-                subCategory: data.subCategory,
-                brand: data.brand,
-                newPrice: data.newPrice,
-                oldPrice: data.oldPrice,
-                freeShipping: data.freeShipping,
-                stock: data.stock,
-                isFeatured: data.isFeatured,
-                isFlashDeal: data.isFlashDeal,
-                ...(data.locationShipping !== undefined ? { locationShipping: data.locationShipping } : {}),
-                images: {
-                    create: mergedImages.map((im, i) => ({
-                        url: im.url,
-                        publicId: im.publicId || null,
-                        sortOrder: i,
-                    })),
-                },
-                specifications: {
-                    create: data.specifications
-                        .filter((s) => s && s.key)
-                        .map((s) => ({ key: s.key, value: s.value || '' })),
-                },
-            },
-            include: productDetailInclude,
-        });
+        // Update product
+        await executeQuery(
+            `UPDATE Product SET
+                name = ?, description = ?, category = ?, subCategory = ?, brand = ?,
+                newPrice = ?, oldPrice = ?, freeShipping = ?, stock = ?,
+                isFeatured = ?, isFlashDeal = ?, locationShipping = ?, updatedAt = NOW()
+            WHERE id = ?`,
+            [
+                data.name, data.description, data.category, data.subCategory, data.brand,
+                data.newPrice, data.oldPrice || null, data.freeShipping, data.stock,
+                data.isFeatured, data.isFlashDeal,
+                data.locationShipping ? JSON.stringify(data.locationShipping) : null,
+                id
+            ]
+        );
+
+        // Delete old images and specs
+        await executeQuery('DELETE FROM ProductImage WHERE productId = ?', [id]);
+        await executeQuery('DELETE FROM ProductSpec WHERE productId = ?', [id]);
+
+        // Insert new images
+        if (mergedImages.length > 0) {
+            const imageQueries = mergedImages.map((im, i) => ({
+                query: `INSERT INTO ProductImage (productId, url, publicId, sortOrder) VALUES (?, ?, ?, ?)`,
+                params: [id, im.url, im.publicId || null, i]
+            }));
+            await executeTransaction(imageQueries);
+        }
+
+        // Insert new specifications
+        const validSpecs = data.specifications.filter(s => s && s.key);
+        if (validSpecs.length > 0) {
+            const specQueries = validSpecs.map(s => ({
+                query: `INSERT INTO ProductSpec (productId, specKey, value) VALUES (?, ?, ?)`,
+                params: [id, s.key, s.value || '']
+            }));
+            await executeTransaction(specQueries);
+        }
+
+        // Fetch updated product
+        const product = await getProductWithRelations(id);
 
         res.json(formatProduct(product));
     } catch (error) {
@@ -272,15 +394,23 @@ export const deleteProduct = async (req, res) => {
             return res.status(400).json({ message: 'Invalid product ID' });
         }
 
-        const product = await prisma.product.findUnique({
-            where: { id },
-            include: { images: true },
-        });
-        if (!product) {
+        // Get product with images
+        const products = await executeQuery(
+            'SELECT * FROM Product WHERE id = ?',
+            [id]
+        );
+        if (products.length === 0) {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        for (const image of product.images || []) {
+        // Get product images for deletion
+        const images = await executeQuery(
+            'SELECT * FROM ProductImage WHERE productId = ?',
+            [id]
+        );
+
+        // Delete images from storage
+        for (const image of images || []) {
             if (image.publicId) {
                 try {
                     await deleteStoredFile(image.publicId);
@@ -288,7 +418,8 @@ export const deleteProduct = async (req, res) => {
             }
         }
 
-        await prisma.product.delete({ where: { id } });
+        // Delete product (cascade will handle related records)
+        await executeQuery('DELETE FROM Product WHERE id = ?', [id]);
         res.json({ message: 'Product deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -303,8 +434,9 @@ export const removeProductImage = async (req, res) => {
             return res.status(400).json({ message: 'Invalid product ID' });
         }
 
-        const product = await prisma.product.findUnique({ where: { id: productId } });
-        if (!product) {
+        // Check if product exists
+        const products = await executeQuery('SELECT * FROM Product WHERE id = ?', [productId]);
+        if (products.length === 0) {
             return res.status(404).json({ message: 'Product not found' });
         }
 
@@ -312,10 +444,65 @@ export const removeProductImage = async (req, res) => {
             await deleteStoredFile(publicId);
         } catch (_) {}
 
-        await prisma.productImage.deleteMany({ where: { productId, publicId } });
+        await executeQuery(
+            'DELETE FROM ProductImage WHERE productId = ? AND publicId = ?',
+            [productId, publicId]
+        );
 
         res.json({ message: 'Image removed successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
+
+// Helper function to get product with all relations
+async function getProductWithRelations(productId) {
+    const products = await executeQuery(`
+        SELECT 
+            p.*,
+            pi.id as imageId,
+            pi.url as imageUrl,
+            pi.publicId as imagePublicId,
+            pi.sortOrder as imageSortOrder,
+            ps.id as specId,
+            ps.specKey,
+            ps.value as specValue
+        FROM Product p
+        LEFT JOIN ProductImage pi ON p.id = pi.productId
+        LEFT JOIN ProductSpec ps ON p.id = ps.productId
+        WHERE p.id = ?
+    `, [productId]);
+
+    if (products.length === 0) return null;
+
+    const product = {
+        ...products[0],
+        images: [],
+        specifications: []
+    };
+
+    const imageMap = new Map();
+    products.forEach(row => {
+        if (row.imageId && !imageMap.has(row.imageId)) {
+            imageMap.set(row.imageId, {
+                id: row.imageId,
+                url: row.imageUrl,
+                publicId: row.imagePublicId,
+                sortOrder: row.imageSortOrder
+            });
+        }
+        if (row.specId && row.specKey) {
+            const exists = product.specifications.find(s => s.id === row.specId);
+            if (!exists) {
+                product.specifications.push({
+                    id: row.specId,
+                    specKey: row.specKey,
+                    value: row.specValue
+                });
+            }
+        }
+    });
+
+    product.images = Array.from(imageMap.values()).sort((a, b) => a.sortOrder - b.sortOrder);
+    return product;
+}
