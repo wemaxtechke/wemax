@@ -1,6 +1,6 @@
-import { prisma } from '../lib/prisma.js';
+import { executeQuery, executeTransaction } from '../lib/mysql.js';
 import { parseIntId } from '../lib/parseId.js';
-import { formatPackage, packageDetailInclude, parseSort } from '../lib/apiFormatters.js';
+import { formatPackage, parseSortForSQL } from '../lib/apiFormatters.js';
 import { saveUploadBuffer, deleteStoredFile } from '../config/storage.js';
 
 function parsePackageBody(body) {
@@ -26,36 +26,44 @@ export const getPackages = async (req, res) => {
     try {
         const { search, category, tag, sort = '-createdAt', page = 1, limit = 20 } = req.query;
 
-        const where = { AND: [] };
+        // Build WHERE clause
+        const whereConditions = [];
+        const params = [];
 
         if (search) {
             const q = String(search);
-            where.AND.push({
-                OR: [{ name: { contains: q } }, { description: { contains: q } }],
-            });
+            whereConditions.push(`(name LIKE ? OR description LIKE ?)`);
+            params.push(`%${q}%`, `%${q}%`);
+        }
+        if (category) {
+            whereConditions.push('category = ?');
+            params.push(category);
+        }
+        if (tag) {
+            whereConditions.push('tag = ?');
+            params.push(tag);
         }
 
-        if (category) where.AND.push({ category });
-        if (tag) where.AND.push({ tag });
+        const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+        
+        const pageNum = Math.max(1, Number(page) || 1);
+        const limitNum = Math.max(1, Math.min(50, Number(limit) || 20));
+        const skip = (pageNum - 1) * limitNum;
+        const orderBy = parseSortForSQL(sort) || 'createdAt DESC';
+        const orderClause = `ORDER BY ${orderBy}`;
 
-        const whereFinal = where.AND.length ? where : {};
-        const skip = (Number(page) - 1) * Number(limit);
-        const orderBy = parseSort(sort);
-
-        const [rows, total] = await Promise.all([
-            prisma.package.findMany({
-                where: whereFinal,
-                orderBy,
-                skip,
-                take: Number(limit),
-                include: packageDetailInclude,
-            }),
-            prisma.package.count({ where: whereFinal }),
-        ]);
+        // Execute queries sequentially
+        const packages = await executeQuery(
+            `SELECT * FROM Package ${whereClause} ${orderClause} LIMIT ? OFFSET ?`,
+            [...params, limitNum, skip]
+        );
+        
+        const totalResult = await executeQuery(`SELECT COUNT(*) as total FROM Package ${whereClause}`, params);
+        const total = totalResult[0].total;
 
         res.json({
-            packages: rows.map(formatPackage),
-            totalPages: Math.ceil(total / Number(limit)),
+            packages: packages.map(formatPackage),
+            totalPages: Math.ceil(total / limitNum),
             currentPage: Number(page),
             total,
         });
@@ -71,14 +79,39 @@ export const getPackageById = async (req, res) => {
             return res.status(400).json({ message: 'Invalid package ID' });
         }
 
-        const packageDoc = await prisma.package.findUnique({
-            where: { id },
-            include: packageDetailInclude,
-        });
-        if (!packageDoc) {
+        const packages = await executeQuery('SELECT * FROM Package WHERE id = ?', [id]);
+        if (packages.length === 0) {
             return res.status(404).json({ message: 'Package not found' });
         }
-        res.json(formatPackage(packageDoc));
+
+        const packageDoc = packages[0];
+
+        // Get images and specifications sequentially
+        const images = await executeQuery(
+            'SELECT url, publicId FROM PackageImage WHERE packageId = ? ORDER BY sortOrder ASC',
+            [id]
+        );
+
+        const specifications = await executeQuery(
+            'SELECT specKey as key, value FROM PackageSpec WHERE packageId = ?',
+            [id]
+        );
+
+        // Format the package with images and specifications
+        const formattedPackage = formatPackage({
+            ...packageDoc,
+            images: images.map(img => ({
+                url: img.url,
+                publicId: img.publicId,
+            })),
+            specifications: specifications.map(spec => ({
+                _id: String(spec.id),
+                key: spec.key,
+                value: spec.value,
+            })),
+        });
+
+        res.json(formattedPackage);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -101,33 +134,51 @@ export const createPackage = async (req, res) => {
 
         const data = parsePackageBody(req.body);
 
-        const packageDoc = await prisma.package.create({
-            data: {
-                name: data.name,
-                description: data.description,
-                totalPrice: data.totalPrice,
-                oldTotalPrice: data.oldTotalPrice,
-                freeShipping: data.freeShipping,
-                category: data.category,
-                tag: data.tag,
-                items: {
-                    create: data.items
-                        .filter((it) => it && it.product)
-                        .map((it) => ({
-                            productId: Number(it.product),
-                            quantity: Number(it.quantity) || 1,
-                        })),
-                },
-                images: {
-                    create: images.map((im, i) => ({
-                        url: im.url,
-                        publicId: im.publicId,
-                        sortOrder: i,
-                    })),
-                },
-            },
-            include: packageDetailInclude,
+        // Use transaction for package creation
+        const queries = [];
+        
+        // Insert package
+        queries.push({
+            query: `INSERT INTO Package (name, description, totalPrice, oldTotalPrice, freeShipping, category, tag, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+            params: [
+                data.name,
+                data.description,
+                data.totalPrice,
+                data.oldTotalPrice,
+                data.freeShipping,
+                data.category,
+                data.tag
+            ]
         });
+
+        // Insert package items
+        const validItems = data.items
+            .filter((it) => it && it.product)
+            .map((it) => ({
+                productId: Number(it.product),
+                quantity: Number(it.quantity) || 1,
+            }));
+
+        for (const item of validItems) {
+            queries.push({
+                query: 'INSERT INTO PackageItem (packageId, productId, quantity) VALUES (LAST_INSERT_ID(), ?, ?)',
+                params: [item.productId, item.quantity]
+            });
+        }
+
+        // Insert package images
+        for (const [im, i] of images.entries()) {
+            queries.push({
+                query: 'INSERT INTO PackageImage (packageId, url, publicId, sortOrder) VALUES (LAST_INSERT_ID(), ?, ?, ?)',
+                params: [im.url, im.publicId, i]
+            });
+        }
+
+        await executeTransaction(queries);
+
+        // Get the created package with all details
+        const packages = await executeQuery('SELECT * FROM Package WHERE id = LAST_INSERT_ID()');
+        const packageDoc = packages[0];
 
         res.status(201).json(formatPackage(packageDoc));
     } catch (error) {
@@ -143,14 +194,15 @@ export const updatePackage = async (req, res) => {
             return res.status(400).json({ message: 'Invalid package ID' });
         }
 
-        const packageDoc = await prisma.package.findUnique({
-            where: { id },
-            include: { images: true },
-        });
-        if (!packageDoc) {
+        // Check if package exists
+        const packages = await executeQuery('SELECT * FROM Package WHERE id = ?', [id]);
+        if (packages.length === 0) {
             return res.status(404).json({ message: 'Package not found' });
         }
 
+        const packageDoc = packages[0];
+
+        // Handle new image uploads
         const newUploads = [];
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
@@ -164,43 +216,66 @@ export const updatePackage = async (req, res) => {
         }
 
         const data = parsePackageBody(req.body);
-        const mergedImages = [...(packageDoc.images || []).map((i) => ({ url: i.url, publicId: i.publicId })), ...newUploads];
 
-        await prisma.$transaction([
-            prisma.packageItem.deleteMany({ where: { packageId: id } }),
-            prisma.packageImage.deleteMany({ where: { packageId: id } }),
-        ]);
-
-        const updated = await prisma.package.update({
-            where: { id },
-            data: {
-                name: data.name,
-                description: data.description,
-                totalPrice: data.totalPrice,
-                oldTotalPrice: data.oldTotalPrice,
-                freeShipping: data.freeShipping,
-                category: data.category,
-                tag: data.tag,
-                items: {
-                    create: data.items
-                        .filter((it) => it && it.product)
-                        .map((it) => ({
-                            productId: Number(it.product),
-                            quantity: Number(it.quantity) || 1,
-                        })),
-                },
-                images: {
-                    create: mergedImages.map((im, i) => ({
-                        url: im.url,
-                        publicId: im.publicId || null,
-                        sortOrder: i,
-                    })),
-                },
-            },
-            include: packageDetailInclude,
+        // Use transaction for update
+        const queries = [];
+        
+        // Delete existing items and images
+        queries.push({
+            query: 'DELETE FROM PackageItem WHERE packageId = ?',
+            params: [id]
+        });
+        queries.push({
+            query: 'DELETE FROM PackageImage WHERE packageId = ?',
+            params: [id]
         });
 
-        res.json(formatPackage(updated));
+        // Update package
+        queries.push({
+            query: `UPDATE Package SET name = ?, description = ?, totalPrice = ?, oldTotalPrice = ?, freeShipping = ?, category = ?, tag = ?, updatedAt = NOW() WHERE id = ?`,
+            params: [
+                data.name,
+                data.description,
+                data.totalPrice,
+                data.oldTotalPrice,
+                data.freeShipping,
+                data.category,
+                data.tag,
+                id
+            ]
+        });
+
+        // Insert new package items
+        const validItems = data.items
+            .filter((it) => it && it.product)
+            .map((it) => ({
+                productId: Number(it.product),
+                quantity: Number(it.quantity) || 1,
+            }));
+
+        for (const item of validItems) {
+            queries.push({
+                query: 'INSERT INTO PackageItem (packageId, productId, quantity) VALUES (?, ?, ?)',
+                params: [id, item.productId, item.quantity]
+            });
+        }
+
+        // Insert new images
+        const mergedImages = [...(packageDoc.images || []).map((i) => ({ url: i.url, publicId: i.publicId })), ...newUploads];
+        for (const [im, i] of mergedImages.entries()) {
+            queries.push({
+                query: 'INSERT INTO PackageImage (packageId, url, publicId, sortOrder) VALUES (?, ?, ?, ?)',
+                params: [id, im.url, im.publicId, i]
+            });
+        }
+
+        await executeTransaction(queries);
+
+        // Get updated package
+        const updatedPackages = await executeQuery('SELECT * FROM Package WHERE id = ?', [id]);
+        const updatedPackage = updatedPackages[0];
+
+        res.json(formatPackage(updatedPackage));
     } catch (error) {
         console.error('Update package error:', error);
         res.status(500).json({ message: error.message });
@@ -214,14 +289,21 @@ export const deletePackage = async (req, res) => {
             return res.status(400).json({ message: 'Invalid package ID' });
         }
 
-        const packageDoc = await prisma.package.findUnique({
-            where: { id },
-            include: { images: true },
-        });
-        if (!packageDoc) {
+        // Get package with images for cleanup
+        const packages = await executeQuery(`
+            SELECT p.*, pi.url, pi.publicId 
+            FROM Package p 
+            LEFT JOIN PackageImage pi ON p.id = pi.packageId 
+            WHERE p.id = ?
+        `, [id]);
+
+        if (packages.length === 0) {
             return res.status(404).json({ message: 'Package not found' });
         }
 
+        const packageDoc = packages[0];
+
+        // Delete associated images from storage
         for (const image of packageDoc.images || []) {
             if (image.publicId) {
                 try {
@@ -230,7 +312,9 @@ export const deletePackage = async (req, res) => {
             }
         }
 
-        await prisma.package.delete({ where: { id } });
+        // Delete package (cascade will handle items and images)
+        await executeQuery('DELETE FROM Package WHERE id = ?', [id]);
+
         res.json({ message: 'Package deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });

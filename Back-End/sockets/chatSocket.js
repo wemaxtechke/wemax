@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma.js';
+import { executeQuery } from '../lib/mysql.js';
 import { formatMessage } from '../lib/apiFormatters.js';
 import { bumpChatAfterMessage } from '../services/chatThread.js';
 import { parseIntId } from '../lib/parseId.js';
@@ -23,14 +23,18 @@ export const setupChatSocket = (io) => {
                 let { chatId, content } = data;
                 const chatIdNum = chatId != null ? parseIntId(String(chatId)) : null;
 
-                let chat = chatIdNum ? await prisma.chat.findUnique({ where: { id: chatIdNum } }) : null;
+                let chats = chatIdNum ? await executeQuery('SELECT * FROM Chat WHERE id = ?', [chatIdNum]) : null;
+                let chat = chats && chats.length > 0 ? chats[0] : null;
 
                 if (!chat) {
                     if (socket.userRole === 'customer') {
                         const uid = parseIntId(socket.userId);
-                        chat = await prisma.chat.create({
-                            data: { userId: uid },
-                        });
+                        const result = await executeQuery(
+                            'INSERT INTO Chat (userId, createdAt, updatedAt) VALUES (?, NOW(), NOW())',
+                            [uid]
+                        );
+                        const newChats = await executeQuery('SELECT * FROM Chat WHERE id = ?', [result.insertId]);
+                        chat = newChats[0];
                     } else {
                         return socket.emit('error', { message: 'Chat not found' });
                     }
@@ -41,23 +45,22 @@ export const setupChatSocket = (io) => {
                 }
 
                 const senderId = parseIntId(socket.userId);
-                const message = await prisma.message.create({
-                    data: {
-                        chatId: chat.id,
-                        senderRole: socket.userRole,
-                        senderId,
-                        content,
-                    },
-                });
+                const messageResult = await executeQuery(
+                    'INSERT INTO Message (chatId, senderRole, senderId, content, createdAt, updatedAt) VALUES (?, ?, ?, ?, NOW(), NOW())',
+                    [chat.id, socket.userRole, senderId, content]
+                );
 
-                await bumpChatAfterMessage(chat.id, socket.userRole, message.createdAt);
+                await bumpChatAfterMessage(chat.id, socket.userRole, new Date());
 
-                const populatedMessage = await prisma.message.findUnique({
-                    where: { id: message.id },
-                    include: messageInclude,
-                });
+                const populatedMessages = await executeQuery(`
+                    SELECT m.*, 
+                           s.id as senderId, s.name as senderName, s.email as senderEmail
+                    FROM Message m
+                    LEFT JOIN User s ON m.senderId = s.id
+                    WHERE m.id = ?
+                `, [messageResult.insertId]);
 
-                const payload = formatMessage(populatedMessage);
+                const payload = formatMessage(populatedMessages[0]);
 
                 if (socket.userRole === 'customer') {
                     io.to('admin').emit('message:new', payload);
@@ -73,29 +76,37 @@ export const setupChatSocket = (io) => {
             }
         });
 
-        socket.on('typing:start', (data) => {
+        socket.on('typing:start', async (data) => {
             const { chatId } = data;
             if (socket.userRole === 'customer') {
                 io.to('admin').emit('typing:start', { chatId, userId: socket.userId });
             } else {
-                prisma.chat.findUnique({ where: { id: parseIntId(String(chatId)) } }).then((chat) => {
+                try {
+                    const chats = await executeQuery('SELECT * FROM Chat WHERE id = ?', [parseIntId(String(chatId))]);
+                    const chat = chats.length > 0 ? chats[0] : null;
                     if (chat) {
                         io.to(`user_${chat.userId}`).emit('typing:start', { chatId, userId: socket.userId });
                     }
-                });
+                } catch (error) {
+                    console.error('Typing start error:', error);
+                }
             }
         });
 
-        socket.on('typing:stop', (data) => {
+        socket.on('typing:stop', async (data) => {
             const { chatId } = data;
             if (socket.userRole === 'customer') {
                 io.to('admin').emit('typing:stop', { chatId });
             } else {
-                prisma.chat.findUnique({ where: { id: parseIntId(String(chatId)) } }).then((chat) => {
+                try {
+                    const chats = await executeQuery('SELECT * FROM Chat WHERE id = ?', [parseIntId(String(chatId))]);
+                    const chat = chats.length > 0 ? chats[0] : null;
                     if (chat) {
                         io.to(`user_${chat.userId}`).emit('typing:stop', { chatId });
                     }
-                });
+                } catch (error) {
+                    console.error('Typing stop error:', error);
+                }
             }
         });
 

@@ -1,10 +1,10 @@
-import { prisma } from '../lib/prisma.js';
+import { executeQuery, executeTransaction } from '../lib/mysql.js';
 import { parseIntId } from '../lib/parseId.js';
 import { formatCart } from '../lib/apiFormatters.js';
 
 export const getCart = async (req, res) => {
     try {
-        const cart = await formatCart(prisma, req.user.id);
+        const cart = await formatCart(req.user.id);
         res.json(cart);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -21,29 +21,27 @@ export const addToCart = async (req, res) => {
             if (!pid) {
                 return res.status(400).json({ message: 'Invalid product ID' });
             }
-            const product = await prisma.product.findUnique({ where: { id: pid } });
-            if (!product) {
+            const products = await executeQuery('SELECT * FROM Product WHERE id = ?', [pid]);
+            if (products.length === 0) {
                 return res.status(404).json({ message: 'Product not found' });
             }
+            const product = products[0];
 
-            const existing = await prisma.cartProductLine.findFirst({
-                where: { userId, productId: pid },
-            });
+            const existing = await executeQuery(
+                'SELECT * FROM CartProductLine WHERE userId = ? AND productId = ?',
+                [userId, pid]
+            );
 
-            if (existing) {
-                await prisma.cartProductLine.update({
-                    where: { id: existing.id },
-                    data: { quantity: existing.quantity + Number(quantity) },
-                });
+            if (existing.length > 0) {
+                await executeQuery(
+                    'UPDATE CartProductLine SET quantity = ? WHERE id = ?',
+                    [existing[0].quantity + Number(quantity), existing[0].id]
+                );
             } else {
-                await prisma.cartProductLine.create({
-                    data: {
-                        userId,
-                        productId: pid,
-                        quantity: Number(quantity),
-                        price: product.newPrice,
-                    },
-                });
+                await executeQuery(
+                    'INSERT INTO CartProductLine (userId, productId, quantity, price) VALUES (?, ?, ?, ?)',
+                    [userId, pid, Number(quantity), product.newPrice]
+                );
             }
         }
 
@@ -52,33 +50,31 @@ export const addToCart = async (req, res) => {
             if (!pkgId) {
                 return res.status(400).json({ message: 'Invalid package ID' });
             }
-            const packageDoc = await prisma.package.findUnique({ where: { id: pkgId } });
-            if (!packageDoc) {
+            const packages = await executeQuery('SELECT * FROM Package WHERE id = ?', [pkgId]);
+            if (packages.length === 0) {
                 return res.status(404).json({ message: 'Package not found' });
             }
+            const packageDoc = packages[0];
 
-            const existing = await prisma.cartPackageLine.findFirst({
-                where: { userId, packageId: pkgId },
-            });
+            const existing = await executeQuery(
+                'SELECT * FROM CartPackageLine WHERE userId = ? AND packageId = ?',
+                [userId, pkgId]
+            );
 
-            if (existing) {
-                await prisma.cartPackageLine.update({
-                    where: { id: existing.id },
-                    data: { quantity: existing.quantity + Number(quantity) },
-                });
+            if (existing.length > 0) {
+                await executeQuery(
+                    'UPDATE CartPackageLine SET quantity = ? WHERE id = ?',
+                    [existing[0].quantity + Number(quantity), existing[0].id]
+                );
             } else {
-                await prisma.cartPackageLine.create({
-                    data: {
-                        userId,
-                        packageId: pkgId,
-                        quantity: Number(quantity),
-                        price: packageDoc.totalPrice,
-                    },
-                });
+                await executeQuery(
+                    'INSERT INTO CartPackageLine (userId, packageId, quantity, price) VALUES (?, ?, ?, ?)',
+                    [userId, pkgId, Number(quantity), packageDoc.totalPrice]
+                );
             }
         }
 
-        const cart = await formatCart(prisma, userId);
+        const cart = await formatCart(userId);
         res.json(cart);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -95,30 +91,32 @@ export const updateCartItem = async (req, res) => {
         const userId = req.user.id;
 
         if (type === 'product') {
-            const item = await prisma.cartProductLine.findFirst({
-                where: { id: lineId, userId },
-            });
-            if (!item) {
+            const items = await executeQuery(
+                'SELECT * FROM CartProductLine WHERE id = ? AND userId = ?',
+                [lineId, userId]
+            );
+            if (items.length === 0) {
                 return res.status(404).json({ message: 'Item not found' });
             }
-            await prisma.cartProductLine.update({
-                where: { id: lineId },
-                data: { quantity: Number(quantity) },
-            });
+            await executeQuery(
+                'UPDATE CartProductLine SET quantity = ? WHERE id = ?',
+                [Number(quantity), lineId]
+            );
         } else if (type === 'package') {
-            const pkg = await prisma.cartPackageLine.findFirst({
-                where: { id: lineId, userId },
-            });
-            if (!pkg) {
+            const pkgs = await executeQuery(
+                'SELECT * FROM CartPackageLine WHERE id = ? AND userId = ?',
+                [lineId, userId]
+            );
+            if (pkgs.length === 0) {
                 return res.status(404).json({ message: 'Package not found' });
             }
-            await prisma.cartPackageLine.update({
-                where: { id: lineId },
-                data: { quantity: Number(quantity) },
-            });
+            await executeQuery(
+                'UPDATE CartPackageLine SET quantity = ? WHERE id = ?',
+                [Number(quantity), lineId]
+            );
         }
 
-        const cart = await formatCart(prisma, userId);
+        const cart = await formatCart(userId);
         res.json(cart);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -135,9 +133,9 @@ export const removeFromCart = async (req, res) => {
         const userId = req.user.id;
 
         if (type === 'product') {
-            await prisma.cartProductLine.deleteMany({ where: { id: lineId, userId } });
+            await executeQuery('DELETE FROM CartProductLine WHERE id = ? AND userId = ?', [lineId, userId]);
         } else if (type === 'package') {
-            await prisma.cartPackageLine.deleteMany({ where: { id: lineId, userId } });
+            await executeQuery('DELETE FROM CartPackageLine WHERE id = ? AND userId = ?', [lineId, userId]);
         }
 
         res.json({ message: 'Item removed from cart' });
@@ -149,9 +147,9 @@ export const removeFromCart = async (req, res) => {
 export const clearCart = async (req, res) => {
     try {
         const userId = req.user.id;
-        await prisma.$transaction([
-            prisma.cartProductLine.deleteMany({ where: { userId } }),
-            prisma.cartPackageLine.deleteMany({ where: { userId } }),
+        await executeTransaction([
+            { query: 'DELETE FROM CartProductLine WHERE userId = ?', params: [userId] },
+            { query: 'DELETE FROM CartPackageLine WHERE userId = ?', params: [userId] }
         ]);
         res.json({ message: 'Cart cleared' });
     } catch (error) {

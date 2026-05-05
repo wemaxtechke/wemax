@@ -24,7 +24,7 @@ export function getUploadsRoot() {
 }
 
 export function getPublicBaseUrl() {
-    const base = process.env.API_PUBLIC_URL || process.env.SERVER_URL || 'http://localhost:5000';
+    const base = 'https://backend.wemax.co.ke'
     return String(base).replace(/\/+$/, '');
 }
 

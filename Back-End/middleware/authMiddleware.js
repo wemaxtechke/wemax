@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { prisma } from '../lib/prisma.js';
+import { executeQuery } from '../lib/mysql.js';
 import { formatUserPublic } from '../lib/apiFormatters.js';
 
 export const requireAuth = async (req, res, next) => {
@@ -16,7 +16,8 @@ export const requireAuth = async (req, res, next) => {
             return res.status(401).json({ message: 'Invalid token' });
         }
 
-        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const users = await executeQuery('SELECT * FROM User WHERE id = ?', [userId]);
+        const user = users.length > 0 ? users[0] : null;
 
         if (!user || !user.isActive) {
             return res.status(401).json({ message: 'Invalid or inactive user' });

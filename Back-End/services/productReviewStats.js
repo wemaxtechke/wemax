@@ -1,17 +1,15 @@
-import { prisma } from '../lib/prisma.js';
+import { executeQuery } from '../lib/mysql.js';
 
 export async function refreshProductReviewStats(productId) {
-    const agg = await prisma.review.aggregate({
-        where: { productId },
-        _avg: { rating: true },
-        _count: { _all: true },
-    });
-    const avg = agg._avg.rating ?? 0;
-    await prisma.product.update({
-        where: { id: productId },
-        data: {
-            averageRating: Math.round(avg * 10) / 10,
-            reviewsCount: agg._count._all,
-        },
-    });
+    const agg = await executeQuery(
+        'SELECT AVG(rating) as avgRating, COUNT(*) as reviewCount FROM Review WHERE productId = ?',
+        [productId]
+    );
+    const avg = agg[0].avgRating ?? 0;
+    const reviewCount = agg[0].reviewCount;
+    
+    await executeQuery(
+        'UPDATE Product SET averageRating = ?, reviewsCount = ? WHERE id = ?',
+        [Math.round(avg * 10) / 10, reviewCount, productId]
+    );
 }

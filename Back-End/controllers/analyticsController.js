@@ -1,56 +1,77 @@
-import { prisma } from '../lib/prisma.js';
-import { formatOrder, formatProduct, prismaOrderInclude, productDetailInclude } from '../lib/apiFormatters.js';
+import { executeQuery } from '../lib/mysql.js';
+import { formatOrder, formatProduct } from '../lib/apiFormatters.js';
 
 export const getDashboardStats = async (req, res) => {
     try {
-        const totalOrders = await prisma.order.count();
+        // Get total orders count
+        const totalOrdersResult = await executeQuery('SELECT COUNT(*) as count FROM `Order`');
+        const totalOrders = totalOrdersResult[0].count;
 
-        const revenueAgg = await prisma.order.aggregate({
-            where: { status: { not: 'Cancelled' } },
-            _sum: { total: true },
-        });
+        // Get total revenue (excluding cancelled orders)
+        const revenueResult = await executeQuery(
+            'SELECT COALESCE(SUM(total), 0) as total FROM `Order` WHERE status != ?',
+            ['Cancelled']
+        );
+        const totalRevenue = revenueResult[0].total;
 
-        const distinctCustomers = await prisma.order.groupBy({
-            by: ['customerId'],
-            _count: { _all: true },
-        });
-        const totalCustomers = distinctCustomers.length;
+        // Get total customers (distinct customer IDs)
+        const customersResult = await executeQuery('SELECT COUNT(DISTINCT customerId) as count FROM `Order`');
+        const totalCustomers = customersResult[0].count;
 
-        const pendingPayments = await prisma.order.count({
-            where: { paymentStatus: 'Pending' },
-        });
+        // Get pending payments count
+        const pendingResult = await executeQuery(
+            'SELECT COUNT(*) as count FROM `Order` WHERE paymentStatus = ?',
+            ['Pending']
+        );
+        const pendingPayments = pendingResult[0].count;
 
-        const recentOrderRows = await prisma.order.findMany({
-            include: prismaOrderInclude,
-            orderBy: { createdAt: 'desc' },
-            take: 10,
-        });
-        const recentOrders = recentOrderRows.map(formatOrder);
+        // Get recent orders with details
+        const recentOrdersData = await executeQuery(`
+            SELECT o.*, 
+                   u.name as customerName, u.email as customerEmail
+            FROM \`Order\` o
+            LEFT JOIN User u ON o.customerId = u.id
+            ORDER BY o.createdAt DESC
+            LIMIT 10
+        `);
+        const recentOrders = recentOrdersData.map(formatOrder);
 
-        const topProductGroups = await prisma.orderItem.groupBy({
-            by: ['productId'],
-            _sum: { quantity: true },
-            orderBy: { _sum: { quantity: 'desc' } },
-            take: 5,
-        });
+        // Get top selling products
+        const topProductsData = await executeQuery(`
+            SELECT productId, SUM(quantity) as totalSold
+            FROM OrderItem
+            GROUP BY productId
+            ORDER BY totalSold DESC
+            LIMIT 5
+        `);
 
-        const productIds = topProductGroups.map((p) => p.productId);
-        const products = await prisma.product.findMany({
-            where: { id: { in: productIds } },
-            include: productDetailInclude,
-        });
+        // Get product details for top products
+        const productIds = topProductsData.map(p => p.productId);
+        let products = [];
+        if (productIds.length > 0) {
+            const productsData = await executeQuery(`
+                SELECT p.*, 
+                       (SELECT GROUP_CONCAT(url ORDER BY sortOrder) as images
+                        FROM ProductImage WHERE productId = p.id) as images,
+                       (SELECT JSON_ARRAYAGG(JSON_OBJECT('key', specKey, 'value', value)) as specifications
+                        FROM ProductSpec WHERE productId = p.id) as specifications
+                FROM Product p
+                WHERE p.id IN (${productIds.map(() => '?').join(',')})
+            `, productIds);
+            products = productsData;
+        }
 
-        const topProductsWithDetails = topProductGroups.map((tp) => {
+        const topProductsWithDetails = topProductsData.map((tp) => {
             const product = products.find((p) => p.id === tp.productId);
             return {
                 product: product ? formatProduct(product) : null,
-                totalSold: tp._sum.quantity || 0,
+                totalSold: tp.totalSold || 0,
             };
         });
 
         res.json({
             totalOrders,
-            totalRevenue: revenueAgg._sum.total || 0,
+            totalRevenue,
             totalCustomers,
             pendingPayments,
             recentOrders,
