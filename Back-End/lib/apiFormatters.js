@@ -1,8 +1,49 @@
 import { discountPercentPackage, discountPercentProduct } from './apiShape.js';
+import { rowProductSpecLabel, rowProductSpecValue } from './productSpecRow.js';
+
+/** Raw SQL may return GROUP_CONCAT as a comma-separated string instead of image rows. */
+function normalizeProductImagesRaw(images) {
+    if (images == null || images === '') return [];
+    if (Array.isArray(images)) return images;
+    if (typeof images === 'string') {
+        return images
+            .split(',')
+            .map((u) => u.trim())
+            .filter(Boolean)
+            .map((url, i) => ({ id: i, url, publicId: null }));
+    }
+    return [];
+}
+
+/** Raw SQL may return JSON_ARRAYAGG as a string/Buffer; some drivers already parse to an array. */
+function normalizeProductSpecsRaw(specs) {
+    if (specs == null || specs === '') return [];
+    if (Array.isArray(specs)) return specs;
+    if (Buffer.isBuffer(specs)) {
+        try {
+            const parsed = JSON.parse(specs.toString('utf8'));
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    }
+    if (typeof specs === 'string') {
+        try {
+            const parsed = JSON.parse(specs);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    }
+    return [];
+}
 
 export function formatProduct(p) {
     if (!p) return null;
     const loc = p.locationShipping;
+    const imageRows = normalizeProductImagesRaw(p.images);
+    const specRows = normalizeProductSpecsRaw(p.specifications);
+
     return {
         _id: String(p.id),
         name: p.name,
@@ -15,14 +56,14 @@ export function formatProduct(p) {
         freeShipping: p.freeShipping,
         stock: p.stock,
         locationShipping: loc && typeof loc === 'object' && !Array.isArray(loc) ? loc : {},
-        images: (p.images || []).map((img) => ({
-            _id: String(img.id),
+        images: imageRows.map((img, i) => ({
+            _id: String(img.id != null ? img.id : `img-${i}`),
             url: img.url,
             publicId: img.publicId,
         })),
-        specifications: (p.specifications || []).map((s) => ({
-            _id: String(s.id),
-            key: s.key,
+        specifications: specRows.map((s, i) => ({
+            _id: String(s.id != null ? s.id : `spec-${i}`),
+            key: s.key ?? s.specKey,
             value: s.value,
         })),
         averageRating: p.averageRating,
@@ -90,6 +131,29 @@ export function formatUserPublic(u) {
     };
 }
 
+/**
+ * Dashboard / SQL list view: flat `Order` row joined with `customerName`, `customerEmail` (no populated items).
+ */
+export function formatOrderMysqlJoinRow(row) {
+    if (!row) return null;
+    const customer =
+        row.customerId != null || row.customerName != null || row.customerEmail != null
+            ? {
+                  id: row.customerId,
+                  name: row.customerName ?? '',
+                  email: row.customerEmail ?? '',
+                  phone: undefined,
+                  role: undefined,
+              }
+            : null;
+    return formatOrder({
+        ...row,
+        customer,
+        items: [],
+        packages: [],
+    });
+}
+
 export function formatOrder(order) {
     if (!order) return null;
     return {
@@ -137,18 +201,24 @@ export function formatOrder(order) {
 }
 
 export async function formatCart(userId) {
-    // Import executeQuery dynamically to avoid circular dependency
+    // Import dynamically to avoid circular dependency
     const { executeQuery } = await import('./mysql.js');
+    const { sqlSpecKeySelect } = await import('./productSpecColumn.js');
+
+    const specKeySel = await sqlSpecKeySelect('ps');
 
     // Get cart product lines with product details
-    const lines = await executeQuery(`
-        SELECT cpl.*, p.*, pi.url as imageUrl, ps.specKey, ps.value as specValue
+    const lines = await executeQuery(
+        `
+        SELECT cpl.*, p.*, pi.url as imageUrl, ps.id as specJoinSpecId, ${specKeySel}, ps.value as specValue
         FROM CartProductLine cpl
         JOIN Product p ON cpl.productId = p.id
         LEFT JOIN ProductImage pi ON p.id = pi.productId AND pi.sortOrder = 0
         LEFT JOIN ProductSpec ps ON p.id = ps.productId
         WHERE cpl.userId = ?
-    `, [userId]);
+    `,
+        [userId]
+    );
 
     // Get cart package lines with package details
     const pkgLines = await executeQuery(`
@@ -186,9 +256,12 @@ export async function formatCart(userId) {
             };
             productMap.set(row.id, { product, quantity: row.quantity, price: row.price, cartLineId: row.id });
         }
-        if (row.specKey && row.specValue) {
+        if (row.specJoinSpecId) {
             const entry = productMap.get(row.id);
-            entry.product.specifications.push({ specKey: row.specKey, value: row.specValue });
+            entry.product.specifications.push({
+                specKey: rowProductSpecLabel(row),
+                value: rowProductSpecValue(row),
+            });
         }
     });
 

@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { executeQuery } from '../lib/mysql.js';
 import { formatProduct } from '../lib/apiFormatters.js';
+import { rowProductSpecLabel, rowProductSpecValue } from '../lib/productSpecRow.js';
 
 /** Prisma Client enum names for ProductCategory */
 const PRODUCT_CATEGORIES = [
@@ -295,6 +296,9 @@ OUTPUT: a single JSON object ONLY:
         if (canQuery) {
             const { whereClause, params } = buildProductWhereSQL(normalizedFilters);
 
+            const { sqlSpecKeySelect } = await import('../lib/productSpecColumn.js');
+            const specKeySel = await sqlSpecKeySelect('ps');
+
             // Get products with images and specs
             const productsQuery = `
                 SELECT
@@ -304,7 +308,7 @@ OUTPUT: a single JSON object ONLY:
                     pi.publicId as imagePublicId,
                     pi.sortOrder as imageSortOrder,
                     ps.id as specId,
-                    ps.specKey,
+                    ${specKeySel},
                     ps.value as specValue
                 FROM Product p
                 LEFT JOIN ProductImage pi ON p.id = pi.productId
@@ -337,8 +341,8 @@ OUTPUT: a single JSON object ONLY:
                 if (row.specId && !product.specifications.find(s => s.id === row.specId)) {
                     product.specifications.push({
                         id: row.specId,
-                        specKey: row.specKey,
-                        value: row.specValue
+                        specKey: rowProductSpecLabel(row),
+                        value: rowProductSpecValue(row),
                     });
                 }
             });

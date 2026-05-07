@@ -8,6 +8,7 @@ import path from 'path';
 
 import { connectDB } from './config/db.js';
 import { ensureUploadsDir, getUploadsRoot } from './config/storage.js';
+import { getProductSpecKeyColumnName } from './lib/productSpecColumn.js';
 import passport from './config/passport.js';
 import { initializeSocket } from './config/socket.js';
 import { setupChatSocket } from './sockets/chatSocket.js';
@@ -144,6 +145,11 @@ const PORT = process.env.PORT || 5000;
 
 connectDB()
     .then(() => ensureUploadsDir())
+    .then(() =>
+        getProductSpecKeyColumnName().then((col) => {
+            console.log(`ProductSpec label column: ${col}`);
+        }).catch((err) => console.warn('ProductSpec column detect skipped:', err.message))
+    )
     .then(() => {
         server.listen(PORT, () => {
             console.log(`🚀 Server is running on port ${PORT}`);

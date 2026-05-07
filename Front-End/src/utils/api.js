@@ -1,9 +1,10 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://wemax.onrender.com/api';
+/** Resolved at build time from `VITE_API_URL`, or the public Render API if unset. */
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://wemax.onrender.com/api';
 
 const api = axios.create({
-    baseURL: API_URL,
+    baseURL: API_BASE_URL,
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
@@ -40,7 +41,7 @@ api.interceptors.response.use(
 export function apiFormData() {
     const token = localStorage.getItem('token');
     return axios.create({
-        baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+        baseURL: API_BASE_URL,
         withCredentials: true,
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         // Leave Content-Type unset so browser sets multipart/form-data with boundary

@@ -11,6 +11,51 @@ import SmartImage from '../components/SmartImage.jsx';
 import { Seo } from '../components/Seo.jsx';
 import { WEMAX_INSTAGRAM_PAGE } from '../constants/social.js';
 
+/** Admin sends [{ key, value }]; endpoints may use specKey, objects, JSON string, etc. */
+function normalizeSpecifications(raw) {
+    const empty = [];
+    if (raw == null || raw === '') return empty;
+
+    let list = raw;
+    if (typeof raw === 'string') {
+        try {
+            list = JSON.parse(raw);
+        } catch {
+            return empty;
+        }
+    }
+    if (!Array.isArray(list) && typeof list === 'object') {
+        list = Object.entries(list).map(([key, value]) => ({
+            key: String(key ?? '').trim(),
+            value:
+                value != null && typeof value !== 'object'
+                    ? String(value).trim()
+                    : value != null
+                      ? JSON.stringify(value)
+                      : '',
+        }));
+    }
+    if (!Array.isArray(list)) return empty;
+
+    return list
+        .map((entry) => {
+            if (!entry || typeof entry !== 'object') return null;
+            const key = String(entry.key ?? entry.specKey ?? entry.name ?? entry.label ?? '').trim();
+            let val = entry.value ?? entry.specValue ?? entry.val;
+            if (val != null && typeof val === 'object') {
+                try {
+                    val = JSON.stringify(val);
+                } catch {
+                    val = String(val);
+                }
+            }
+            const value = val != null && val !== '' ? String(val).trim() : '';
+            if (!key && !value) return null;
+            return { key: key || '—', value: value || '—' };
+        })
+        .filter(Boolean);
+}
+
 export default function ProductDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -276,6 +321,7 @@ export default function ProductDetail() {
     const discount = calculateDiscount();
     const isInStock = currentProduct.stock > 0;
     const maxQuantity = currentProduct.stock || 999;
+    const specRows = normalizeSpecifications(currentProduct.specifications);
 
     const productUrlBase = import.meta.env.VITE_PUBLIC_SITE_URL || 'http://localhost:5173';
     const productUrl = `${productUrlBase}/products/${currentProduct._id}`;
@@ -611,6 +657,81 @@ export default function ProductDetail() {
                             </div>
                         </div>
 
+                        {/* Specifications (above description so shoppers see tech details without scrolling past long copy) */}
+                        {specRows.length > 0 && (
+                            <section id="product-specifications" aria-label="Product specifications">
+                                <h3 className={`mb-1 text-xs font-bold sm:mb-3 sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                    Specifications
+                                </h3>
+                                <div className={`overflow-x-auto rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                    <table className="w-full min-w-[280px] border-collapse text-left text-[10px] sm:text-sm">
+                                        <thead>
+                                            <tr
+                                                className={
+                                                    theme === 'dark'
+                                                        ? 'border-b border-gray-600 bg-gray-900/50'
+                                                        : 'border-b border-gray-300 bg-gray-200/70'
+                                                }
+                                            >
+                                                <th
+                                                    scope="col"
+                                                    className={`px-2 py-1.5 font-bold sm:px-4 sm:py-2 ${
+                                                        theme === 'dark' ? 'text-gray-100' : 'text-gray-800'
+                                                    }`}
+                                                >
+                                                    Specification
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className={`px-2 py-1.5 font-bold sm:px-4 sm:py-2 ${
+                                                        theme === 'dark' ? 'text-gray-100' : 'text-gray-800'
+                                                    }`}
+                                                >
+                                                    Details
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {specRows.map((spec, idx) => (
+                                                <tr
+                                                    key={`${spec.key}-${idx}`}
+                                                    className={
+                                                        theme === 'dark'
+                                                            ? idx % 2 === 1
+                                                                ? 'bg-gray-900/25'
+                                                                : ''
+                                                            : idx % 2 === 1
+                                                              ? 'bg-white/60'
+                                                              : ''
+                                                    }
+                                                >
+                                                    <th
+                                                        scope="row"
+                                                        className={`w-[32%] max-w-[9rem] align-top whitespace-normal break-words border-b px-2 py-1.5 font-semibold sm:max-w-none sm:px-4 sm:py-2 ${
+                                                            theme === 'dark'
+                                                                ? 'border-gray-700 text-gray-200'
+                                                                : 'border-gray-200 text-gray-800'
+                                                        }`}
+                                                    >
+                                                        {spec.key}
+                                                    </th>
+                                                    <td
+                                                        className={`align-top whitespace-normal break-words border-b px-2 py-1.5 sm:px-4 sm:py-2 ${
+                                                            theme === 'dark'
+                                                                ? 'border-gray-700 text-gray-300'
+                                                                : 'border-gray-200 text-gray-700'
+                                                        }`}
+                                                    >
+                                                        {spec.value}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        )}
+
                         {/* Description */}
                         <div>
                             <h3 className={`mb-0.5 text-xs font-bold sm:mb-2 sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
@@ -645,40 +766,6 @@ export default function ProductDetail() {
                                 )}
                             </button>
                         </div>
-
-                        {/* Specifications as table */}
-                        {currentProduct.specifications && currentProduct.specifications.length > 0 && (
-                            <div>
-                                <h3 className={`mb-1 text-xs font-bold sm:mb-3 sm:text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                                    Specifications
-                                </h3>
-                                <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} overflow-hidden rounded-lg`}>
-                                    <table className="min-w-full text-[10px] sm:text-sm">
-                                        <tbody>
-                                            {currentProduct.specifications.map((spec, idx) => (
-                                                spec.key && spec.value && (
-                                                    <tr
-                                                        key={idx}
-                                                        className={theme === 'dark' ? 'border-b border-gray-700 last:border-b-0' : 'border-b border-gray-200 last:border-b-0'}
-                                                    >
-                                                        <th
-                                                            className={`w-1/3 px-2 py-1 text-left font-semibold sm:px-4 sm:py-2 ${
-                                                                theme === 'dark' ? 'text-gray-200 bg-gray-900/40' : 'text-gray-700 bg-gray-200/40'
-                                                            }`}
-                                                        >
-                                                            {spec.key}
-                                                        </th>
-                                                        <td className={`px-2 py-1 sm:px-4 sm:py-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                            {spec.value}
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )}
 
                         {/* Additional Info */}
                         <div className={`space-y-0.5 rounded-lg p-2 sm:space-y-2 sm:p-4 ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-gray-100'}`}>

@@ -1,7 +1,12 @@
+/** Deploy with these peers on the server (FTP/cPanel uploads): ../lib/productSpecColumn.js + ../lib/productSpecInbound.js.
+ * Uploading only this file causes ERR_MODULE_NOT_FOUND and the proxy may return 503 + a misleading browser CORS error. */
 import { executeQuery, executeTransaction } from '../lib/mysql.js';
 import { parseIntId } from '../lib/parseId.js';
 import { formatProduct, parseSortForSQL } from '../lib/apiFormatters.js';
 import { saveUploadBuffer, deleteStoredFile } from '../config/storage.js';
+import { sqlSpecKeySelect, sqlSpecKeyInsertColumnRef } from '../lib/productSpecColumn.js';
+import { normalizeIncomingSpecifications, normalizeIncomingSpec } from '../lib/productSpecInbound.js';
+import { rowProductSpecLabel, rowProductSpecValue } from '../lib/productSpecRow.js';
 
 export const getProducts = async (req, res) => {
     try {
@@ -75,12 +80,14 @@ export const getProducts = async (req, res) => {
         const countResult = await executeQuery(countQuery, params);
         const total = countResult[0].total;
 
-        // Get products with related data
+        // ProductSpec label column may be specKey or `key` (Prisma migration)
+        const specKeySel = await sqlSpecKeySelect('ps');
         const productsQuery = `
             SELECT 
                 p.*,
                 pi.url as imageUrl,
-                ps.specKey,
+                ps.id as specJoinSpecId,
+                ${specKeySel},
                 ps.value as specValue
             FROM Product p
             LEFT JOIN ProductImage pi ON p.id = pi.productId AND pi.sortOrder = 0
@@ -101,11 +108,11 @@ export const getProducts = async (req, res) => {
                     specifications: []
                 });
             }
-            if (row.specKey && row.specValue) {
+            if (row.specJoinSpecId) {
                 const product = productsMap.get(row.id);
                 product.specifications.push({
-                    specKey: row.specKey,
-                    value: row.specValue
+                    specKey: rowProductSpecLabel(row),
+                    value: rowProductSpecValue(row),
                 });
             }
         });
@@ -131,8 +138,9 @@ export const getProductById = async (req, res) => {
             return res.status(400).json({ message: 'Invalid product ID' });
         }
 
-        // Get product with images and specs
-        const products = await executeQuery(`
+        const specKeySel = await sqlSpecKeySelect('ps');
+        const products = await executeQuery(
+            `
             SELECT 
                 p.*,
                 pi.id as imageId,
@@ -140,13 +148,15 @@ export const getProductById = async (req, res) => {
                 pi.publicId as imagePublicId,
                 pi.sortOrder as imageSortOrder,
                 ps.id as specId,
-                ps.specKey,
+                ${specKeySel},
                 ps.value as specValue
             FROM Product p
             LEFT JOIN ProductImage pi ON p.id = pi.productId
             LEFT JOIN ProductSpec ps ON p.id = ps.productId
             WHERE p.id = ?
-        `, [id]);
+        `,
+            [id]
+        );
 
         if (products.length === 0) {
             return res.status(404).json({ message: 'Product not found' });
@@ -169,13 +179,13 @@ export const getProductById = async (req, res) => {
                     sortOrder: row.imageSortOrder
                 });
             }
-            if (row.specId && row.specKey) {
-                const exists = product.specifications.find(s => s.id === row.specId);
+            if (row.specId) {
+                const exists = product.specifications.find((s) => s.id === row.specId);
                 if (!exists) {
                     product.specifications.push({
                         id: row.specId,
-                        specKey: row.specKey,
-                        value: row.specValue
+                        specKey: rowProductSpecLabel(row),
+                        value: rowProductSpecValue(row),
                     });
                 }
             }
@@ -201,14 +211,87 @@ function parseLocationShipping(body) {
     }
 }
 
-function parseProductBody(body) {
-    const specRaw = body.specifications;
+function ensureSpecificationsArray(specifications) {
+    if (Array.isArray(specifications)) return specifications;
+    if (specifications && typeof specifications === 'object') {
+        const keys = Object.keys(specifications);
+        if (keys.length && keys.every((k) => /^\d+$/.test(k))) {
+            return keys.sort((a, b) => Number(a) - Number(b)).map((k) => specifications[k]);
+        }
+    }
+    return [];
+}
+
+function shouldLogProductSpecs() {
+    return process.env.NODE_ENV !== 'production' || process.env.LOG_PRODUCT_SPECS === '1';
+}
+
+/**
+ * Multipart-safe parse for ProductSpec payloads.
+ * Returns whether the field was present, whether JSON.parse failed, and normalized rows for persistence.
+ */
+function parseSpecificationsFromBody(body) {
+    const fieldPresent = Object.prototype.hasOwnProperty.call(body, 'specifications');
+    let specRaw = body.specifications;
+    if (Buffer.isBuffer(specRaw)) {
+        specRaw = specRaw.toString('utf8');
+    }
+    if (typeof specRaw === 'string') {
+        specRaw = specRaw.replace(/^\ufeff/, '').trim();
+    }
+    const rawLength =
+        typeof specRaw === 'string' ? specRaw.length : specRaw != null ? String(specRaw).length : 0;
+
     let specifications = [];
-    if (specRaw) {
+    let parseFailed = false;
+
+    if (specRaw != null && specRaw !== '') {
         try {
             specifications = typeof specRaw === 'string' ? JSON.parse(specRaw) : specRaw;
-        } catch (_) {}
+        } catch (err) {
+            parseFailed = true;
+            if (shouldLogProductSpecs()) {
+                const preview =
+                    typeof specRaw === 'string'
+                        ? specRaw.slice(0, 280)
+                        : JSON.stringify(specRaw)?.slice?.(0, 280);
+                console.warn(
+                    '[parseSpecificationsFromBody] JSON.parse failed:',
+                    err?.message || err,
+                    'preview:',
+                    preview
+                );
+            }
+        }
+        while (!parseFailed && typeof specifications === 'string') {
+            try {
+                specifications = JSON.parse(specifications);
+            } catch (err) {
+                parseFailed = true;
+                if (shouldLogProductSpecs()) {
+                    console.warn('[parseSpecificationsFromBody] nested JSON.parse failed:', err?.message || err);
+                }
+                break;
+            }
+        }
     }
+
+    if (parseFailed) {
+        specifications = [];
+    }
+    specifications = ensureSpecificationsArray(specifications);
+    const normalized = normalizeIncomingSpecifications(specifications);
+
+    return {
+        fieldPresent,
+        parseFailed,
+        rawLength,
+        normalized,
+    };
+}
+
+function parseProductBody(body) {
+    const specParse = parseSpecificationsFromBody(body);
     return {
         name: body.name,
         description: body.description || '',
@@ -221,9 +304,26 @@ function parseProductBody(body) {
         stock: Number(body.stock) || 0,
         isFeatured: body.isFeatured === 'true' || body.isFeatured === true,
         isFlashDeal: body.isFlashDeal === 'true' || body.isFlashDeal === true,
-        specifications: Array.isArray(specifications) ? specifications : [],
+        specifications: specParse.normalized,
+        specParseMeta: specParse,
         locationShipping: parseLocationShipping(body),
     };
+}
+
+/** Persist spec label + value; run full inbound normalization again (label/specKey/key), then value-only fallback. */
+function prepareSpecsForStorage(rows) {
+    return (Array.isArray(rows) ? rows : [])
+        .map((s) => normalizeIncomingSpec(s))
+        .filter(Boolean)
+        .map((row) => {
+            let key = String(row.key ?? '').replace(/\u00a0/g, ' ').trim();
+            let value = String(row.value ?? '').replace(/\u00a0/g, ' ').trim();
+            if (!key && value) key = 'Details';
+            if (!key && !value) return null;
+            return { key, value };
+        })
+        .filter(Boolean)
+        .filter((s) => s.key.length > 0);
 }
 
 export const createProduct = async (req, res) => {
@@ -284,11 +384,12 @@ export const createProduct = async (req, res) => {
         }
 
         // Insert specifications
-        const validSpecs = data.specifications.filter(s => s && s.key);
+        const validSpecs = prepareSpecsForStorage(data.specifications);
         if (validSpecs.length > 0) {
-            const specQueries = validSpecs.map(s => ({
-                query: `INSERT INTO ProductSpec (productId, specKey, value) VALUES (?, ?, ?)`,
-                params: [productId, s.key, s.value || '']
+            const specColSql = await sqlSpecKeyInsertColumnRef();
+            const specQueries = validSpecs.map((s) => ({
+                query: `INSERT INTO ProductSpec (productId, ${specColSql}, value) VALUES (?, ?, ?)`,
+                params: [productId, s.key, s.value || ''],
             }));
             await executeTransaction(specQueries);
         }
@@ -315,7 +416,6 @@ export const updateProduct = async (req, res) => {
         if (existingProducts.length === 0) {
             return res.status(404).json({ message: 'Product not found' });
         }
-        const existing = existingProducts[0];
 
         const newUploads = [];
         if (req.files && req.files.length > 0) {
@@ -330,6 +430,38 @@ export const updateProduct = async (req, res) => {
         }
 
         const data = parseProductBody(req.body);
+
+        const specExplicit =
+            req.body.specificationsExplicit === '1' || req.body.specificationsExplicit === 'true';
+        const { fieldPresent: specFieldPresent, parseFailed: specParseFailed, rawLength: specRawLen } =
+            data.specParseMeta || {};
+        if (specExplicit && !specFieldPresent) {
+            return res.status(400).json({
+                message:
+                    'Specifications were not received (blocked or stripped). Reload and try again, or contact support.',
+            });
+        }
+
+        const shouldReplaceSpecs = specFieldPresent && !specParseFailed;
+        const validSpecs = prepareSpecsForStorage(data.specifications);
+
+        if (shouldLogProductSpecs()) {
+            console.log('[updateProduct specs]', {
+                productId: id,
+                specFieldPresent,
+                specExplicit,
+                specParseFailed,
+                specRawLen,
+                normalizedIncomingCount: data.specifications?.length ?? 0,
+                validSpecsCount: validSpecs.length,
+                willReplaceSpecs: shouldReplaceSpecs,
+            });
+        }
+        if (specParseFailed && shouldLogProductSpecs()) {
+            console.warn('[updateProduct] Keeping existing ProductSpec rows — JSON parse failed.', {
+                productId: id,
+            });
+        }
 
         // Get existing images
         const existingImages = await executeQuery(
@@ -354,9 +486,7 @@ export const updateProduct = async (req, res) => {
             ]
         );
 
-        // Delete old images and specs
         await executeQuery('DELETE FROM ProductImage WHERE productId = ?', [id]);
-        await executeQuery('DELETE FROM ProductSpec WHERE productId = ?', [id]);
 
         // Insert new images
         if (mergedImages.length > 0) {
@@ -367,13 +497,15 @@ export const updateProduct = async (req, res) => {
             await executeTransaction(imageQueries);
         }
 
-        // Insert new specifications
-        const validSpecs = data.specifications.filter(s => s && s.key);
-        if (validSpecs.length > 0) {
-            const specQueries = validSpecs.map(s => ({
-                query: `INSERT INTO ProductSpec (productId, specKey, value) VALUES (?, ?, ?)`,
-                params: [id, s.key, s.value || '']
-            }));
+        if (shouldReplaceSpecs) {
+            const specColSql = await sqlSpecKeyInsertColumnRef();
+            const specQueries = [
+                { query: 'DELETE FROM ProductSpec WHERE productId = ?', params: [id] },
+                ...validSpecs.map((s) => ({
+                    query: `INSERT INTO ProductSpec (productId, ${specColSql}, value) VALUES (?, ?, ?)`,
+                    params: [id, s.key, s.value || ''],
+                })),
+            ];
             await executeTransaction(specQueries);
         }
 
@@ -457,7 +589,9 @@ export const removeProductImage = async (req, res) => {
 
 // Helper function to get product with all relations
 async function getProductWithRelations(productId) {
-    const products = await executeQuery(`
+    const specKeySel = await sqlSpecKeySelect('ps');
+    const products = await executeQuery(
+        `
         SELECT 
             p.*,
             pi.id as imageId,
@@ -465,39 +599,41 @@ async function getProductWithRelations(productId) {
             pi.publicId as imagePublicId,
             pi.sortOrder as imageSortOrder,
             ps.id as specId,
-            ps.specKey,
+            ${specKeySel},
             ps.value as specValue
         FROM Product p
         LEFT JOIN ProductImage pi ON p.id = pi.productId
         LEFT JOIN ProductSpec ps ON p.id = ps.productId
         WHERE p.id = ?
-    `, [productId]);
+    `,
+        [productId]
+    );
 
     if (products.length === 0) return null;
 
     const product = {
         ...products[0],
         images: [],
-        specifications: []
+        specifications: [],
     };
 
     const imageMap = new Map();
-    products.forEach(row => {
+    products.forEach((row) => {
         if (row.imageId && !imageMap.has(row.imageId)) {
             imageMap.set(row.imageId, {
                 id: row.imageId,
                 url: row.imageUrl,
                 publicId: row.imagePublicId,
-                sortOrder: row.imageSortOrder
+                sortOrder: row.imageSortOrder,
             });
         }
-        if (row.specId && row.specKey) {
-            const exists = product.specifications.find(s => s.id === row.specId);
+        if (row.specId) {
+            const exists = product.specifications.find((s) => s.id === row.specId);
             if (!exists) {
                 product.specifications.push({
                     id: row.specId,
-                    specKey: row.specKey,
-                    value: row.specValue
+                    specKey: rowProductSpecLabel(row),
+                    value: rowProductSpecValue(row),
                 });
             }
         }

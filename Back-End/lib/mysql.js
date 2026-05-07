@@ -14,7 +14,6 @@ export const mysqlPool = globalForMySQL.mysqlPool ?? mysql.createPool({
   queueLimit: 3, // Minimal queue
   enableKeepAlive: true,
   keepAliveInitialDelay: 0,
-  acquireTimeout: 30000, // 30 second timeout
   // node-mysql2 specific optimizations
   charset: 'utf8mb4',
   timezone: '+00:00',

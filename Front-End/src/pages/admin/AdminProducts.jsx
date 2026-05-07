@@ -36,6 +36,7 @@ export default function AdminProducts() {
     const [myProductCount, setMyProductCount] = useState(null);
     const [specPasteText, setSpecPasteText] = useState('');
     const [specGenerating, setSpecGenerating] = useState(false);
+    const [editDetailLoading, setEditDetailLoading] = useState(false);
 
     const PAGE_SIZE = 50;
     const sentinelRef = useRef(null);
@@ -118,6 +119,7 @@ export default function AdminProducts() {
 
     const openAdd = () => {
         setEditingId(null);
+        setEditDetailLoading(false);
         setForm({
             name: '',
             description: '',
@@ -137,27 +139,64 @@ export default function AdminProducts() {
         setFormOpen(true);
     };
 
-    const openEdit = (p) => {
+    const openEdit = async (p) => {
         setEditingId(p._id);
-        setForm({
-            name: p.name || '',
-            description: p.description || '',
-            category: p.category || 'Electronics',
-            subCategory: p.subCategory || 'Phones',
-            brand: p.brand || '',
-            newPrice: String(p.newPrice ?? ''),
-            oldPrice: p.oldPrice != null ? String(p.oldPrice) : '',
-            freeShipping: !!p.freeShipping,
-            stock: String(p.stock ?? '0'),
-            isFeatured: !!p.isFeatured,
-            isFlashDeal: !!p.isFlashDeal,
-            specifications: (p.specifications && p.specifications.length)
-                ? p.specifications.map((s) => ({ key: s.key || '', value: s.value || '' }))
-                : [{ ...initialSpec }],
-        });
         setImageFiles([]);
-        setExistingImages(p.images || []);
+        setError('');
         setFormOpen(true);
+        setEditDetailLoading(true);
+        setForm({
+            name: '',
+            description: '',
+            category: 'Electronics',
+            subCategory: 'Phones',
+            brand: '',
+            newPrice: '',
+            oldPrice: '',
+            freeShipping: false,
+            stock: '0',
+            isFeatured: false,
+            isFlashDeal: false,
+            specifications: [{ ...initialSpec }],
+        });
+        setExistingImages([]);
+
+        const mapProductToForm = (full) => ({
+            name: full.name || '',
+            description: full.description || '',
+            category: full.category || 'Electronics',
+            subCategory: full.subCategory || 'Phones',
+            brand: full.brand || '',
+            newPrice: String(full.newPrice ?? ''),
+            oldPrice: full.oldPrice != null ? String(full.oldPrice) : '',
+            freeShipping: !!full.freeShipping,
+            stock: String(full.stock ?? '0'),
+            isFeatured: !!full.isFeatured,
+            isFlashDeal: !!full.isFlashDeal,
+            specifications:
+                full.specifications && full.specifications.length
+                    ? full.specifications.map((s) => ({
+                          key: String(s.key ?? s.specKey ?? '').trim(),
+                          value: String(s.value ?? s.specValue ?? '').trim(),
+                      }))
+                    : [{ ...initialSpec }],
+        });
+
+        try {
+            const res = await api.get(`/products/${p._id}`);
+            const full = res.data;
+            setForm(mapProductToForm(full));
+            setExistingImages(full.images || []);
+        } catch (e) {
+            setForm(mapProductToForm(p));
+            setExistingImages(p.images || []);
+            setError(
+                e.response?.data?.message ||
+                    'Could not load full product details; showing data from the list.'
+            );
+        } finally {
+            setEditDetailLoading(false);
+        }
     };
 
     const updateForm = (field, value) => {
@@ -199,7 +238,10 @@ export default function AdminProducts() {
             if (Array.isArray(specs) && specs.length) {
                 setForm((prev) => ({
                     ...prev,
-                    specifications: specs,
+                    specifications: specs.map((s) => ({
+                        key: String(s.key ?? s.specKey ?? '').trim(),
+                        value: String(s.value ?? s.specValue ?? '').trim(),
+                    })),
                 }));
             }
         } catch (e) {
@@ -269,9 +311,16 @@ export default function AdminProducts() {
             formData.append('stock', form.stock);
             formData.append('isFeatured', form.isFeatured);
             formData.append('isFlashDeal', form.isFlashDeal);
-            formData.append('specifications', JSON.stringify(
-                (form.specifications || []).filter((s) => s.key || s.value)
-            ));
+            // Use `label` + `specKey` (not only `key`): some WAFs strip a JSON property named "key" from multipart posts.
+            const specsForApi = (form.specifications || [])
+                .filter((s) => String(s.key ?? '').trim() || String(s.value ?? '').trim())
+                .map((s) => {
+                    const label = String(s.key ?? '').trim();
+                    const value = String(s.value ?? '').trim();
+                    return { label, specKey: label, value };
+                });
+            formData.append('specificationsExplicit', '1');
+            formData.append('specifications', JSON.stringify(specsForApi));
             
             // Send files to backend - backend will upload to Cloudinary
             imageFiles.forEach((file) => formData.append('images', file));
@@ -329,8 +378,8 @@ export default function AdminProducts() {
     const descTextAreaClass = cn(formFieldClass, 'min-h-[72px] resize-y sm:min-h-[100px]');
 
     return (
-        <div>
-            <div className="mb-2 flex flex-col items-start justify-between gap-3 border-b-2 pb-3 sm:flex-row sm:items-center sm:gap-4 sm:pb-4" style={{ borderColor: 'var(--color-border)' }}>
+        <div className="min-w-0 max-w-full">
+            <div className="mb-2 flex min-w-0 flex-col items-stretch justify-between gap-3 border-b-2 pb-3 sm:flex-row sm:items-center sm:gap-4 sm:pb-4" style={{ borderColor: 'var(--color-border)' }}>
                 <h1 className={cn('m-0 text-xl font-bold sm:text-2xl md:text-3xl', textClass)}>Products</h1>
                 <button 
                     type="button"
@@ -369,38 +418,50 @@ export default function AdminProducts() {
             )}
             {loading ? (
                 <>
-                    {/* Mobile skeleton cards */}
-                    <div className="md:hidden space-y-3">
+                    {/* Mobile skeleton — structure mirrors loaded cards below */}
+                    <div className="space-y-3 md:hidden">
                         {Array.from({ length: 5 }).map((_, i) => (
                             <div
                                 key={i}
                                 className={cn(
-                                    "rounded-2xl border p-4 shadow-sm flex gap-3 animate-pulse",
+                                    'flex gap-3 rounded-2xl border p-4 shadow-sm animate-pulse',
                                     bgClass,
-                                    borderClass
+                                    borderClass,
                                 )}
                             >
-                                <div className={cn(
-                                    "w-14 h-14 rounded-xl shrink-0",
-                                    theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
-                                )} />
-                                <div className="flex-1 space-y-2">
+                                <div
+                                    className={cn(
+                                        'h-14 w-14 shrink-0 rounded-xl',
+                                        theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200',
+                                    )}
+                                />
+                                <div className="min-w-0 flex-1 space-y-2">
                                     <div className={cn(
-                                        "h-3 rounded w-2/3",
-                                        theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                        'h-3 rounded w-[66%]',
+                                        theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200',
                                     )} />
                                     <div className={cn(
-                                        "h-3 rounded w-1/2",
-                                        theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                        'h-3 rounded w-[50%]',
+                                        theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200',
                                     )} />
                                     <div className="flex items-center justify-between gap-3 pt-2">
                                         <div className={cn(
-                                            "h-4 rounded w-20",
-                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                            'h-4 w-20 rounded',
+                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200',
                                         )} />
                                         <div className={cn(
-                                            "h-3 rounded w-12",
-                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                                            'h-3 w-12 rounded',
+                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200',
+                                        )} />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 pt-1">
+                                        <div className={cn(
+                                            'h-8 rounded-lg',
+                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200',
+                                        )} />
+                                        <div className={cn(
+                                            'h-8 rounded-lg',
+                                            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200',
                                         )} />
                                     </div>
                                 </div>
@@ -485,68 +546,105 @@ export default function AdminProducts() {
                 </>
             ) : (
                 <>
-                    {/* Mobile cards */}
-                    <div className="md:hidden space-y-3">
+                    {/* Mobile cards — matches skeleton layout: thumb left, stacked lines, price row, compact actions */}
+                    <div className="space-y-3 md:hidden">
                         {products.length === 0 ? (
-                            <div className={cn('rounded-xl border p-4 text-center text-sm shadow-sm sm:rounded-2xl sm:p-6', bgClass, borderClass, textSecondaryClass)}>
+                            <div className={cn(
+                                'rounded-2xl border p-6 text-center text-sm shadow-sm',
+                                bgClass,
+                                borderClass,
+                                textSecondaryClass,
+                            )}
+                            >
                                 No products yet. Add one to get started.
                             </div>
-                        ) : products.map((p) => (
-                            <div key={p._id} className={cn('rounded-xl border p-3 shadow-sm sm:rounded-2xl sm:p-4', bgClass, borderClass)}>
-                                <div className="flex items-start gap-2.5 sm:gap-3">
-                                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-white/10 sm:h-14 sm:w-14 sm:rounded-xl">
+                        ) : (
+                            products.map((p) => (
+                                <article
+                                    key={p._id}
+                                    className={cn(
+                                        'flex gap-3 rounded-2xl border p-4 shadow-sm',
+                                        'w-full min-w-0 max-w-full overflow-hidden',
+                                        bgClass,
+                                        borderClass,
+                                    )}
+                                >
+                                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/10">
                                         {p.images?.[0]?.url ? (
-                                            <SmartImage src={p.images[0].url} alt="" className="w-full h-full object-cover" />
+                                            <SmartImage
+                                                src={p.images[0].url}
+                                                alt=""
+                                                className="h-full w-full object-cover"
+                                            />
                                         ) : (
-                                            <div className={cn("w-full h-full flex items-center justify-center text-sm", textSecondaryClass)}>
+                                            <div
+                                                className={cn(
+                                                    'flex h-full w-full items-center justify-center text-xs',
+                                                    textSecondaryClass,
+                                                )}
+                                            >
                                                 —
                                             </div>
                                         )}
                                     </div>
-                                    <div className="min-w-0 flex-1">
-                                        <div className={cn('truncate text-sm font-bold sm:text-base', textClass)}>{p.name}</div>
-                                        <div className={cn('mt-0.5 text-xs sm:text-sm', textSecondaryClass)}>{p.category} / {p.subCategory}</div>
-                                        {p.createdByEmail && (
-                                            <div className={cn('mt-1 text-[11px] leading-snug sm:text-xs', textSecondaryClass)}>
-                                                Created by: <span className={cn("font-medium", textClass)}>{p.createdByEmail}</span>
-                                            </div>
-                                        )}
-                                        <div className="mt-2 flex items-center justify-between gap-2 sm:gap-3">
-                                            <div className={cn('text-base font-bold tabular-nums sm:text-lg', textClass)}>
+                                    <div className="min-w-0 flex-1 space-y-2">
+                                        <h3
+                                            className={cn(
+                                                'line-clamp-2 text-sm font-semibold leading-snug break-words',
+                                                textClass,
+                                            )}
+                                        >
+                                            {p.name}
+                                        </h3>
+                                        <p className={cn('truncate text-xs leading-relaxed', textSecondaryClass)}>
+                                            {p.category} / {p.subCategory}
+                                        </p>
+                                        <div className="flex items-center justify-between gap-3 pt-2">
+                                            <span
+                                                className={cn(
+                                                    'min-w-0 shrink text-sm font-bold tabular-nums',
+                                                    textClass,
+                                                )}
+                                            >
                                                 KES {p.newPrice?.toLocaleString()}
-                                            </div>
-                                            <div className={cn('text-xs sm:text-sm', textSecondaryClass)}>
-                                                Stock: <span className={cn("font-semibold", textClass)}>{p.stock}</span>
-                                            </div>
+                                            </span>
+                                            <span
+                                                className={cn(
+                                                    'shrink-0 text-[11px] font-medium tabular-nums uppercase tracking-wide',
+                                                    textSecondaryClass,
+                                                )}
+                                            >
+                                                Stock {p.stock}
+                                            </span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2 pt-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => openEdit(p)}
+                                                className={cn(
+                                                    'rounded-lg border py-2 text-center text-xs font-semibold transition-all',
+                                                    theme === 'dark'
+                                                        ? 'border-gray-600 bg-gray-900/90 text-gray-100 hover:bg-gray-800'
+                                                        : 'border-gray-200 bg-white text-gray-800 hover:bg-gray-50',
+                                                )}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDelete(p._id)}
+                                                className={cn(
+                                                    'rounded-lg border border-red-500/80 bg-red-500/10 py-2 text-center text-xs font-semibold transition-colors hover:bg-red-500 hover:text-white',
+                                                    theme === 'dark' ? 'text-red-400' : 'text-red-600',
+                                                )}
+                                            >
+                                                Delete
+                                            </button>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => openEdit(p)}
-                                        className={cn(
-                                            "rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all border sm:rounded-xl sm:px-3 sm:py-2 sm:text-sm",
-                                            theme === 'dark'
-                                                ? "bg-gray-900 text-gray-200 border-gray-700 hover:bg-gray-800"
-                                                : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                                        )}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleDelete(p._id)}
-                                        className={cn(
-                                            'rounded-lg border border-red-500 bg-red-500/15 px-2.5 py-1.5 text-xs font-semibold text-red-500 transition-all hover:bg-red-500 hover:text-white sm:rounded-xl sm:px-3 sm:py-2 sm:text-sm',
-                                        )}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                                </article>
+                            ))
+                        )}
                     </div>
 
                     {/* Desktop table */}
@@ -650,6 +748,16 @@ export default function AdminProducts() {
                         'animate-in slide-in-from-bottom-4 duration-300 sm:slide-in-from-bottom-0',
                         theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white',
                     )}>
+                        {editDetailLoading && (
+                            <div
+                                className={cn(
+                                    'absolute inset-0 z-10 flex items-center justify-center rounded-t-2xl sm:rounded-xl',
+                                    theme === 'dark' ? 'bg-gray-900/60' : 'bg-white/70',
+                                )}
+                            >
+                                <span className={cn('text-sm font-semibold', textClass)}>Loading product…</span>
+                            </div>
+                        )}
                         <h2 className={cn(
                             'border-b-2 pb-3 text-lg font-bold sm:pb-4 sm:text-xl md:text-2xl',
                             textClass,
@@ -943,7 +1051,7 @@ export default function AdminProducts() {
                                 </button>
                                 <button 
                                     type="submit" 
-                                    disabled={saving}
+                                    disabled={saving || (Boolean(editingId) && editDetailLoading)}
                                     className={cn(
                                         'rounded-lg bg-gradient-to-r from-blue-600 to-blue-800 px-4 py-2 text-sm font-semibold !text-white transition-all hover:!text-white disabled:cursor-not-allowed disabled:opacity-60 disabled:transform-none sm:flex-1 sm:px-6 sm:text-base',
                                         'hover:shadow-lg hover:-translate-y-0.5',

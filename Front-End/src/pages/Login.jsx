@@ -6,6 +6,7 @@ import { FaUser, FaLock, FaEnvelope } from 'react-icons/fa';
 import GoogleIcon from '../components/GoogleIcon.jsx';
 import wemaxDarkBg from '../assets/wemax-dark-bg.png';
 import wemaxLightBg from '../assets/wemax-light-bg.png';
+import { API_BASE_URL } from '../utils/api.js';
 
 export default function Login() {
     const dispatch = useDispatch();
@@ -17,8 +18,7 @@ export default function Login() {
 
     const handleGoogleLogin = () => {
         setGoogleLoading(true);
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-        window.location.href = `${API_URL}/auth/google`;
+        window.location.href = `${API_BASE_URL}/auth/google`;
     };
 
     const handleSubmit = async (e) => {

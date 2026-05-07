@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
-import api from '../../utils/api.js';
+import api, { API_BASE_URL } from '../../utils/api.js';
 import { cn } from '../../lib/utils.js';
 
 export default function AdminChats() {
@@ -65,7 +65,7 @@ export default function AdminChats() {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const baseURL = api.defaults.baseURL || (import.meta.env.VITE_API_URL || 'http://localhost:5000/api');
+        const baseURL = api.defaults.baseURL || API_BASE_URL;
         const socketURL = baseURL.replace(/\/api\/?$/, '');
 
         const socket = io(socketURL, {

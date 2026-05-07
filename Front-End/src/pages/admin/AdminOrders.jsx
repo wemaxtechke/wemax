@@ -279,15 +279,18 @@ export default function AdminOrders() {
             )}
 
             {selectedOrder && (
-                <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-2 sm:p-4" role="dialog" aria-modal="true">
+                <div className="fixed inset-0 z-[1000] flex flex-col justify-end sm:justify-center sm:items-center sm:p-4" role="dialog" aria-modal="true">
                     <div className="fixed inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setSelectedOrder(null)} />
-                    <div className={cn(
-                        "relative w-full sm:max-w-3xl max-h-[92vh] overflow-hidden rounded-2xl border shadow-2xl",
-                        bgClass,
-                        borderClass,
-                        "animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
-                    )}>
-                        <div className={cn('flex items-start justify-between gap-3 border-b px-4 py-3 sm:gap-4 sm:px-6 sm:py-4', borderClass)}>
+                    <div
+                        className={cn(
+                            'relative z-[1001] flex w-full flex-col overflow-hidden rounded-t-2xl border shadow-2xl sm:max-w-3xl sm:rounded-2xl',
+                            'h-[min(95dvh,100dvh)] max-h-[min(95dvh,100dvh)] sm:h-[min(92dvh,920px)] sm:max-h-[min(92dvh,920px)]',
+                            'animate-in slide-in-from-bottom-6 duration-200 sm:slide-in-from-bottom-0 sm:zoom-in-95',
+                            bgClass,
+                            borderClass,
+                        )}
+                    >
+                        <div className={cn('flex shrink-0 items-start justify-between gap-3 border-b px-4 py-3 sm:gap-4 sm:px-6 sm:py-4', borderClass)}>
                             <div className="min-w-0">
                                 <h2 className={cn('text-base font-bold sm:text-lg md:text-xl', textClass)}>
                                     Order #{String(selectedOrder._id).slice(-8)}
@@ -311,12 +314,12 @@ export default function AdminOrders() {
                             </button>
                         </div>
 
-                        <div className="px-5 sm:px-6 py-4 overflow-y-auto max-h-[calc(92vh-140px)]">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-4 [scrollbar-gutter:stable] sm:px-6">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className={cn("rounded-xl border p-4", borderClass, theme === 'dark' ? 'bg-gray-900/50' : 'bg-gray-50')}>
                                     <div className={cn("text-xs uppercase tracking-wider font-semibold", textSecondaryClass)}>Customer</div>
                                     <div className={cn("mt-2 font-semibold", textClass)}>{selectedOrder.customer?.name || '—'}</div>
-                                    <div className={cn("text-sm", textSecondaryClass)}>{selectedOrder.customer?.email || '—'}</div>
+                                    <div className={cn("break-all text-sm", textSecondaryClass)}>{selectedOrder.customer?.email || '—'}</div>
                                     <div className={cn("text-sm", textSecondaryClass)}>{selectedOrder.customer?.phone || '—'}</div>
                                 </div>
 
@@ -331,7 +334,7 @@ export default function AdminOrders() {
                                     <div className={cn("mt-2 text-lg font-bold", textClass)}>
                                         Total: KES {selectedOrder.total?.toLocaleString() || '—'}
                                     </div>
-                                    <div className="mt-3 space-y-1">
+                                    <div className="mt-3 flex flex-wrap gap-2">
                                         <span className={cn("inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border", statusBadgeClass(selectedOrder.payment?.status || (selectedOrder.payment?.paidAt ? 'Paid' : 'Pending')))}>
                                             Payment: {selectedOrder.payment?.status || (selectedOrder.payment?.paidAt ? 'Paid' : 'Pending')}
                                         </span>
@@ -344,10 +347,10 @@ export default function AdminOrders() {
 
                             <div className={cn('mt-3 rounded-lg border p-3 sm:mt-4 sm:rounded-xl sm:p-4', borderClass, theme === 'dark' ? 'bg-gray-900/50' : 'bg-gray-50')}>
                                 <div className={cn('text-[10px] font-semibold uppercase tracking-wider sm:text-xs', textSecondaryClass)}>Delivery</div>
-                                <div className={cn('mt-1.5 text-xs sm:mt-2 sm:text-sm', textSecondaryClass)}>
+                                <div className={cn('mt-1.5 break-words text-xs sm:mt-2 sm:text-sm', textSecondaryClass)}>
                                     <span className={cn("font-semibold", textClass)}>Shipping location:</span> {selectedOrder.shippingLocation || '—'}
                                 </div>
-                                <div className={cn('mt-1 text-xs sm:text-sm', textSecondaryClass)}>
+                                <div className={cn('mt-1 break-words text-xs sm:text-sm', textSecondaryClass)}>
                                     <span className={cn("font-semibold", textClass)}>Address:</span>{' '}
                                     {selectedOrder.shippingAddress?.name ? `${selectedOrder.shippingAddress.name}, ` : ''}
                                     {selectedOrder.shippingAddress?.addressLine ? `${selectedOrder.shippingAddress.addressLine}, ` : ''}
@@ -375,22 +378,22 @@ export default function AdminOrders() {
                                 <div className="space-y-2">
                                     {(selectedOrder.items || []).map((item, i) => (
                                         <div key={i} className={cn('flex items-start justify-between gap-2 text-xs sm:gap-3 sm:text-sm', textSecondaryClass)}>
-                                            <div>
-                                                <div className={cn("font-semibold", textClass)}>{item.product?.name || 'Product'}</div>
+                                            <div className="min-w-0 pr-2">
+                                                <div className={cn("break-words font-semibold", textClass)}>{item.product?.name || 'Product'}</div>
                                                 <div className="text-xs">Qty {item.quantity}</div>
                                             </div>
-                                            <div className={cn("font-semibold", textClass)}>
+                                            <div className={cn("shrink-0 font-semibold", textClass)}>
                                                 KES {(item.price * item.quantity).toLocaleString()}
                                             </div>
                                         </div>
                                     ))}
                                     {(selectedOrder.packages || []).map((pkg, i) => (
                                         <div key={`p-${i}`} className={cn('flex items-start justify-between gap-2 text-xs sm:gap-3 sm:text-sm', textSecondaryClass)}>
-                                            <div>
-                                                <div className={cn("font-semibold", textClass)}>{pkg.package?.name || 'Package'}</div>
+                                            <div className="min-w-0 pr-2">
+                                                <div className={cn("break-words font-semibold", textClass)}>{pkg.package?.name || 'Package'}</div>
                                                 <div className="text-xs">Qty {pkg.quantity}</div>
                                             </div>
-                                            <div className={cn("font-semibold", textClass)}>
+                                            <div className={cn("shrink-0 font-semibold", textClass)}>
                                                 KES {(pkg.price * pkg.quantity).toLocaleString()}
                                             </div>
                                         </div>
@@ -399,53 +402,61 @@ export default function AdminOrders() {
                             </div>
                         </div>
 
-                            <div className={cn('flex flex-col gap-2 border-t px-4 py-3 sm:flex-row sm:gap-3 sm:px-6 sm:py-4', borderClass)}>
-                            <div className="flex-1">
-                                <label className="sr-only" htmlFor="orderStatusSelect">Update tracking status</label>
-                                <select
-                                    id="orderStatusSelect"
-                                    value={selectedOrder.status}
-                                    onChange={(e) => updateStatus(selectedOrder._id, e.target.value)}
-                                    disabled={updating}
-                                    className={cn(
-                                        'w-full rounded-lg border px-3 py-2 text-sm transition-all sm:px-4 sm:text-base',
-                                        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                                        inputBgClass,
-                                        borderClass,
-                                        textClass,
-                                        "disabled:opacity-60 disabled:cursor-not-allowed"
-                                    )}
-                                >
-                                    {TRACKING_STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                            </div>
-                            {(selectedOrder.payment?.status || (selectedOrder.payment?.paidAt ? 'Paid' : 'Pending')) === 'Pending' && (
-                                <button
-                                    type="button"
-                                    onClick={() => confirmPayment(selectedOrder._id)}
-                                    disabled={updating}
-                                    className={cn(
-                                        'rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-2 text-sm font-semibold !text-white transition-all hover:!text-white sm:px-6 sm:text-base',
-                                        "hover:shadow-lg hover:-translate-y-0.5",
-                                        "disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
-                                    )}
-                                >
-                                    Confirm payment
-                                </button>
+                        <div
+                            className={cn(
+                                'flex shrink-0 flex-col gap-2 border-t px-4 py-3 sm:flex-row sm:items-stretch sm:gap-3 sm:px-6 sm:py-4',
+                                'pb-[max(0.75rem,env(safe-area-inset-bottom))]',
+                                borderClass,
                             )}
-                            <button
-                                type="button"
-                                onClick={() => setSelectedOrder(null)}
-                                className={cn(
-                                    'rounded-lg border px-4 py-2 text-sm font-medium transition-all sm:px-6 sm:text-base',
-                                    theme === 'dark'
-                                        ? "bg-gray-900 border-gray-700 text-gray-200 hover:bg-gray-800"
-                                        : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
-                                )}
-                            >
-                                Close
-                            </button>
-                        </div>
+                        >
+                                <div className="min-w-0 flex-1 sm:self-center">
+                                    <label className="sr-only" htmlFor="orderStatusSelect">Update tracking status</label>
+                                    <select
+                                        id="orderStatusSelect"
+                                        value={selectedOrder.status}
+                                        onChange={(e) => updateStatus(selectedOrder._id, e.target.value)}
+                                        disabled={updating}
+                                        className={cn(
+                                            'w-full rounded-lg border px-3 py-2.5 text-sm transition-all sm:px-4 sm:text-base',
+                                            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                                            inputBgClass,
+                                            borderClass,
+                                            textClass,
+                                            "disabled:cursor-not-allowed disabled:opacity-60"
+                                        )}
+                                    >
+                                        {TRACKING_STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                                    </select>
+                                </div>
+                                <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:flex-wrap min-[420px]:items-center">
+                                    {(selectedOrder.payment?.status || (selectedOrder.payment?.paidAt ? 'Paid' : 'Pending')) === 'Pending' && (
+                                        <button
+                                            type="button"
+                                            onClick={() => confirmPayment(selectedOrder._id)}
+                                            disabled={updating}
+                                            className={cn(
+                                                'w-full whitespace-nowrap rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-2.5 text-sm font-semibold !text-white transition-all hover:!text-white sm:w-auto sm:min-w-[9rem] sm:px-6 sm:text-base',
+                                                "hover:shadow-lg hover:-translate-y-0.5",
+                                                "disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                                            )}
+                                        >
+                                            Confirm payment
+                                        </button>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedOrder(null)}
+                                        className={cn(
+                                            'w-full rounded-lg border px-4 py-2.5 text-sm font-medium transition-all sm:w-auto sm:px-6 sm:text-base',
+                                            theme === 'dark'
+                                                ? "bg-gray-900 border-gray-700 text-gray-200 hover:bg-gray-800"
+                                                : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+                                        )}
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
                     </div>
                 </div>
             )}

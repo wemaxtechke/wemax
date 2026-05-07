@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { FaComments, FaTimes } from 'react-icons/fa';
 import { io } from 'socket.io-client';
-import api from '../utils/api.js';
+import api, { API_BASE_URL } from '../utils/api.js';
 import { cn } from '../lib/utils.js';
 
 export default function SupportChatWidget({ isOpen, setIsOpen }) {
@@ -70,7 +70,7 @@ export default function SupportChatWidget({ isOpen, setIsOpen }) {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const baseURL = api.defaults.baseURL || (import.meta.env.VITE_API_URL || 'http://localhost:5000/api');
+        const baseURL = api.defaults.baseURL || API_BASE_URL;
         const socketURL = baseURL.replace(/\/api\/?$/, '');
 
         const socket = io(socketURL, {

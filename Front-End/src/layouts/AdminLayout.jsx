@@ -17,11 +17,11 @@ export default function AdminLayout() {
     }, []);
 
     return (
-        <div className={`flex min-h-screen ${theme === 'dark' ? 'bg-gray-950' : 'bg-gray-50'}`}>
+        <div className={`flex min-h-screen min-w-0 ${theme === 'dark' ? 'bg-gray-950' : 'bg-gray-50'}`}>
             <AdminSidebar isOpen={sidebarOpen} onClose={handleCloseSidebar} />
-            <div className="flex-1 ml-0 md:ml-[260px] flex flex-col min-h-screen transition-all duration-300">
+            <div className="ml-0 flex min-h-0 min-w-0 flex-1 flex-col transition-all duration-300 md:ml-[260px]">
                 <AdminHeader onMenuToggle={handleToggleSidebar} />
-                <main className="flex-1 overflow-y-auto px-3 py-4 sm:px-4 md:p-8">
+                <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden px-3 py-4 sm:px-4 md:p-8">
                     <Outlet />
                 </main>
             </div>
